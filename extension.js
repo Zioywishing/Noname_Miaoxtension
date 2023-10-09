@@ -2161,7 +2161,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_osiris": ["male", "shu", 4, ["zioy_zhuxingwuchang", "zioy_zhufashengmie", "zioy_yongyeqingxiao", "zioy_liechenyuyou_fire"], []],
 					"zioy_morana": ["female", "jin", 6, ["zioy_lanzhiyuane", "zioy_liuzhenxiongxiang", "zioy_yinhuxiaowu"], ["hiddenSkill"]],
 					"zioy_guanghan": ["female", "wu", "2/9", ["zioy_nongying", "zioy_chanjuan"], ["des:2023中秋"]],
-					"zioy_xuanhu": ["male", "wei", 1, ["zioy_noname1"], []]
+					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu"], []]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -7188,7 +7188,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									if (trigger.player.countCards("hej") > 0) player.discardPlayerCard(trigger.player, "hej", true, 1);
 								},
 								sub: true,
-								"_priority": 0
+								"_priority": 123
 							}
 						},
 						"_priority": 16
@@ -7405,7 +7405,80 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yinhuxiaowu": {
 						"_priority": 0
 					},
-					"zioy_noname1": {
+					"zioy_leimingqiangu": {
+                        trigger:{
+                            player:['damageBegin']
+                        },
+                        filter:function(event,player){
+                            return true;
+                        },
+                        init:function(player){
+                            player.addDamageLimiter(parseInt(player.maxHp/2),'zioy_leimingqiangu')
+                        },
+                        mark:true,
+                        marktext:'鸣雷',
+                        intro:{},
+                        forced:true,
+                        content:function(){
+                            'step 0'
+                            if(player.maxHp < 9)player.gainMaxHp();
+                            'step 1'
+                            if(player.maxHp < 9)player.recover();
+                            'step 2'
+                            if(player.maxHp < 9)player.addDamageLimiter(parseInt(player.maxHp/2),'zioy_leimingqiangu')
+                            'step 3'
+                            player.addMark("zioy_leimingqiangu",player.maxHp*5)
+                            event.trigger('addMark_zioy_leimingqiangu')
+                        },
+                        group:['zioy_leimingqiangu_useCard','zioy_leimingqiangu_addMark','zioy_leimingqiangu_phaseDraw'],
+                        subSkill:{
+                            useCard:{
+                                trigger:{
+                                    player:['useCard']
+                                },
+                                filter:function(event,player){
+                                    return player.maxHp < 9 && event.card && get.tag(event.card, "damage");
+                                },
+                                forced:true,
+                                content:function(){
+                                    'step 0'
+                                    player.gainMaxHp();
+                                    'step 1'
+                                    player.recover();
+                                    'step 2'
+                                    player.addDamageLimiter(parseInt(player.maxHp/2),'zioy_leimingqiangu')
+                                },
+                            },
+                            addMark:{
+                                trigger:{
+                                    player:['addMark_zioy_leimingqiangu']
+                                },
+                                filter:function(event,player){
+                                    return player.countMark('zioy_leimingqiangu') >= 100;
+                                },
+                                forced:true,
+                                content:function(){
+                                    'step 0'
+                                    player.removeMark('zioy_leimingqiangu',100);
+                                    player.recover()
+                                },
+                            },
+                            phaseDraw:{
+                                trigger:{
+                                    player:"phaseDrawBegin",
+                                },
+                                forced:true,
+                                filter:function(event,player){
+                                    return !event.numFixed;
+                                },
+                                content:function(){
+                                    trigger.num=player.maxHp;
+                                },
+                                ai:{
+                                    threaten:1.3,
+                                },
+                            }
+                        },
 						"_priority": 0
 					}
 				},
@@ -7696,9 +7769,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_liuzhenxiongxiang_info": "",
 					"zioy_yinhuxiaowu": "饮蛊销污",
 					"zioy_yinhuxiaowu_info": "",
-					"zioy_noname1": "占位",
-					"zioy_noname1_info":
-						'①记你的体力上限为你的"尾数"，若你的"尾数"不为9，你每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/2(向下取整)，你受到的伤害减少尾数*0.05(向上取整)，你的摸牌阶段摸牌数+X(X为你的尾数)。<br>③当你尾数为9时，你造成的任何伤害+1并且附带1点不触发此技能的雷属性伤害。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。'
+					"zioy_leimingqiangu": "雷鸣千古",
+					"zioy_leimingqiangu_info":
+						'①记你的体力上限为你的"尾数"，若你的"尾数"不为9，你每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/2(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到100枚时你移去100枚“鸣雷”标记并回复1点体力值。你的摸牌阶段摸牌数基数为你的尾数。<br>③当你尾数为9时，你造成的任何伤害+1并且附带1点不触发此技能的雷属性伤害。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。'
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
