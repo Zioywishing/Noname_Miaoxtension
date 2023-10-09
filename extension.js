@@ -923,6 +923,9 @@ game.import("extension",function(lib,game,ui,get,ai,_status){return {name:"喵�
 						trigger: {
 							source: "damageBegin1"
 						},
+						filter:function(event){
+                            return event.hasNature('fire');
+                        },
 						priority: -5,
 						content: function () {
 							trigger.nature = null;
@@ -937,6 +940,9 @@ game.import("extension",function(lib,game,ui,get,ai,_status){return {name:"喵�
 						trigger: {
 							source: "damageBegin1"
 						},
+						filter:function(event){
+                            return event.hasNature('fire');
+                        },
 						priority: -5,
 						content: function () {
 							trigger.num += 1;
@@ -2149,8 +2155,9 @@ game.import("extension",function(lib,game,ui,get,ai,_status){return {name:"喵�
             "zioy_badun":["male","qun","8/8/8",["zioy_yuemai"],[]],
             "zioy_nemesis":["female","wu","4/7",["zioy_pinghuqiuyue","zioy_yurangzhijian","zioy_liechenyuyou_water"],[]],
             "zioy_osiris":["male","shu",4,["zioy_zhuxingwuchang","zioy_zhufashengmie","zioy_yongyeqingxiao","zioy_liechenyuyou_fire"],[]],
-            "zioy_morana":["female","jin",6,[],["hiddenSkill"]],
+            "zioy_morana":["female","jin",6,["zioy_lanzhiyuane","zioy_liuzhenxiongxiang","zioy_yinhuxiaowu"],["hiddenSkill"]],
             "zioy_guanghan":["female","wu","2/9",["zioy_nongying","zioy_chanjuan"],["des:2023中秋"]],
+            "zioy_xuanhu":["male","wei",1,["zioy_noname1"],[]],
         },
         translate:{
             "zioy_xixuegui":"弗拉基米尔",
@@ -2191,6 +2198,7 @@ game.import("extension",function(lib,game,ui,get,ai,_status){return {name:"喵�
             "zioy_osiris":"奥曦里斯",
             "zioy_morana":"莫洛娜",
             "zioy_guanghan":"广寒",
+            "zioy_xuanhu":"翾狐",
         },
     },
     card:{
@@ -6235,25 +6243,25 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                 },
                 forced:true,
                 filter:function(event,player){
-                    return (event.name!='phase'||game.phaseNumber==0);
-                },
+        return (event.name!='phase'||game.phaseNumber==0);
+    },
                 mark:true,
                 marktext:"驭械",
                 intro:{
                     name:"驭械",
                     mark:function (dialog, storage, player) {
-                        if(player.countCards('h') < player.hp)
-                            return "当前处于冷却状态";
-                        return "当前处于暴走状态"
-                    },
+            if(player.countCards('h') < player.hp)
+                return "当前处于冷却状态";
+            return "当前处于暴走状态"
+        },
                 },
                 init:function(player){
-                    player.unmarkSkill('zioy_v07yuxie');
-                },
+        player.unmarkSkill('zioy_v07yuxie');
+    },
                 content:function(){
-                    player.changeHujia(4);
-                    player.addSkill('zioy_v07yuxie_yuxie');
-                },
+        player.changeHujia(4);
+        player.addSkill('zioy_v07yuxie_yuxie');
+    },
                 group:["zioy_v07yuxie_exitYuxie"],
                 subSkill:{
                     exitYuxie:{
@@ -6262,54 +6270,54 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         },
                         direct:true,
                         filter:function(event, player){
-                            return player.hasSkill('zioy_v07yuxie_yuxie')&&player.hujia==0
-                        },
+                return player.hasSkill('zioy_v07yuxie_yuxie')&&player.hujia==0
+            },
                         priority:22,
                         content:function(){
-                            player.removeSkill('zioy_v07yuxie_yuxie')
-                        },
+                player.removeSkill('zioy_v07yuxie_yuxie')
+            },
                         sub:true,
                         "_priority":2200,
                     },
                     yuxie:{
                         init:function(player){
-                            player.markSkill('zioy_v07yuxie')
-                            player.removeDamageLimiter(1,'zioy_v07yuxie_yuxie');
-                            c = ["strike", "attack", "defend", "miss", "hit"];
-                            for (var i = 0; i < c.length; ++i) {
-                                player.changeEnhancement(c[i], -1 * player.storage.enhancementArray[c[i]]);
-                            }
-                            player.removeBuff("all");
-                            var cards=player.getCards('j');
-                            if(cards.length){
-                                player.gain(cards);
-                            }
-                            game.log(player,'已进入驭械状态')
-                        },
+                player.markSkill('zioy_v07yuxie')
+                player.removeDamageLimiter(1,'zioy_v07yuxie_yuxie');
+                c = ["strike", "attack", "defend", "miss", "hit"];
+                for (var i = 0; i < c.length; ++i) {
+                    player.changeEnhancement(c[i], -1 * player.storage.enhancementArray[c[i]]);
+                }
+                player.removeBuff("all");
+                var cards=player.getCards('j');
+                if(cards.length){
+                    player.gain(cards);
+                }
+                game.log(player,'已进入驭械状态')
+            },
                         onremove:function(player){
-                            player.unmarkSkill('zioy_v07yuxie')
-                            player.addDamageLimiter(1,'zioy_v07yuxie_yuxie');
-                            c = ["strike", "attack", "defend", "miss", "hit"];
-                            for (var i = 0; i < c.length; ++i) {
-                                player.changeEnhancement(c[i], -1 * player.storage.enhancementArray[c[i]]);
-                            }
-                            player.removeBuff("all");
-                            var cards=player.getCards('j');
-                            if(cards.length){
-                                player.gain(cards);
-                            }
-                            game.log(player,'已退出驭械状态')
-                        },
+                player.unmarkSkill('zioy_v07yuxie')
+                player.addDamageLimiter(1,'zioy_v07yuxie_yuxie');
+                c = ["strike", "attack", "defend", "miss", "hit"];
+                for (var i = 0; i < c.length; ++i) {
+                    player.changeEnhancement(c[i], -1 * player.storage.enhancementArray[c[i]]);
+                }
+                player.removeBuff("all");
+                var cards=player.getCards('j');
+                if(cards.length){
+                    player.gain(cards);
+                }
+                game.log(player,'已退出驭械状态')
+            },
                         mod:{
                             globalFrom:function(from,to,current){
-                                if(from.hp<=from.countCards('h')) return current-2;
-                            },
+                    if(from.hp<=from.countCards('h')) return current-2;
+                },
                             cardUsable:function(card,player){
-                                if(player.hp<=player.countCards('h')) return true;
-                            },
+                    if(player.hp<=player.countCards('h')) return true;
+                },
                             maxHandcard:function(player,num){
-                                return num+player.hujia;
-                            },
+                    return num+player.hujia;
+                },
                         },
                         group:["zioy_v07yuxie_yuxie1","zioy_v07yuxie_yuxie2","zioy_v07yuxie_yuxie3","zioy_v07yuxie_yuxie4","zioy_v07yuxie_yuxie5","zioy_v07yuxie_yuxie6","zioy_v07yuxie_yuxie7"],
                         sub:true,
@@ -6321,16 +6329,16 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         },
                         direct:true,
                         filter:function(event,player){
-                            if(player.countCards('h') < player.hp)return false;
-                            return event.card.name == 'sha' && game.hasPlayer(current=>{
-                                return current!=player;
-                            });
-                        },
+                if(player.countCards('h') < player.hp)return false;
+                return event.card.name == 'sha' && game.hasPlayer(current=>{
+                    return current!=player;
+                });
+            },
                         content:function(){
-                            trigger.directHit.addArray(game.filterPlayer(current=>{
-                                return current!=player;
-                            }));
-                        },
+                trigger.directHit.addArray(game.filterPlayer(current=>{
+                    return current!=player;
+                }));
+            },
                         sub:true,
                         "_priority":0,
                     },
@@ -6340,13 +6348,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         },
                         forced:true,
                         filter:function(event,player){
-                            if(player.countCards('h') >= player.hp)return false;
-                            if(get.type2(event.card)!='trick') return false;
-                            return player != event.target//event.targets.some(i=>i!=player);
-                        },
+                if(player.countCards('h') >= player.hp)return false;
+                if(get.type2(event.card)!='trick') return false;
+                return player != event.target//event.targets.some(i=>i!=player);
+            },
                         content:function(){
-                            player.discardPlayerCard(trigger.target,'hej',false,[1,2]);
-                        },
+                player.discardPlayerCard(trigger.target,'hej',false,[1,2]);
+            },
                         sub:true,
                         "_priority":0,
                     },
@@ -6356,14 +6364,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         },
                         direct:true,
                         filter:function(event,player){
-                            if(player.countCards('h') >= player.hp)return false;
-                            return event.num>1;
-                        },
+                if(player.countCards('h') >= player.hp)return false;
+                return event.num>1;
+            },
                         priority:0.4547,
                         content:function(){
-                            trigger.num--;
-                            player.recover()
-                        },
+                trigger.num--;
+                player.recover()
+            },
                         sub:true,
                         "_priority":45.47,
                     },
@@ -6374,15 +6382,15 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         forced:true,
                         priority:0.4457,
                         filter:function(event,player){
-                            if(player.countCards('he')==0) return false;
-                            if(player.countCards('h') < player.hp)return false;
-                            // if(event.card.name=='sha') return true;
-                            return true;
-                        },
+                if(player.countCards('he')==0) return false;
+                if(player.countCards('h') < player.hp)return false;
+                // if(event.card.name=='sha') return true;
+                return true;
+            },
                         autodelay:true,
                         content:function(){
-                            player.chooseToDiscard(true,'hej');
-                        },
+                player.chooseToDiscard(true,'hej');
+            },
                         sub:true,
                         "_priority":44.57,
                     },
@@ -6392,27 +6400,27 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         },
                         forced:true,
                         filter:function(event,player){
-                            if(player.countCards('h') >= player.hp)return false;
-                            for(var i = 0;i < player.storage.zioy_yuxie5_cards.length;i++){
-                                for(var c of event.cards){
-                                    if (player.storage.zioy_yuxie5_cards[i] == c){
-                                        return false;
-                                    }
-                                }
-                            }
-                            return event.cards && player.storage.zioy_yuxie5_flag && get.type(event.card)!='equip'
-                        },
+                if(player.countCards('h') >= player.hp)return false;
+                for(var i = 0;i < player.storage.zioy_yuxie5_cards.length;i++){
+                    for(var c of event.cards){
+                        if (player.storage.zioy_yuxie5_cards[i] == c){
+                            return false;
+                        }
+                    }
+                }
+                return event.cards && player.storage.zioy_yuxie5_flag && get.type(event.card)!='equip'
+            },
                         init:function(player){
-                            player.storage.zioy_yuxie5_flag = true;
-                            player.storage.zioy_yuxie5_cards = [];
-                        },
+                player.storage.zioy_yuxie5_flag = true;
+                player.storage.zioy_yuxie5_cards = [];
+            },
                         content:function(){
-                            player.gain(trigger.cards);
-                            for(var c of trigger.cards){
-                                player.storage.zioy_yuxie5_cards.push(c);
-                            }
-                            player.storage.zioy_yuxie5_flag = false;
-                        },
+                player.gain(trigger.cards);
+                for(var c of trigger.cards){
+                    player.storage.zioy_yuxie5_cards.push(c);
+                }
+                player.storage.zioy_yuxie5_flag = false;
+            },
                         sub:true,
                         "_priority":0,
                     },
@@ -6422,14 +6430,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         },
                         direct:true,
                         filter:function(event,player){
-                            return true;
-                        },
+                return true;
+            },
                         priority:0.6854,
                         autodelay:true,
                         content:function(){
-                            player.storage.zioy_yuxie5_flag = true;
-                            player.storage.zioy_yuxie5_cards = [];
-                        },
+                player.storage.zioy_yuxie5_flag = true;
+                player.storage.zioy_yuxie5_cards = [];
+            },
                         sub:true,
                         "_priority":68.54,
                     },
@@ -6439,12 +6447,12 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         },
                         direct:true,
                         filter:function(event,player){
-                            return player.countCards('h') > player.hp
-                        },
+                return player.countCards('h') > player.hp
+            },
                         autodelay:true,
                         content:function(){
-                            player.storage.zioy_yuxie5_flag = true;
-                        },
+                player.storage.zioy_yuxie5_flag = true;
+            },
                         sub:true,
                         "_priority":0,
                     },
@@ -6845,62 +6853,62 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                 usable:1,
                 unique:true,
                 init:function(player){
-                    player.storage.yurangzhijian_nuqi = 0.0;
-                    player.storage.yurangzhijian_count = 0;
-                },
+        player.storage.yurangzhijian_nuqi = 0.0;
+        player.storage.yurangzhijian_count = 0;
+    },
                 content:function(){
-                    nuqi = player.countMark('zioy_pinghuqiuyue')
-                    player.removeMark('zioy_pinghuqiuyue',nuqi)
-                    m = 0
-                    if(player.hasSkill('zioy_yurangzhijian_chengsheng')){
-                        m = player.countMark('zioy_yurangzhijian_chengsheng')
-                        if(m < 4){
-                            m = m - 1
-                        }
-                        else{
-                            m = 3
-                        }
-                        player.removeMark('zioy_yurangzhijian_chengsheng',m)
-                    }
-                    game.changeGlobalStatus('xiyu',5,'round');
-                    player.addBuffImmune('all',5,'round');
-                    x = player.storage.yurangzhijian_count;
-                    y = parseInt(0 - x + parseInt(nuqi/3) + m);
-                    if(y > 0){
-                        player.recover(y)
-                    }else if(y < 0){
-                        if(player.hasSkill('zioy_yurangzhijian_chengsheng')){
-                            player.chooseToDiscard('h',Math.min(player.countCards('h'),-y),true)
-                        }else{
-                            player.chooseToDiscard('he',Math.min(player.countCards('he'),-y),true)
-                        }
-                    }
-                    if(player.hasSkill('zioy_yurangzhijian_chengsheng')){
-                        player.addSkill('zioy_yurangzhijian_damage');
-                    }
-                    if(player.storage.yurangzhijian_nuqi + nuqi >= 10 && !player.hasSkill('zioy_yurangzhijian_chengsheng')){
-                        player.addSkill('zioy_yurangzhijian_chengsheng');
-                        player.addMark('zioy_yurangzhijian_chengsheng',1);
-                    }
-                    player.storage.yurangzhijian_nuqi += nuqi/3
-                    player.storage.yurangzhijian_count+=1.5;
-                },
+        nuqi = player.countMark('zioy_pinghuqiuyue')
+        player.removeMark('zioy_pinghuqiuyue',nuqi)
+        m = 0
+        if(player.hasSkill('zioy_yurangzhijian_chengsheng')){
+            m = player.countMark('zioy_yurangzhijian_chengsheng')
+            if(m < 4){
+                m = m - 1
+            }
+            else{
+                m = 3
+            }
+            player.removeMark('zioy_yurangzhijian_chengsheng',m)
+        }
+        game.changeGlobalStatus('xiyu',5,'round');
+        player.addBuffImmune('all',5,'round');
+        x = player.storage.yurangzhijian_count;
+        y = parseInt(0 - x + parseInt(nuqi/3) + m);
+        if(y > 0){
+            player.recover(y)
+        }else if(y < 0){
+            if(player.hasSkill('zioy_yurangzhijian_chengsheng')){
+                player.chooseToDiscard('h',Math.min(player.countCards('h'),-y),true)
+            }else{
+                player.chooseToDiscard('he',Math.min(player.countCards('he'),-y),true)
+            }
+        }
+        if(player.hasSkill('zioy_yurangzhijian_chengsheng')){
+            player.addSkill('zioy_yurangzhijian_damage');
+        }
+        if(player.storage.yurangzhijian_nuqi + nuqi >= 10 && !player.hasSkill('zioy_yurangzhijian_chengsheng')){
+            player.addSkill('zioy_yurangzhijian_chengsheng');
+            player.addMark('zioy_yurangzhijian_chengsheng',1);
+        }
+        player.storage.yurangzhijian_nuqi += nuqi/3
+        player.storage.yurangzhijian_count+=1.5;
+    },
                 ai:{
                     order:1,
                     result:{
                         player:function(player){
-                            x = player.storage.yurangzhijian_count;
-                            n = player.countMark('zioy_pinghuqiuyue');
-                            m = player.countMark('zioy_yurangzhijian_chengsheng');
-                            y = parseInt(0 - x + n/3 + m);
-                            if(player.storage.yurangzhijian_nuqi + n >= 10 && !player.hasSkill('zioy_yurangzhijian_chengsheng')){
-                                return 100;
-                            }
-                            if(player.hp < 3 && y > 0){
-                                return 100;
-                            }
-                            return Math.min(y,player.maxHp - player.hp) - 1;
-                        },
+                x = player.storage.yurangzhijian_count;
+                n = player.countMark('zioy_pinghuqiuyue');
+                m = player.countMark('zioy_yurangzhijian_chengsheng');
+                y = parseInt(0 - x + n/3 + m);
+                if(player.storage.yurangzhijian_nuqi + n >= 10 && !player.hasSkill('zioy_yurangzhijian_chengsheng')){
+                    return 100;
+                }
+                if(player.hp < 3 && y > 0){
+                    return 100;
+                }
+                return Math.min(y,player.maxHp - player.hp) - 1;
+            },
                     },
                 },
                 subSkill:{
@@ -6911,9 +6919,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         forced:true,
                         priority:54145,
                         content:function(){
-                            trigger.num = 0;
-                            player.removeSkill('zioy_yurangzhijian_damage');
-                        },
+                trigger.num = 0;
+                player.removeSkill('zioy_yurangzhijian_damage');
+            },
                         sub:true,
                         "_priority":5414500,
                     },
@@ -6927,26 +6935,26 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                             name:"盛怒",
                         },
                         init:function(player){
-                            game.log(player,'已进入盛怒')
-                        },
+                game.log(player,'已进入盛怒')
+            },
                         trigger:{
                             player:"useCard",
                         },
                         filter:function(event,player){
-                            return event.card &&(get.tag(event.card,'damage')) ;
-                        },
+                return event.card &&(get.tag(event.card,'damage')) ;
+            },
                         content:function(){
-                            if(player.countMark('zioy_yurangzhijian_chengsheng') < 7){
-                                player.addMark('zioy_yurangzhijian_chengsheng',1);
-                            }
-                        },
+                if(player.countMark('zioy_yurangzhijian_chengsheng') < 7){
+                    player.addMark('zioy_yurangzhijian_chengsheng',1);
+                }
+            },
                         mod:{
                             cardUsable:function(card,player,num){
-                                if(card.name=='sha') return num+parseInt(player.countMark('zioy_yurangzhijian_chengsheng')*0.43);
-                            },
+                    if(card.name=='sha') return num+parseInt(player.countMark('zioy_yurangzhijian_chengsheng')*0.43);
+                },
                             canBeDiscarded:function(card){
-                                if(get.position(card)=='e') return false;
-                            },
+                    if(get.position(card)=='e') return false;
+                },
                         },
                         group:["zioy_yurangzhijian_wushuang","zioy_yurangzhijian_damageEnd","zioy_yurangzhijian_damageBegin"],
                         sub:true,
@@ -6958,29 +6966,29 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         },
                         forced:true,
                         filter:function(event,player){
-                            return event.card.name=='sha'&&!event.getParent().directHit.contains(event.target);
-                        },
+                return event.card.name=='sha'&&!event.getParent().directHit.contains(event.target);
+            },
                         logTarget:"target",
                         content:function(){
-                            var id=trigger.target.playerid;
-                            var map=trigger.getParent().customArgs;
-                            if(!map[id]) map[id]={};
-                            if(typeof map[id].shanRequired=='number'){
-                                n = parseInt(player.countMark('zioy_yurangzhijian_chengsheng')/2.3);
-                                if(n == 0){
-                                    n = 1
-                                }
-                                map[id].shanRequired+=n;
-                            }
-                            else{
-                                map[id].shanRequired=2;
-                            }
-                        },
+                var id=trigger.target.playerid;
+                var map=trigger.getParent().customArgs;
+                if(!map[id]) map[id]={};
+                if(typeof map[id].shanRequired=='number'){
+                    n = parseInt(player.countMark('zioy_yurangzhijian_chengsheng')/2.3);
+                    if(n == 0){
+                        n = 1
+                    }
+                    map[id].shanRequired+=n;
+                }
+                else{
+                    map[id].shanRequired=2;
+                }
+            },
                         ai:{
                             "directHit_ai":true,
                             skillTagFilter:function(player,tag,arg){
-                                if(arg.card.name!='sha'||arg.target.countCards('h','shan')>parseInt(player.countMark('zioy_yurangzhijian_chengsheng')/2.3)) return false;
-                            },
+                    if(arg.card.name!='sha'||arg.target.countCards('h','shan')>parseInt(player.countMark('zioy_yurangzhijian_chengsheng')/2.3)) return false;
+                },
                         },
                         sub:true,
                         "_priority":0,
@@ -6992,13 +7000,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         forced:true,
                         priority:5243145,
                         filter:function(event,player){
-                            return true;
-                        },
+                return true;
+            },
                         content:function(){
-                            player.recover(parseInt(trigger.num*0.05*player.countMark('zioy_yurangzhijian_chengsheng')));
-                            if(parseInt(trigger.num*0.15*player.countMark('zioy_yurangzhijian_chengsheng')) > 0)
-                                player.discardPlayerCard(trigger.player,'hej',true,Math.min(trigger.player.countCards('hej'),parseInt(trigger.num*0.15*player.countMark('zioy_yurangzhijian_chengsheng'))));
-                        },
+                player.recover(parseInt(trigger.num*0.05*player.countMark('zioy_yurangzhijian_chengsheng')));
+                if(parseInt(trigger.num*0.15*player.countMark('zioy_yurangzhijian_chengsheng')) > 0)
+                    player.discardPlayerCard(trigger.player,'hej',true,Math.min(trigger.player.countCards('hej'),parseInt(trigger.num*0.15*player.countMark('zioy_yurangzhijian_chengsheng'))));
+            },
                         sub:true,
                         "_priority":524314500,
                     },
@@ -7009,11 +7017,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         direct:true,
                         priority:5045,
                         filter:function(event,player){
-                            return true;
-                        },
+                return true;
+            },
                         content:function(){
-                            trigger.num+=parseInt(0.58*player.countMark('zioy_yurangzhijian_chengsheng'));
-                        },
+                trigger.num+=parseInt(0.58*player.countMark('zioy_yurangzhijian_chengsheng'));
+            },
                         sub:true,
                         "_priority":504500,
                     },
@@ -7077,45 +7085,45 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
             },
             "zioy_zhuxingwuchang":{
                 filter:function(event,player){
-                    return player.countMark("zioy_yongyeqingxiao") == 0;
-                },
+        return player.countMark("zioy_yongyeqingxiao") == 0;
+    },
                 direct:true,
                 locked:true,
                 trigger:{
                     source:"damageEnd",
                 },
                 content:function(){
-                    'step 0'
-                    player.loseHp(1);
-                    'step 1'
-                    if(game.globalStatus.name != 'huoshan'){
-                        player.recover(2);
-                    }
-                    else{
-                        player.recover(4);
-                    }
-                    'step 2'
-                    if(game.roundNumber%2 == 1){
-                        game.changeGlobalStatus('rerang',2);
-                    }
-                    else{
-                        game.changeGlobalStatus('huoshan',2);
-                    }
-                },
+        'step 0'
+        player.loseHp(1);
+        'step 1'
+        if(game.globalStatus.name != 'huoshan'){
+            player.recover(2);
+        }
+        else{
+            player.recover(4);
+        }
+        'step 2'
+        if(game.roundNumber%2 == 1){
+            game.changeGlobalStatus('rerang',2);
+        }
+        else{
+            game.changeGlobalStatus('huoshan',2);
+        }
+    },
                 group:["zioy_zhuxingwuchang_damageBegin","zioy_zhuxingwuchang_damageEnd","zioy_zhuxingwuchang_useCard"],
                 subSkill:{
                     damageBegin:{
                         filter:function(event,player){
-                            return get.status(game.globalStatus.name).type == "weather";
-                        },
+                return get.status(game.globalStatus.name).type == "weather";
+            },
                         direct:true,
                         locked:true,
                         trigger:{
                             player:["useCardToBefore"],
                         },
                         content:function(){
-                            trigger.card.nature = 'fire';
-                        },
+                trigger.card.nature = 'fire';
+            },
                         "_priority":165463463456,
                         sub:true,
                     },
@@ -7126,28 +7134,28 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                         direct:true,
                         locked:true,
                         filter:function(event,player){
-                            return get.status(game.globalStatus.name).type == "environment";
-                        },
+                return get.status(game.globalStatus.name).type == "environment";
+            },
                         content:function(){
-                            trigger.directHit.addArray(game.filterPlayer());
-                        },
+                trigger.directHit.addArray(game.filterPlayer());
+            },
                         sub:true,
                         "_priority":0,
                     },
                     damageEnd:{
                         filter:function(event,player){
-                            return get.status(game.globalStatus.name).type == "weather";
-                        },
+                return get.status(game.globalStatus.name).type == "weather";
+            },
                         direct:true,
                         locked:true,
                         trigger:{
                             source:"damageEnd",
                         },
                         content:function(){
-                            'step 0'
-                            if(trigger.player.countCards('hej') > 0)
-                                player.discardPlayerCard(trigger.player,'hej',true,1);
-                        },
+                'step 0'
+                if(trigger.player.countCards('hej') > 0)
+                    player.discardPlayerCard(trigger.player,'hej',true,1);
+            },
                         sub:true,
                         "_priority":0,
                     },
@@ -7266,94 +7274,105 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                 },
                 "_priority":0,
             },
-            "zioy_anyuningfeng":{
-                "_priority":0,
-            },
             "zioy_nongying":{
                 trigger:{
                     player:["chooseToRespondBegin","chooseToUseBegin"],
                 },
                 filter:function(event,player){
-                    if(event.responded) return false;
-                    if(!event.filterCard({name:'shan'},player,event)) return false;
-                    return true;
-                },
+        if(event.responded) return false;
+        if(!event.filterCard({name:'shan'},player,event)) return false;
+        return true;
+    },
                 content:function(){
-                    trigger.untrigger();
-                    // game.log(trigger)
-                    trigger.responded=true;
-                    trigger.result={bool:true,card:{name:'shan'}}
-                    if(player.hp < player.maxHp){
-                        player.recover()
-                        player.loseMaxHp()
-                    }else{
-                        player.loseHp()
-                        player.gainMaxHp()
-                    }
-                },
+        trigger.untrigger();
+        // game.log(trigger)
+        trigger.responded=true;
+        trigger.result={bool:true,card:{name:'shan'}}
+        if(player.hp < player.maxHp){
+            player.recover()
+            player.loseMaxHp()
+        }else{
+            player.loseHp()
+            player.gainMaxHp()
+        }
+    },
                 mod:{
                     cardname:function(card){
-                        if(card.name=='shan') return 'sha';
-                    },
+            if(card.name=='shan') return 'sha';
+        },
                 },
-                group:['zioy_nongying_2'],
+                group:["zioy_nongying_2"],
                 subSkill:{
-                    2:{
+                    "2":{
                         trigger:{
-                            player:['useCard',"respond"]
+                            player:["useCard","respond"],
                         },
                         filter:function(event,player){
-                            if(event.card.name != 'sha')return false
-                            for(var c of event.cards){
-                                if(c.name == 'shan') return true
-                            }
-                            return false
-                        },
+                if(event.card.name != 'sha')return false
+                for(var c of event.cards){
+                    if(c.name == 'shan') return true
+                }
+                return false
+            },
                         forced:true,
                         content:function(){
-                            if(player.hp < player.maxHp){
-                                player.recover()
-                                player.loseMaxHp()
-                            }else{
-                                player.loseHp()
-                                player.gainMaxHp()
-                            }
-                        }
-                    }
+                if(player.hp < player.maxHp){
+                    player.recover()
+                    player.loseMaxHp()
+                }else{
+                    player.loseHp()
+                    player.gainMaxHp()
+                }
+            },
+                        sub:true,
+                        "_priority":0,
+                    },
                 },
                 "_priority":0,
             },
             "zioy_chanjuan":{
                 trigger:{
-                    player:'recoverEnd'
+                    player:"recoverEnd",
                 },
                 filter:function(event,player){
-                    return event && event.num > 0;
-                },
+        return event && event.num > 0;
+    },
                 direct:true,
                 content:function(){
-                    'step 0'
-                    player
-                        .chooseTarget(
-                            "令任意名其他角色恢复" + trigger.num + "点体力",
-                            function (card, player, target) {
-                                return target.hp < target.maxHp && target != player;
-                            },[1,game.countPlayer(function (target) {
-                                return target.hp < target.maxHp;
-                            })],
-                            false
-                        )
-                        .set("ai", function (target) {
-                            var att = get.attitude(_status.event.player, target);
-                            return att;
-                        });
-                    'step 1'
-                    if(result.bool){
-                        for(var p of result.targets){
-                            p.recover(trigger.num)
-                        }
-                    }
-                },
+        'step 0'
+        player
+            .chooseTarget(
+                "令任意名其他角色恢复" + trigger.num + "点体力",
+                function (card, player, target) {
+                    return target.hp < target.maxHp && target != player;
+                },[1,game.countPlayer(function (target) {
+                    return target.hp < target.maxHp;
+                })],
+                false
+            )
+            .set("ai", function (target) {
+                var att = get.attitude(_status.event.player, target);
+                return att;
+            });
+        'step 1'
+        if(result.bool){
+            for(var p of result.targets){
+                p.recover(trigger.num)
+            }
+        }
+    },
+                "_priority":0,
+            },
+            "zioy_lanzhiyuane":{
+                "_priority":0,
+            },
+            "zioy_liuzhenxiongxiang":{
+                "_priority":0,
+            },
+            "zioy_yinhuxiaowu":{
+                "_priority":0,
+            },
+            "zioy_noname1":{
                 "_priority":0,
             },
         },
@@ -7571,7 +7590,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
             "zioy_xumie":"虚灭",
             "zioy_xumie_info":"当你造成伤害时，根据你对该受伤角色造成伤害的次数追加以下效果：<br>大于0次：其始终在你攻击范围内且不能响应你使用的【杀】。<br>大于1次：你弃置其至多2张牌。<br>大于2次：其下一次造成的伤害-1。<br>大于3次：你对其追加1点伤害，此伤害无法触发〖虚灭〗。<br>大于4次:你获得1点“烬”",
             "zioy_v07yuxie":"V07-驭械",
-            "zioy_v07yuxie_info":"①游戏开始时你获得4点护甲并进入“驭械”状态，当你的护甲被击破时你退出“驭械”状态。<br>②“驭械”状态为你提供以下增益：<br>1.你的手牌上限+X(X为你的护甲值)。<br><br>·>当你手牌数不小于体力值时，你为暴走状态，获得以下增益：<br>1.你的进攻距离+2。<br>2.你的【杀】无法被响应。<br>3.你使用牌没有次数限制。<br>4.你使用牌时需额外弃置1张牌。<br><br>·>当你手牌数小于体力值时，你为冷却状态，获得以下增益：<br>1.你使用锦囊牌指定角色为目标时，你可以弃置目标角色至多2张牌。<br>2.你使用非装备牌结算完成后，你收回此牌。每回合限1次，获得手牌时若手牌数大于体力值则重置此计数。每张牌每回合限1次。<br>3.你即将受到超过1点的伤害时令此伤害值-1并恢复你1点体力。<br><br>③非“驭械”状态下限制你受到的伤害不超过1点。<br>④切换“驭械”状态时清除自身任何强化与异常状态并获得判定区内的所有牌。",
+            "zioy_v07yuxie_info":"①游戏开始时你获得4点护甲并进入“驭械”状态，当你的护甲被击破时你退出“驭械”状态。<br>②“驭械”状态为你提供以下增益：<br>1.你的手牌上限+X(X为你的护甲值)。<br><br>·>当你手牌数不小于体力值时，你为暴走状态，获得以下增益：<br>1.你的进攻距离+2。<br>2.你的【杀】无法被响应。<br>3.你使用牌没有次数限制。<br>4.你使用牌时需额外弃置1张牌。<br><br>·>当你手牌数小于体力值时，你为冷却状态，获得以下增益：<br>1.你使用锦囊牌指定角色为目标时，你可以弃置目标角色至多2张牌。<br>2.你使用非装备牌结算完成后，你收回此牌。每回合限1次，获得手牌时若手牌数大于体力值则重置此计数。每张牌每回合限1次。<br>3.你即将受到超过1点的伤害时令此伤害值-1并恢复你1点体力。<br><br>③非“驭械”状态下限制你受到的伤害不超过1点。<br>④进入或退出“驭械”状态时清除自身任何强化与异常状态并获得判定区内的所有牌。",
             "zioy_f42chongzai":"F42-重载",
             "zioy_f42chongzai_info":"出牌阶段各限1次：<br>①若你为“驭械”状态，你令所有角色受到1点无来源伤害，然后你摸3张牌，然后若你未损失体力则储存1点体力，若你拥有护甲则储存1点护甲。<br>②若你不为“驭械”状态，你可以弃置至少2张花色各不同的手牌，根据你弃置的手牌数执行以下效果：<br>不为4张：你获得等同于弃置手牌数-1枚“能量”标记。<br>4张：你获得4枚“能量”标记。<br>然后将当前体力值超过1的部分转化为等量“能量”标记，之后释放你储存的体力值。使用此技能后的每个的回合结束阶段，根据你的“能量”标记数量，执行以下效果：<br>小于体力上限：你获得1枚“能量”标记。<br>不小于体力上限：你弃置所有“能量”标记，获得等量护甲并释放储存的护甲，进入“驭械”状态，若你以此法获得的护甲值大于你的体力上限，你获得1点体力上限。",
             "zioy_yuemai":"岳衇",
@@ -7581,26 +7600,32 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
             "zioy_pinghuqiuyue":"平湖秋月",
             "zioy_pinghuqiuyue_info":"①限制你受到的伤害最大为2点。<br>②当你流失体力后，防止你于本轮游戏流失体力。<br>③你的手牌上限-4且不小于3。<br>④你对拥有护甲的角色造成的伤害+1。<br>⑤触发限伤效果/击破一名角色护甲/令一名角色进入濒死状态时获得7点怒气，受到/造成伤害时获得等额怒气。<br>⑥你的回合结束阶段，你失去1点怒气。",
             "zioy_yurangzhijian":"与浪之间",
-            "zioy_yurangzhijian_info":"出牌阶段限一次，依次结算以下效果：<br>①消耗你所有“怒气”，减少你至多3层“盛怒”层数（最多减少至1层）。<br>②召唤5轮“细雨”天气，获得5回合全异常免疫。<br>③令Y=M-1.5X+N/3（向下取整），若Y大于零则回复Y点体力，否则弃置Y张牌（X为本局游戏〖与浪之间〗累计使用次数，N为本次消耗怒气值，M为本次消耗“盛怒”层数）。<br>④若累计记录消耗怒气数+N达到10点则进入盛怒状态并获得1点“盛怒”层数，此效果一局游戏限1次。<br>⑤盛怒状态下使你下一次受到的伤害基础值等于0。<br>⑥记录N/3点消耗怒气数。<br>盛怒状态：盛怒状态最多达到7层，盛怒状态中每次使用伤害类型牌时获得1层“盛怒”层数，盛怒状态为你提供以下增益：<br>>①你出牌阶段可以多使用X*0.43（向下取整）张【杀】<br>>②你使用【杀】时对方需多使用X*0.43（向下取整且至少为1）张【闪】<br>>③你的【杀】造成的伤害+X*0.58（向下取整）<br>>④造成伤害时你回复0.05*X*伤害值（向下取整）点伤害值并弃置受伤角色0.15*X*伤害值（向下取整）张牌。<br>>⑤你装备区的牌无法被弃置。",
+            "zioy_yurangzhijian_info":"出牌阶段限一次，依次结算以下效果：<br>①消耗你所有“怒气”，减少你至多3层“盛怒”层数（最多减少至1层）。<br>②召唤5轮“细雨”天气，获得5回合全异常免疫。<br>③令Y=M-1.5X+N/3（向下取整），若Y大于零则回复Y点体力，否则弃置-Y张牌（X为本局游戏〖与浪之间〗累计使用次数，N为本次消耗怒气值，M为本次消耗“盛怒”层数）。<br>④若累计记录消耗怒气数+N达到10点则进入盛怒状态并获得1点“盛怒”层数，此效果一局游戏限1次。<br>⑤盛怒状态下使你下一次受到的伤害基础值等于0。<br>⑥记录N/3点消耗怒气数。<br>盛怒状态：盛怒状态最多达到7层，盛怒状态中每次使用伤害类型牌时获得1层“盛怒”层数，盛怒状态为你提供以下增益：<br>>①你出牌阶段可以多使用X*0.43（向下取整）张【杀】<br>>②你使用【杀】时对方需多使用X*0.43（向下取整且至少为1）张【闪】<br>>③你的【杀】造成的伤害+X*0.58（向下取整）<br>>④造成伤害时你回复0.05*X*伤害值（向下取整）点伤害值并弃置受伤角色0.15*X*伤害值（向下取整）张牌。<br>>⑤你装备区的牌无法被弃置。",
             "zioy_liechenyuyou_fire":"列辰御佑",
             "zioy_liechenyuyou_fire_info":"血脉技，免疫失效。<br>①令你获得“燚之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“苏之神佑”的角色造成的伤害+1。",
             "zioy_zhuxingwuchang":"诸行无常",
-            "zioy_zhuxingwuchang_info":"锁定技，若场上为天气，你造成的伤害视为火属性伤害且造成伤害后弃置受伤角色1张牌；若场上为环境，你的牌不可被响应；若你没有“无瞋”：造成伤害后你失去1点体力然后恢复2点体力，“风林火山”环境下提升至4点，若当前为奇数轮则召唤2轮“热浪”天气，否则召唤2轮“风林火山”环境。。",
+            "zioy_zhuxingwuchang_info":"锁定技，若场上为天气，你使用的牌视为火属性且造成伤害后弃置受伤角色1张牌；若场上为环境，你的牌不可被响应；若你没有“无瞋”：造成伤害后你失去1点体力然后恢复2点体力，“风林火山”环境下提升至4点，若当前为奇数轮则召唤2轮“热浪”天气，否则召唤2轮“风林火山”环境。。",
             "zioy_zhufashengmie":"诸法生灭",
             "zioy_zhufashengmie_info":"一局游戏限一次，你死亡时，取消之，然后你令你的体力值等于体力上限并锁定体力直到你的下个出牌阶段结束。",
             "zioy_yongyeqingxiao":"永夜清宵",
             "zioy_yongyeqingxiao_info":"①获得此技能时你获得5个“无瞋”标记。若你有“无瞋”，你使用牌结算后需弃置1张牌（没有则不弃）并失去1个“无瞋”。<br>②出牌阶段，若你有“无瞋”标记且不为5个，你可以将“无瞋”补至5个，记补充数量为X，你摸X*1.25（向下取整）张牌，回复X/2（向下取整）点体力（回复体力效果每回合限1次），获得X轮异常免疫，若当前为奇数轮则召唤X轮“热浪”天气，否则召唤X轮“风林火山”环境。<br>③若你没有“无瞋”，你废弃你的判定区，永久获得全异常免疫，攻击距离+1。",
-            "zioy_anyuningfeng":"黯喻凝风",
-            "zioy_anyuningfeng_info":"",
             "zioy_nongying":"弄影",
-            "zioy_nongying_info":"起舞弄清影，何似在人间。<br>①你的【闪】均视为【杀】，当你需要使用或打出【闪】时，你可以视为打出一张【闪】。<br>②每当你使用〖弄影①〗或将【闪】视为【杀】使用或打出时，若你已受伤，你失去1点体力上限并恢复1点体力，否则你获得1点体力上限并失去1点体力。",
+            "zioy_nongying_info":"起舞弄清影，何似在人间。<br>①你手牌中的【闪】均视为【杀】，当你需要使用或打出【闪】时，你可以视为打出一张【闪】。<br>②每当你发动〖弄影①〗或将【闪】视为【杀】使用或打出时，若你已受伤，你失去1点体力上限并恢复1点体力，否则你获得1点体力上限并失去1点体力。",
             "zioy_chanjuan":"婵娟",
-            "zioy_chanjuan_info":"但愿人长久，千里共婵娟。<br>当你回复体力时，你可令任意名已受伤的其他角色回复等量体力。",
+            "zioy_chanjuan_info":"但愿人长久，千里共婵娟。<br>你回复体力后，可令任意名已受伤的其他角色回复等量体力。",
+            "zioy_lanzhiyuane":"滥蛭垣厄",
+            "zioy_lanzhiyuane_info":"锁定技，你的【杀】造成的伤害+X(X为log2(目标角色当前体力)且向下取整)，若造成伤害后目标角色体力值不小于最大体力值*0.5则弃置其2张牌，否则倒置其下次回复体力效果并令此技能无法再对其发动。",
+            "zioy_liuzhenxiongxiang":"流鸩汹飨",
+            "zioy_liuzhenxiongxiang_info":"",
+            "zioy_yinhuxiaowu":"饮蛊销污",
+            "zioy_yinhuxiaowu_info":"",
+            "zioy_noname1":"占位",
+            "zioy_noname1_info":"①记你的体力上限为你的\"尾数\"，若你的\"尾数\"不为9，你每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/2(向下取整)，你受到的伤害减少尾数*0.05(向上取整)，你的摸牌阶段摸牌数+X(X为你的尾数)。<br>③当你尾数为9时，你造成的任何伤害+1并且附带1点不触发此技能的雷属性伤害。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。",
         },
     },
-    intro:"??????????????????????????",
+    intro:"??????????????????????????<br>拒绝规范描述",
     author:"喵喵",
     diskURL:"",
     forumURL:"",
     version:"23.08.13.01.39",
-},files:{"character":["zioy_gaiying.jpg","test.jpg","zioy_senjianmeng.jpg","zioy_xixuegui.jpg","zioy_shuijinxiezi.jpg","zioy_zhigaotian.jpg","zioy_renturtle.jpg","zioy_yinlong.jpg","zioy_heibai.jpg","zioy_yilong.jpg","zioy_huajian.jpg","zioy_shenxianxiang.jpg","zioy_sose.jpg","zioy_pqsj.jpg","zioy_dreamaker.jpg","zioy_drugdoctor.jpg","zioy_peiki.jpg","zioy_xielingyun.jpg","zioy_nianshou.jpg","zioy_jinu.jpg","zioy_diana.jpg","zioy_lanchesite.jpg","zioy_badun.jpg","zioy_xiaozhenhe.jpg","zioy_xingjun.jpg","zioy_osiris.jpg","zioy_titan.jpg","zioy_yenglish.jpg","zioy_alps.jpg","zioy_nemesis.jpg","zioy_bailu.jpg","zioy_xukongchong.jpg","zioy_muxi.jpg","zioy_kailuer.jpg","zioy_morana.jpg","zioy_nike.jpg","zioy_b7chuhaoji.jpg","zioy_guanghan.jpg"],"card":["zioy_yueguang.jpg"],"skill":[]}}})
+},files:{"character":["zioy_xuanhu.jpg"],"card":["zioy_yueguang.jpg"],"skill":[],"audio":[]}}})
