@@ -7413,7 +7413,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                             return true;
                         },
                         init:function(player){
-                            player.addDamageLimiter(parseInt(player.maxHp/2),'zioy_leimingqiangu')
+                            player.addDamageLimiter(parseInt(player.maxHp/3),'zioy_leimingqiangu')
                         },
                         mark:true,
                         marktext:'鸣雷',
@@ -7425,12 +7425,12 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                             'step 1'
                             if(player.maxHp < 9)player.recover();
                             'step 2'
-                            if(player.maxHp < 9)player.addDamageLimiter(parseInt(player.maxHp/2),'zioy_leimingqiangu')
+                            if(player.maxHp < 9)player.addDamageLimiter(parseInt(player.maxHp/3),'zioy_leimingqiangu')
                             'step 3'
                             player.addMark("zioy_leimingqiangu",player.maxHp*5)
                             event.trigger('addMark_zioy_leimingqiangu')
                         },
-                        group:['zioy_leimingqiangu_useCard','zioy_leimingqiangu_addMark','zioy_leimingqiangu_phaseDraw'],
+                        group:['zioy_leimingqiangu_useCard','zioy_leimingqiangu_addMark','zioy_leimingqiangu_phaseDraw','zioy_leimingqiangu_source'],
                         subSkill:{
                             useCard:{
                                 trigger:{
@@ -7472,10 +7472,32 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                                     return !event.numFixed;
                                 },
                                 content:function(){
-                                    trigger.num=player.maxHp;
+                                    trigger.num=parseInt(player.maxHp/1.5 + 0.001);
                                 },
                                 ai:{
                                     threaten:1.3,
+                                },
+                            },
+                            source:{
+                                trigger:{
+                                    source:['damageEnd']
+                                },
+                                filter:function(event,player){
+                                    return player.maxHp >= 9 && player.storage.leimingqiangu_source;
+                                },
+                                init:function(player){
+                                    player.storage.leimingqiangu_source = true;
+                                },
+                                forced:true,
+                                content:function(){
+                                    'step 0'
+                                    player.storage.leimingqiangu_source = false
+                                    'step 1'
+                                    trigger.player.damage(1,'thunder')
+                                    'step 2'
+                                    player.storage.leimingqiangu_source = true
+                                    player.addMark("zioy_leimingqiangu",trigger.num*9)
+                                    event.trigger('addMark_zioy_leimingqiangu')
                                 },
                             }
                         },
@@ -7771,7 +7793,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yinhuxiaowu_info": "",
 					"zioy_leimingqiangu": "雷鸣千古",
 					"zioy_leimingqiangu_info":
-						'①记你的体力上限为你的"尾数"，若你的"尾数"不为9，你每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/2(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到100枚时你移去100枚“鸣雷”标记并回复1点体力值。你的摸牌阶段摸牌数基数为你的尾数。<br>③当你尾数为9时，你造成的任何伤害+1并且附带1点不触发此技能的雷属性伤害。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。'
+						'①记你的体力上限为你的"尾数"，若你的"尾数"不为9，你每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/3(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到100枚时你移去100枚“鸣雷”标记并回复1点体力值。你的摸牌阶段摸牌数基数为你的尾数/1.5(向下取整)。<br>③当你尾数达到9时，你造成的任何伤害后附带1点不触发此技能的雷属性伤害并获得伤害值*9点“鸣雷”标记。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。'
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
