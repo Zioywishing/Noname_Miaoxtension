@@ -7461,6 +7461,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                                     'step 0'
                                     player.removeMark('zioy_leimingqiangu',100);
                                     player.recover()
+									'step 1'
+									if(player.countMark('zioy_leimingqiangu') >= 100){
+										event.goto(0)
+									}
                                 },
                             },
                             phaseDraw:{
