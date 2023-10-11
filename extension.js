@@ -7569,7 +7569,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									result: {
 										player: function (player) {
 											var n = player.countMark('zioy_zhoumingchuanxuan');
-											return 5 * (n-1);
+											return 3;
+										},
+										target:function(player,target){
+											return 3*get.damageEffect(target,player,_status.event.player,'thunder');
 										}
 									}
 								},
