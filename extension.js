@@ -2161,7 +2161,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_osiris": ["male", "shu", 4, ["zioy_zhuxingwuchang", "zioy_zhufashengmie", "zioy_yongyeqingxiao", "zioy_liechenyuyou_fire"], []],
 					"zioy_morana": ["female", "jin", 6, ["zioy_lanzhiyuane", "zioy_liuzhenxiongxiang", "zioy_yinhuxiaowu"], ["hiddenSkill"]],
 					"zioy_guanghan": ["female", "wu", "2/9", ["zioy_nongying", "zioy_chanjuan"], ["des:2023中秋"]],
-					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu"], []]
+					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu", "zioy_zhoumingchuanxuan"], []]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -7406,111 +7406,175 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"_priority": 0
 					},
 					"zioy_leimingqiangu": {
-                        trigger:{
-                            player:['damageBegin']
-                        },
-                        filter:function(event,player){
-                            return true;
-                        },
-                        init:function(player){
-                            player.addDamageLimiter(parseInt(player.maxHp/3),'zioy_leimingqiangu')
-                        },
-                        mark:true,
-                        marktext:'鸣雷',
-                        intro:{},
-                        forced:true,
-                        content:function(){
-                            'step 0'
-                            if(player.maxHp < 9)player.gainMaxHp();
-                            'step 1'
-                            if(player.maxHp < 9)player.recover();
-                            'step 2'
-                            if(player.maxHp < 9)player.addDamageLimiter(parseInt(player.maxHp/3),'zioy_leimingqiangu')
-                            'step 3'
-                            player.addMark("zioy_leimingqiangu",player.maxHp*5)
-                            event.trigger('addMark_zioy_leimingqiangu')
-                        },
-                        group:['zioy_leimingqiangu_useCard','zioy_leimingqiangu_addMark','zioy_leimingqiangu_phaseDraw','zioy_leimingqiangu_source'],
-                        subSkill:{
-                            useCard:{
-                                trigger:{
-                                    player:['useCard']
-                                },
-                                filter:function(event,player){
-                                    return player.maxHp < 9 && event.card && get.tag(event.card, "damage");
-                                },
-                                forced:true,
-                                content:function(){
-                                    'step 0'
-                                    player.gainMaxHp();
-                                    'step 1'
-                                    player.recover();
-                                    'step 2'
-                                    player.addDamageLimiter(parseInt(player.maxHp/2),'zioy_leimingqiangu')
-                                },
-                            },
-                            addMark:{
-                                trigger:{
-                                    player:['addMark_zioy_leimingqiangu']
-                                },
-                                filter:function(event,player){
-                                    return player.countMark('zioy_leimingqiangu') >= 100;
-                                },
-                                forced:true,
-                                content:function(){
-                                    'step 0'
-                                    player.removeMark('zioy_leimingqiangu',100);
-                                    player.recover()
-									if(player.maxHp >= 9)player.storage.leimingqiangu_count++;
-									'step 1'
-									if(player.countMark('zioy_leimingqiangu') >= 100){
-										event.goto(0)
+						trigger: {
+							player: ["damageBegin"]
+						},
+						filter: function (event, player) {
+							return true;
+						},
+						init: function (player) {
+							player.getTailCount = function(){
+								return this.maxHp + this.countMark('zioy_zhoumingchuanxuan')
+							}
+							player.addDamageLimiter(parseInt(player.getTailCount() / 3), "zioy_leimingqiangu");
+						},
+						mark: true,
+						marktext: "鸣雷",
+						intro: {name:"鸣雷"},
+						forced: true,
+						content: function () {
+							"step 0"
+							if (player.getTailCount() < 9) player.gainMaxHp();
+							"step 1"
+							if (player.getTailCount() < 9) player.recover();
+							"step 2"
+							if (player.getTailCount() < 9) player.addDamageLimiter(parseInt(player.getTailCount() / 3), "zioy_leimingqiangu");
+							"step 3"
+							player.addMark("zioy_leimingqiangu", player.getTailCount() * 5);
+							event.trigger("addMark_zioy_leimingqiangu");
+						},
+						group: ["zioy_leimingqiangu_useCard", "zioy_leimingqiangu_addMark", "zioy_leimingqiangu_phaseDraw", "zioy_leimingqiangu_source"],
+						subSkill: {
+							useCard: {
+								trigger: {
+									player: ["useCard"]
+								},
+								filter: function (event, player) {
+									return player.getTailCount() < 9 && event.card && get.tag(event.card, "damage");
+								},
+								forced: true,
+								content: function () {
+									"step 0"
+									player.gainMaxHp();
+									"step 1"
+									player.recover();
+									"step 2"
+									player.addDamageLimiter(parseInt(player.getTailCount() / 2), "zioy_leimingqiangu");
+								},
+								sub: true,
+								"_priority": 0
+							},
+							addMark: {
+								trigger: {
+									player: ["addMark_zioy_leimingqiangu"]
+								},
+								filter: function (event, player) {
+									return player.countMark("zioy_leimingqiangu") >= 100;
+								},
+								forced: true,
+								content: function () {
+									"step 0"
+									player.removeMark("zioy_leimingqiangu", 100);
+									player.recover();
+									if (player.getTailCount() >= 9) player.storage.leimingqiangu_count++;
+									"step 1"
+									if (player.countMark("zioy_leimingqiangu") >= 100) {
+										event.goto(0);
 									}
-                                },
-                            },
-                            phaseDraw:{
-                                trigger:{
-                                    player:"phaseDrawBegin",
-                                },
-                                forced:true,
-                                filter:function(event,player){
-                                    return !event.numFixed;
-                                },
-                                content:function(){
-                                    trigger.num=parseInt(player.maxHp/1.5 + 0.001);
-                                },
-                                ai:{
-                                    threaten:1.3,
-                                },
-                            },
-                            source:{
-                                trigger:{
-                                    source:['damageEnd']
-                                },
-                                filter:function(event,player){
-                                    return player.storage.leimingqiangu_source;
-                                },
-                                init:function(player){
-                                    player.storage.leimingqiangu_source = true;
+								},
+								sub: true,
+								"_priority": 0
+							},
+							phaseDraw: {
+								trigger: {
+									player: "phaseDrawBegin"
+								},
+								forced: true,
+								filter: function (event, player) {
+									return !event.numFixed;
+								},
+								content: function () {
+									trigger.num = parseInt(player.getTailCount() / 1.5 + 0.001);
+								},
+								ai: {
+									threaten: 1.3
+								},
+								sub: true,
+								"_priority": 0
+							},
+							source: {
+								trigger: {
+									source: ["damageEnd"]
+								},
+								filter: function (event, player) {
+									return player.storage.leimingqiangu_source;
+								},
+								init: function (player) {
+									player.storage.leimingqiangu_source = true;
 									player.storage.leimingqiangu_count = 0;
-                                },
-                                forced:true,
-                                content:function(){
-                                    'step 0'
-                                    player.storage.leimingqiangu_source = false
-                                    'step 1'
-									if(player.storage.leimingqiangu_count > 0){
-										trigger.player.damage(1,'thunder')
-										player.storage.leimingqiangu_count--
+								},
+								forced: true,
+								content: function () {
+									"step 0"
+									player.storage.leimingqiangu_source = false;
+									"step 1"
+									if (player.storage.leimingqiangu_count > 0) {
+										trigger.player.damage(1, "thunder");
+										player.storage.leimingqiangu_count--;
 									}
-                                    'step 2'
-                                    player.storage.leimingqiangu_source = true
-                                    player.addMark("zioy_leimingqiangu",trigger.num*3*player.maxHp)
-                                    event.trigger('addMark_zioy_leimingqiangu')
-                                },
-                            }
-                        },
+									"step 2"
+									player.storage.leimingqiangu_source = true;
+									player.addMark("zioy_leimingqiangu", trigger.num * 3 * player.getTailCount());
+									event.trigger("addMark_zioy_leimingqiangu");
+								},
+								sub: true,
+								"_priority": 0
+							}
+						},
 						"_priority": 0
+					},
+					"zioy_zhoumingchuanxuan": {
+						mod:{
+							selectTarget:function(card,player,range){
+								if(player.hasSkill("zioy_leimingqiangu" && (['delay'].contains(get.type(card)))) && range[1]!=-1) range[1] +=parseInt(player.getTailCount()/3);
+							},
+							attackFrom:function(from,to,distance){
+								if(from.hasSkill("zioy_leimingqiangu")) return distance-parseInt(from.getTailCount()/3);
+							},
+						},
+						trigger:{
+							player:"useCardToTarget",
+						},
+						forced:true,
+						mark: true,
+						marktext: "雷殊",
+						intro: {name:'雷殊'},
+						logTarget:"target",
+						filter:function(event,player){
+							return event.target&&event.target!=player&&event.targets.length==1&&player.maxHp > 1;
+						},
+						content:function(){
+							player.loseMaxHp(1)
+							player.addMark('zioy_zhoumingchuanxuan')
+						},
+						group:['zioy_zhoumingchuanxuan_phaseUse'],
+						subSkill:{
+							phaseUse:{
+								enable:"phaseUse",
+								usable:1,
+								filter:function(event,player){
+									return player.countMark('zioy_zhoumingchuanxuan')>0;
+								},
+								filterTarget:function(card,player,target){
+									return player!=target;
+								},
+								content:function(){
+									'step 0'
+									event.num = player.countMark('zioy_zhoumingchuanxuan')
+									player.removeMark('zioy_zhoumingchuanxuan',player.countMark('zioy_zhoumingchuanxuan'))
+									target.damage(event.num,'thunder')
+								},
+								ai: {
+									order: 1,
+									result: {
+										player: function (player) {
+											var n = player.countMark('zioy_zhoumingchuanxuan');
+											return 5 * (n-1);
+										}
+									}
+								},
+							}
+						}
 					}
 				},
 				translate: {
@@ -7802,7 +7866,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yinhuxiaowu_info": "",
 					"zioy_leimingqiangu": "雷鸣千古",
 					"zioy_leimingqiangu_info":
-						'①记你的体力上限为你的"尾数"，若你的"尾数"小于9，你每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/3(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到100枚时你移去100枚“鸣雷”标记并回复1点体力值，若尾数达到9则使你下一次造成伤害后对受伤角色造成1点不会触发此技能③效果的雷属性伤害。<br>③当你尾数达到9时，你造成的任何伤害后获得伤害值*尾数*3点“鸣雷”标记。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。<br>⑤你的摸牌阶段摸牌数基数为你的尾数/1.5(向下取整)。'
+						'①记你的体力上限+你拥有的“雷殊”数量为你的"尾数"，若你的"尾数"小于9，你每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/3(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到100枚时你移去100枚“鸣雷”标记并回复1点体力值，若尾数达到9则使你下一次造成伤害后对受伤角色造成1点不会触发此技能③效果的雷属性伤害。<br>③当你尾数达到9时，你造成的任何伤害后获得伤害值*尾数*3点“鸣雷”标记。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。<br>⑤你的摸牌阶段摸牌数基数为你的尾数/1.5(向下取整)。',
+					"zioy_zhoumingchuanxuan": "骤明穿玄",
+					"zioy_zhoumingchuanxuan_info": "①你的攻击距离+X，使用牌（延时锦囊除外）可多指定X名角色为目标（X为你的尾数/3且向下取整）<br>②若你使用牌指定唯一其他角色为目标且你的体力上限大于1，你失去1点体力上限并获得1枚“雷殊”标记，然后清除场上非天气的全局状态<br>③若你有“雷殊”，你可以主动发动此技能并移去所有“雷殊”并选择1名其他角色，你对其造成X点雷属性伤害（X为你移去“雷殊”的数量）"
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
@@ -7811,6 +7877,50 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 			forumURL: "",
 			version: "23.08.13.01.39"
 		},
-		files: { "character": ["zioy_xuanhu.jpg"], "card": ["zioy_yueguang.jpg"], "skill": [], "audio": [] }
+		files: {
+			"character": [
+				"zioy_gaiying.jpg",
+				"test.jpg",
+				"zioy_xuanhu.jpg",
+				"zioy_zhigaotian.jpg",
+				"zioy_renturtle.jpg",
+				"zioy_yinlong.jpg",
+				"zioy_heibai.jpg",
+				"zioy_xixuegui.jpg",
+				"zioy_shuijinxiezi.jpg",
+				"zioy_senjianmeng.jpg",
+				"zioy_drugdoctor.jpg",
+				"zioy_huajian.jpg",
+				"zioy_shenxianxiang.jpg",
+				"zioy_peiki.jpg",
+				"zioy_sose.jpg",
+				"zioy_nianshou.jpg",
+				"zioy_jinu.jpg",
+				"zioy_dreamaker.jpg",
+				"zioy_yilong.jpg",
+				"zioy_xielingyun.jpg",
+				"zioy_pqsj.jpg",
+				"zioy_guanghan.jpg",
+				"zioy_diana.jpg",
+				"zioy_lanchesite.jpg",
+				"zioy_xiaozhenhe.jpg",
+				"zioy_badun.jpg",
+				"zioy_xingjun.jpg",
+				"zioy_osiris.jpg",
+				"zioy_titan.jpg",
+				"zioy_yenglish.jpg",
+				"zioy_alps.jpg",
+				"zioy_nemesis.jpg",
+				"zioy_bailu.jpg",
+				"zioy_xukongchong.jpg",
+				"zioy_nike.jpg",
+				"zioy_morana.jpg",
+				"zioy_muxi.jpg",
+				"zioy_b7chuhaoji.jpg",
+				"zioy_kailuer.jpg"
+			],
+			"card": ["zioy_yueguang.jpg"],
+			"skill": []
+		}
 	};
 });
