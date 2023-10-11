@@ -7863,7 +7863,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_liuzhenxiongxiang": "流鸩汹飨",
 					"zioy_liuzhenxiongxiang_info": "",
 					"zioy_yinhuxiaowu": "饮蛊销污",
-					"zioy_yinhuxiaowu_info": "",
+					"zioy_yinhuxiaowu_info": "测试是否有更新",
 					"zioy_leimingqiangu": "雷鸣千古",
 					"zioy_leimingqiangu_info":
 						'①记你的体力上限+你拥有的“雷殊”数量为你的"尾数"，若你的"尾数"小于9，你每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/3(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到100枚时你移去100枚“鸣雷”标记并回复1点体力值，若尾数达到9则使你下一次造成伤害后对受伤角色造成1点不会触发此技能③效果的雷属性伤害。<br>③当你尾数达到9时，你造成的任何伤害后获得伤害值*尾数*3点“鸣雷”标记。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。<br>⑤你的摸牌阶段摸牌数基数为你的尾数/1.5(向下取整)。',
