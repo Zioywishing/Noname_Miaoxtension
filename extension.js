@@ -7552,6 +7552,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							phaseUse:{
 								enable:"phaseUse",
 								usable:1,
+								skillAnimation: true,
+								animationColor: "thunder",
 								filter:function(event,player){
 									return player.countMark('zioy_zhoumingchuanxuan')>0;
 								},
@@ -7572,7 +7574,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 											return 3;
 										},
 										target:function(player,target){
-											return 3*get.damageEffect(target,player,_status.event.player,'thunder');
+											return -3
 										}
 									}
 								},
