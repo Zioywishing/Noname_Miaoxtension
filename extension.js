@@ -7555,16 +7555,35 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								skillAnimation: true,
 								animationColor: "thunder",
 								filter:function(event,player){
-									return player.countMark('zioy_zhoumingchuanxuan')>0;
+									return player.countMark('zioy_zhoumingchuanxuan')>1;
 								},
-								filterTarget:function(card,player,target){
-									return player!=target;
-								},
+								// filterTarget:function(card,player,target){
+								// 	return player!=target;
+								// },
 								content:function(){
 									'step 0'
-									event.num = player.countMark('zioy_zhoumingchuanxuan')
+									event.num = parseInt(player.countMark('zioy_zhoumingchuanxuan')/1.5)
 									player.removeMark('zioy_zhoumingchuanxuan',player.countMark('zioy_zhoumingchuanxuan'))
-									target.damage(event.num,'thunder')
+									player.chooseTarget(
+										"对至多"+event.num+"名其他角色造成" + event.num + "点伤害",
+										function (card, player, target) {
+											return target != player;
+										},
+										[
+											1,event.num
+										],
+										true
+									)
+									.set("ai", function (target) {
+										var att = get.attitude(_status.event.player, target);
+										return att;
+									});
+									'step 1'
+									if(result.bool){
+										for(var p of result.targets){
+											p.damage(event.num,'thunder')
+										}
+									}
 								},
 								ai: {
 									order: 1,
@@ -7573,9 +7592,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 											var n = player.countMark('zioy_zhoumingchuanxuan');
 											return 3;
 										},
-										target:function(player,target){
-											return -3
-										}
+										// target:function(player,target){
+										// 	return -3
+										// }
 									}
 								},
 							}
