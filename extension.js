@@ -7526,7 +7526,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_zhoumingchuanxuan": {
 						mod:{
 							selectTarget:function(card,player,range){
-								if(player.hasSkill("zioy_leimingqiangu") && (['delay'].contains(get.type(card))) && range[1]!=-1) range[1] +=parseInt(player.getTailCount()/3);
+								if(player.hasSkill("zioy_leimingqiangu") && !(['delay'].contains(get.type(card))) && range[1]!=-1) range[1] += parseInt(player.getTailCount()/3);
 							},
 							attackFrom:function(from,to,distance){
 								if(from.hasSkill("zioy_leimingqiangu")) return distance-parseInt(from.getTailCount()/3);
