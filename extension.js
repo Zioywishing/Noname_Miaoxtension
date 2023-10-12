@@ -7576,7 +7576,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									)
 									.set("ai", function (target) {
 										var att = get.attitude(_status.event.player, target);
-										return att;
+										return -att;
 									});
 									'step 1'
 									if(result.bool){
