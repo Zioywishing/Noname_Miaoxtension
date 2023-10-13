@@ -1768,7 +1768,13 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					locked_type: null
 				};
 				game.players.push(player);
-				game.playerMap.push(player)
+				player.playerid = get.id()
+				game.playerMap[player.playerid] = player
+				// game.log(game.playerMap)
+				// for(var i in game.playerMap){
+				// 	game.log(i)
+				// }
+				// game.playerMap.push(player);
 				player.dataset.position=position;
 				game.arrangePlayers();
 				return player;
