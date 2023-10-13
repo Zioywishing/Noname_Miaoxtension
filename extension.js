@@ -5634,7 +5634,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									// player.hp -=trigger.num;
 									"step 2"
 									player.storage.shuohui_locked = false;
-									game.log(player.hp);
+									// game.log(player.hp);
 								},
 								sub: true,
 								"_priority": 0
@@ -5689,9 +5689,12 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							player: ["loseHpBegin", "damageBegin3"]
 						},
 						filter: function (event, player) {
-							
-							if(player.storage.hxcx_x1 < player.storage.hxcx_x)player.storage.hxcx_x1++;
-							game.log(player.storage.hxcx_x1)
+							//防止一个时机重复触发
+							if(player.storage.hxcx_x1 < player.storage.hxcx_x && player.storage.hxcx_x1_flag){
+								player.storage.hxcx_x1++;
+								player.storage.hxcx_x1_flag = false;
+							}
+							game.log(player.storage.hxcx_x1, player.storage.hxcx_x,event.getParent().name)
 							if(event.num > player.storage.hxcx_x){
 								return true
 							}else{
@@ -5706,6 +5709,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							var p = player;
 							p.storage.hxcx_x = 0;
 							p.storage.hxcx_x1 = -1;// 回合内满足1时机次数
+							p.storage.hxcx_x1_flag = true;// 修时机重复触发的bug
 							p.storage.hxcx_count1 = 0;// 效果1触发次数
 							p.storage.hxcx_count2 = 0;// 复活次数
 							p.storage.yzyw_count1 = 0;// 月坠计数
@@ -5762,7 +5766,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								player.storage.hxcx_count1 = 0;
 							}
 						},
-						group: ["zioy_hexuchongxiang_revive", "zioy_hexuchongxiang_damage", "zioy_hexuchongxiang_loseMaxHpEnd", "zioy_hexuchongxiang_phaseEnd"],
+						group: ["zioy_hexuchongxiang_revive", "zioy_hexuchongxiang_damage", "zioy_hexuchongxiang_loseMaxHpEnd", "zioy_hexuchongxiang_phaseEnd", "zioy_hexuchongxiang_useCardAfter"],
 						subSkill: {
 							mark: {
 								mark: false,
@@ -5889,10 +5893,31 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								unique: true,
 								direct: true,
 								content: function () {
+									player.storage.hxcx_x1_flag = true;
 									player.storage.hxcx_x1=-1;
 								},
 								sub: true,
 								"_priority": -301712300
+							},
+
+							useCardAfter:{
+								trigger: {
+									global: ["useCardAfter","damageEnd"],
+									player: ["loseHpBegin", "damageBegin3"]
+								},
+								filter: function (event, player) {
+									return true;
+								},
+								priority: -301754154563,
+								// forced: true,
+								charlotte: true,
+								unique: true,
+								direct: true,
+								content: function () {
+									player.storage.hxcx_x1_flag = true;
+								},
+								sub: true,
+								"_priority": -30171230236
 							}
 						},
 						"_priority": 1300
