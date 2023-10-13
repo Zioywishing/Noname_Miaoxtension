@@ -852,7 +852,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					translation: "海市蜃楼",
 					skill: "zioy_status_shenlou",
 					type: "weather",
-					intro: "回合结束阶段令当前回合角色执行[失去1点体力，弃置1张牌，获得“睡眠”异常]中随机任意项。"
+					intro: "回合结束阶段令当前回合角色执行[失去1点体力，将牌弃置至X张（X为体力值，至少弃置1张），获得“睡眠”异常]中随机任意项。"
 				},
 
 				/*以下为环境 */
@@ -990,15 +990,17 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						onremove: function (player) {},
 						content: function () {
 							var r = function () {
-								return [true, false, false, false].randomGet();
+								return [true,false].randomGet();
 							};
-							if (r) {
+							if (r()) {
 								player.loseHp();
 							}
-							if (r) {
-								player.chooseToDiscard(true);
+							if (r()) {
+								var n = player.countCards() - player.hp
+								if(player.countCards() > 0 && n <= 0)n = 1
+								player.chooseToDiscard(true,n);
 							}
-							if (r) {
+							if (r()) {
 								player.addBuff("shuimian", null);
 							}
 						},
@@ -5687,7 +5689,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							player: ["loseHpBegin", "damageBegin3"]
 						},
 						filter: function (event, player) {
-							return event.num > player.storage.hxcx_x;
+							
+							if(player.storage.hxcx_x1 < player.storage.hxcx_x)player.storage.hxcx_x1++;
+							game.log(player.storage.hxcx_x1)
+							if(event.num > player.storage.hxcx_x){
+								return true
+							}else{
+								return false;
+							}
 						},
 						priority: 13,
 						forced: true,
@@ -5696,18 +5705,20 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						init: function (player) {
 							var p = player;
 							p.storage.hxcx_x = 0;
-							p.storage.hxcx_count1 = 0;
-							p.storage.hxcx_count2 = 0;
-							p.storage.yzyw_count1 = 0;
+							p.storage.hxcx_x1 = -1;// 回合内满足1时机次数
+							p.storage.hxcx_count1 = 0;// 效果1触发次数
+							p.storage.hxcx_count2 = 0;// 复活次数
+							p.storage.yzyw_count1 = 0;// 月坠计数
 							p.gainShenqi = function (num) {
 								if (num > 999) num = 999;
+								if(num < 0)return;
 								var p = this;
 								var mark = "zioy_hexuchongxiang_mark";
 								var mark_count = p.countMark(mark);
 								var num_gain = 0;
 								var num_hp = 0;
 								var num_hx = 0;
-								while (num != 0) {
+								while (num > 0) {
 									num--;
 									if (mark_count + num_gain + 1 <= p.maxHp) {
 										num_gain++;
@@ -5742,16 +5753,16 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						content: function () {
 							player.storage.hxcx_count1++;
-							var num1 = trigger.num - player.storage.hxcx_x;
+							var num1 = trigger.num - player.storage.hxcx_x + player.storage.hxcx_x1;
 							player.gainShenqi(num1);
-							trigger.num = player.storage.hxcx_x;
+							trigger.num = player.storage.hxcx_x - player.storage.hxcx_x1;
 							if (player.storage.hxcx_count1 > player.storage.hxcx_x + 1) {
 								player.storage.hxcx_x *= 2;
 								if (player.storage.hxcx_x == 0) player.storage.hxcx_x++;
 								player.storage.hxcx_count1 = 0;
 							}
 						},
-						group: ["zioy_hexuchongxiang_revive", "zioy_hexuchongxiang_damage", "zioy_hexuchongxiang_loseMaxHpEnd"],
+						group: ["zioy_hexuchongxiang_revive", "zioy_hexuchongxiang_damage", "zioy_hexuchongxiang_loseMaxHpEnd", "zioy_hexuchongxiang_phaseEnd"],
 						subSkill: {
 							mark: {
 								mark: false,
@@ -5781,6 +5792,12 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 										}
 										p = p.next;
 									}
+									if(player.storage.hxcx_count2 < 2){
+										flag = true
+									}
+									// if(flag == false && player.hp <= 0 && game.globalStatus.name == "shenlou"){
+
+									// }
 									return player.hp > 0 || flag;
 								},
 								logTarget: "player",
@@ -5809,10 +5826,17 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									if (player.storage.yzyw_eq_flag) player.storage.yzyw_eq_flag = true;
 									"step 2"
 									player.recover(player.maxHp - player.hp);
+									"step 3"
+									if(player.hp < 0){
+										player.hp = player.maxHp;
+										player.update()
+									}
 								},
 								sub: true,
 								"_priority": 0
 							},
+
+							// 增伤
 							damage: {
 								trigger: {
 									player: ["loseHpBegin", "damageBegin2", "phaseDrawBegin2"],
@@ -5849,6 +5873,26 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								sub: true,
 								"_priority": -30172700
+							},
+
+							// 重置回合内触发效果1的计数
+							phaseEnd: {
+								trigger: {
+									player: ["phaseEnd"]
+								},
+								filter: function (event, player) {
+									return true;
+								},
+								priority: -30174563,
+								// forced: true,
+								charlotte: true,
+								unique: true,
+								direct: true,
+								content: function () {
+									player.storage.hxcx_x1=-1;
+								},
+								sub: true,
+								"_priority": -301712300
 							}
 						},
 						"_priority": 1300
@@ -7829,14 +7873,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"锁定技<br>①防止你在已损失体力时死亡，你在未损失体力时进入濒死状态。<br>②你不以此法失去体力与受到伤害均改为回复体力，不以此法回复体力均改为失去体力。<br>③除开始阶段与结束阶段，你的回合阶段执行顺序与正常顺序相反。<br>④你的手牌上限等于你已损失体力。",
 					"zioy_hexuchongxiang": "鹤墟重香",
 					"zioy_hexuchongxiang_info":
-						"清香更何用，犹发去年枝。<br>①将你即将受到伤害/流失体力时伤害/流失值超过X点的部分转化为“蜃气”，触发此效果超过X+1次后令X翻倍（若X=0则令X加1）并重置计数（获得此技能时令X=0）<br>②当你死亡时，若你体力值不小于0则改为失去所有体力，否则：若你体力上限不为场上唯一最多，你复活，获得N+1点体力上限，回复所有体力，移去所有“蜃气”并获得等量护盾，摸等量的牌，令X等于N-1，重置①效果计数，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加80%（向下取整）（N为〖鹤墟重香②〗发动的次数）<br>③你的“蜃气”数量不会超过你体力上限，获得“蜃气”时根据你是否受伤将多余的“蜃气”转换为体力值或“海市蜃楼”天气回合数。",
+						"清香更何用，犹发去年枝。<br>①将你即将受到伤害/流失体力时伤害/流失值超过X-N点的部分转化为“蜃气”，触发此效果超过X+1次后令X翻倍（若X=0则令X加1）并重置计数（获得此技能时令X=0，N为本回合满足〖鹤墟重香①〗的时机次数-1且不超过X）<br>②当你死亡时，若你体力值大于0则改为失去所有体力，否则：若你体力上限不为场上唯一最多或于体力值不大于0时发动〖鹤墟重香①〗次数小于2，你复活，获得N+1点体力上限，回复所有体力，移去所有“蜃气”并获得等量护盾，摸等量的牌，令X等于N-1，重置①效果计数，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加80%（向下取整）（N为〖鹤墟重香②〗发动的次数）<br>③你的“蜃气”数量不会超过你体力上限，获得“蜃气”时根据你是否受伤将多余的“蜃气”转换为体力值或“海市蜃楼”天气回合数。",
 					"zioy_hexuchongxiang_mark": "鹤墟重香③",
 					"zioy_hexuchongxiang_revive": "鹤墟重香②",
 					"zioy_yuezhuiyunwei": "月坠云微",
 					"zioy_yuezhuiyunwei_info":
 						"梦回芳草思依依，天远雁声稀。<br>①根据当前“蜃气”的数量执行下列效果：<br>不大于50%体力上限：一名角色的回合开始阶段你失去1级防御，攻击强化，你的判定区视为被废除，你免疫任何异常状态，你的武将牌始终正面向上。<br>大于25%体力上限：当你成为其他角色使用牌的目标时，其弃置一张与此牌同名的手牌（没有则不弃）<br>大于6：当你造成超过1点伤害后，你失去1点体力上限并令其获得1点体力上限，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加20%（与〖鹤墟重香〗同乘区）。<br>等于体力上限：每局游戏限一次，发动〖鹤墟重香②〗或〖月坠云微②〗时重置计数。当你使用牌对指定一名角色为唯一目标时，你与其交换体力与体力上限。以此法交换的体力和体力上限不超过X点（X为你发动〖鹤墟重香③〗的次数）<br>②每回合限1次，出牌阶段，若你有“蜃气”，你可以主动发动此技能：你失去所有“蜃气”，倒置负面强化并清除所有异常状态，召唤等量回合的“海市蜃楼”天气，令一名角色获得等量护盾，令一名角色回复等量体力（X=你的体力上限/2且向下取整）<br>③你永久免疫“睡眠”异常，永久免疫“海市蜃楼”的任何效果。",
 					"zioy_zhumingxiangan": "烛明香暗",
-					"zioy_zhumingxiangan_info": "凭阑半日独无言，依旧竹声新月似当年。<br>①。",
+					"zioy_zhumingxiangan_info": "凭阑半日独无言，依旧竹声新月似当年。<br>①若你",
 					"zioy_hanbosuliu": "寒波泝流",
 					"zioy_hanbosuliu_info": "琼窗春断双蛾皱，回首边头。",
 					"zioy_pianhongxiusao": "片红休埽",
