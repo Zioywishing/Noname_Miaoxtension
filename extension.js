@@ -1746,8 +1746,37 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				}
 			};
 
+			//并不是很好的写法
+			game.addPlayer=(position,character,character2)=>{
+				if(position<0||position>game.players.length+game.dead.length||position==undefined) position=Math.ceil(Math.random()*(game.players.length+game.dead.length));
+				const players=game.players.concat(game.dead);
+				ui.arena.setNumber(players.length+1);
+				players.forEach(value=>{
+					if(parseInt(value.dataset.position)>=position) value.dataset.position=parseInt(value.dataset.position)+1;
+				});
+				const player=ui.create.player(ui.arena).animate('start');
+				if(character) player.init(character,character2);
+				player.storage.enhancementArray = {
+					attack: 0, //攻击力
+					defend: 0, //防御力
+					miss: 0, //闪避率
+					hit: 0, //命中率
+					strike: 0, //暴击率，目前没用
+					draw: 0, //摸牌，目前没用
+					locked: false,
+					locked_end: -1,
+					locked_type: null
+				};
+				game.players.push(player);
+				game.playerMap.push(player)
+				player.dataset.position=position;
+				game.arrangePlayers();
+				return player;
+			},
+
 			lib.skill._miao_enhancement_init = {
 				/*游戏开始时设置player.storage.enhancementArray */
+				// addplayer时会出错，需要注意
 				unique: true,
 				trigger: {
 					global: "phaseBefore",
