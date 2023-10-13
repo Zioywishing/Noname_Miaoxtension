@@ -46,28 +46,38 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 			// 重写废除判定区相关
 			lib.element.content.enableJudge = function () {
 				"step 0"
-				if (!player.storage._disableJudge) return;
+				if (!player.storage._disableJudge || player.storage._disableJudge == false) event.finish()
 				// 多次废除恢复判断
 				if (!player.storage._disableJudge_layer){
 					player.storage._disableJudge_layer = 0
 				}
 				player.storage._disableJudge_layer--
+				if (player.storage._disableJudge_layer < 0){
+					player.storage._disableJudge_layer = 0
+					event.finish()
+				}
+				if(player.storage._disableJudge_layer > 0)event.finish()
+				'step 1'
 				game.log(player, "恢复了判定区");
 				player.storage._disableJudge = false;
 				// player.markSkill('_disableJudge');
-				"step 1"
+				"step 2"
 				game.broadcastAll(function (player, card) {
 					player.$enableJudge();
 				}, player);
 			};
+
 			lib.element.content.disableJudge = function () {
 				"step 0"
-				if (player.storage._disableJudge == true) return;
+				// if (player.storage._disableJudge == true) return;
 				// 多次废除恢复判断
 				if (!player.storage._disableJudge_layer){
 					player.storage._disableJudge_layer = 0
 				}
 				player.storage._disableJudge_layer++
+				if(player.storage._disableJudge_layer > 1){
+					event.finish()
+				}
 				"step 1"
 				game.log(player, "废除了判定区");
 				var js = player.getCards("j");
