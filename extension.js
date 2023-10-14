@@ -8007,7 +8007,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							return true;
 						},
 						init:function(player){
-							player.storage.jisuishengjin_ai = 'nb'
+							player.storage.jisuishengjin_ai = 'nb1'
 						},
 						content:function(){
 							player.damage(1);
@@ -8016,12 +8016,12 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							order:99,
 							result: {
 								player: function (player) {
-									if(true){
+									if(!player.storage.jisuishengjin_ai || player.storage.jisuishengjin_ai == 'nb'){
 										if(player.countCards('h','tao')+player.countCards('h','jiu') > 0)return 9999;
 										if(player.hp<3) return -1;
 										return 9999;
 									}else if(true){
-										
+										return -1
 									}else{
 
 									}
