@@ -13,8 +13,6 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				return false;
 			};
 
-
-
 			game.changeRoundNumber = function () {
 				/*接受输入num，游戏轮数+=num */
 				//event.trigger("changeRoundNumberBegin");
@@ -43,7 +41,6 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				game.updateRoundNumber();
 				//event.trigger("changeRoundNumberEnd");
 			};
-
 
 			// 重写废除判定区相关
 			lib.element.content.enableJudge = function () {
@@ -144,12 +141,11 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 			// }
 
 			//更换武将头像
-			lib.element.player.changeAvatarMiao = function(imgFrom,imgTo){
+			lib.element.player.changeAvatarMiao = function (imgFrom, imgTo) {
+				path = this.node.avatar.style.backgroundImage.split(imgFrom)[0];
 
-				path = this.node.avatar.style.backgroundImage.split(imgFrom)[0]
-
-				this.node.avatar.style.backgroundImage = path + imgTo +'")'
-			}
+				this.node.avatar.style.backgroundImage = path + imgTo + '")';
+			};
 			//获得限伤
 			lib.element.player.addDamageLimiter = function () {
 				if (!this.storage._damageLimiter_Miao) {
@@ -1816,8 +1812,6 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				}
 			};
 
-			
-
 			lib.skill._miao_enhancement_init = {
 				/*游戏开始时设置player.storage.enhancementArray */
 				// addplayer时会出错，需要注意
@@ -2249,7 +2243,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_morana": ["female", "jin", 6, ["zioy_lanzhiyuane", "zioy_liuzhenxiongxiang", "zioy_yinhuxiaowu"], ["hiddenSkill"]],
 					"zioy_guanghan": ["female", "wu", "2/9", ["zioy_nongying", "zioy_chanjuan"], ["des:2023中秋"]],
 					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu", "zioy_zhoumingchuanxuan"], []],
-					"zioy_xiyueying": ["male", "shen", 4, ["zioy_riyuexingkong"], []]
+					"zioy_xiyueying": ["double", "shen", 4, ["zioy_riyuexingkong"], []],
+					"zioy_purangsigai": ["none", "wu", 4, ["zioy_jisuishengjin"], ["des:plus黄盖"]]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2291,7 +2286,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_morana": "莫洛娜",
 					"zioy_guanghan": "广寒",
 					"zioy_xuanhu": "翾狐",
-					"zioy_xiyueying": "曦月吟"
+					"zioy_xiyueying": "曦月吟",
+					"zioy_purangsigai": "普琅斯盖"
 				}
 			},
 			card: {
@@ -7799,211 +7795,277 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"_priority": 0
 					},
 					"zioy_riyuexingkong": {
-						// enable: "phaseUse",
-						// usable: 119,
-						// filter: function (event, player) {
-						// 	return true
-						// },unique:true,
-						trigger:{
-							global:"phaseBefore",
-							player:"enterGame",
+						trigger: {
+							global: "phaseBefore",
+							player: "enterGame"
 						},
-						forced:true,
-						direct:true,
-						derivation:"",
-						filter:function(event,player){
+						forced: true,
+						direct: true,
+						derivation: "",
+						filter: function (event, player) {
 							// return true;
-							return (event.name!='phase'||game.phaseNumber==0);
+							return event.name != "phase" || game.phaseNumber == 0;
 						},
-						mod:{
-							// 共享距离
-							inRange:function(from,to){
-								if(!from.storage._miao_twins||!from.storage._miao_twins.isIn()||from.storage.zioy_riyuexingkong_inRange_flag === false) return;
+						mod: {
+							inRange: function (from, to) {
+								if (!from.storage._miao_twins || !from.storage._miao_twins.isIn() || from.storage.zioy_riyuexingkong_inRange_flag === false) return;
 								// 防止堆栈溢出
 								from.storage._miao_twins.storage.zioy_riyuexingkong_inRange_flag = false;
-								if(from.storage._miao_twins.inRange(to)){
-									return true
+								if (from.storage._miao_twins.inRange(to)) {
+									return true;
 								}
 								from.storage._miao_twins.storage.zioy_riyuexingkong_inRange_flag = true;
-							},
-
-
+							}
 						},
-						content:function(){
+						content: function () {
 							"step 0"
-							game.addGlobalSkill('autoswap');
+							game.addGlobalSkill("autoswap");
 
 							// player.node.avatar.style.backgroundImage = path + 'zioy_xiyueying1.jpg")'
-							player.changeAvatarMiao('zioy_xiyueying.jpg','zioy_xiyueying1.jpg')
+							player.changeAvatarMiao("zioy_xiyueying.jpg", "zioy_xiyueying1.jpg");
 							player.node.name.innerHTML = "耀阳";
+							player.sex = "male";
 
-							
-							var p = game.addPlayer(player.dataset.position+1, player.name)
+							var p = game.addPlayer(player.dataset.position + 1, player.name);
 
 							//fix bug....
-							p.removeSkill("zioy_riyuexingkong")
-							p.addSkill("zioy_riyuexingkong")
-							p.changeAvatarMiao('zioy_xiyueying.jpg','zioy_xiyueying2.jpg')
+							for (var s of player.getSkills()) {
+								// p.removeSkill("zioy_riyuexingkong")
+								// p.addSkill("zioy_riyuexingkong")
+								p.removeSkill(s);
+								p.addSkill(s);
+							}
+							p.changeAvatarMiao("zioy_xiyueying.jpg", "zioy_xiyueying2.jpg");
 							p.node.name.innerHTML = "辉月";
-							p.maxHp = player.maxHp
-							p.hp = player.hp
+							p.maxHp = player.maxHp;
+							p.hp = player.hp;
 							p.directgain(get.cards(4));
-							p._trueMe = player
-							p.sex = 'female'
+							p._trueMe = player;
+							p.sex = "female";
 
 							p.identity = player.identity;
 							p.setIdentity();
 							p.identityShown = true;
-							
 
-							
-							p.storage._miao_twins = player
-							player.storage._miao_twins = p
+							p.storage._miao_twins = player;
+							player.storage._miao_twins = p;
 
 							// player.removeSkill(event.name);
 							// p.removeSkill(event.name)
 							// for(var p1 of game.players){
-							// 	game.log(p1.sex,typeof p1.sex)
-							// 	game.log(p1.identity)
+							//     game.log(p1.sex,typeof p1.sex)
+							//     game.log(p1.identity)
 							// }
 							// game.log(p1.sex,typeof p1.sex)
 						},
-						group:["zioy_riyuexingkong_die","zioy_riyuexingkong_return"],
-						subSkill:{
-							die:{
-								trigger:{
-									player:"dieBefore",
+						group: ["zioy_riyuexingkong_die", "zioy_riyuexingkong_return", "zioy_riyuexingkong_win"],
+						subSkill: {
+							die: {
+								trigger: {
+									player: "dieBefore"
 								},
-								filter:function(event,player){
+								filter: function (event, player) {
 									// game.log(player.storage._miao_twins.hp > 0&& player.storage._miao_twins.isIn()&&event.getParent().name!='giveup'&&player.maxHp>0)
-									return !player.storage._miao_twins.storage.zioy_riyuexingkong_die
+									return !player.storage._miao_twins.storage.zioy_riyuexingkong_die;
 								},
-								forced:true,
-								direct:true,
-								priority:-1561565189,
-								// group:["mbmowang_die","mbmowang_return"],
-								content:function(){
-
+								forced: true,
+								direct: true,
+								priority: -1561565189,
+								content: function () {
 									// 休整
-									if(player.storage._miao_twins.hp > 0 && player.storage._miao_twins.isIn()&&event.getParent().name!='giveup'&&player.maxHp>0){
+									if (player.storage._miao_twins.hp > 0 && player.storage._miao_twins.isIn() && event.getParent().name != "giveup" && player.maxHp > 0) {
 										// trigger.cancel()
-										trigger.setContent(function(){
-											event.forceDie=true;
+										trigger.setContent(function () {
+											event.forceDie = true;
 											// event.forceDie=true;
-											if(source){
-												game.log(player,'被',source,'杀害');
-												if(source.stat[source.stat.length-1].kill==undefined){
-													source.stat[source.stat.length-1].kill=1;
+											if (source) {
+												game.log(player, "被", source, "杀害");
+												if (source.stat[source.stat.length - 1].kill == undefined) {
+													source.stat[source.stat.length - 1].kill = 1;
+												} else {
+													source.stat[source.stat.length - 1].kill++;
 												}
-												else{
-													source.stat[source.stat.length-1].kill++;
-												}
-											}
-											else{
-												game.log(player,'阵亡');
+											} else {
+												game.log(player, "阵亡");
 											}
 											// if(player.isIn()&&(false&&(!_status.mbmowang_return||!_status.mbmowang_return[player.playerid]))){
-												event.reserveOut=true;
-												game.log(player,'进入了修整状态');
-												game.log(player,'移出了游戏');
+											event.reserveOut = true;
+											game.log(player, "进入了修整状态");
+											game.log(player, "移出了游戏");
 											// }
 											// else event.finish();
-											if(!game.countPlayer()) game.over();
-											else if(player.hp!=0){
-												player.changeHp(0-player.hp,false).forceDie=true;
+											if (!game.countPlayer()) game.over();
+											else if (player.hp != 0) {
+												player.changeHp(0 - player.hp, false).forceDie = true;
 											}
-											game.broadcastAll(function(player){
-												if(player.isLinked()){
-													if(get.is.linked2(player)){
-														player.classList.toggle('linked2');
-													}
-													else{
-														player.classList.toggle('linked');
+											game.broadcastAll(function (player) {
+												if (player.isLinked()) {
+													if (get.is.linked2(player)) {
+														player.classList.toggle("linked2");
+													} else {
+														player.classList.toggle("linked");
 													}
 												}
-												if(player.isTurnedOver()){
-													player.classList.toggle('turnedover');
+												if (player.isTurnedOver()) {
+													player.classList.toggle("turnedover");
 												}
-											},player);
-											game.addVideo('link',player,player.isLinked());
-											game.addVideo('turnOver',player,player.classList.contains('turnedover'));
+											}, player);
+											game.addVideo("link", player, player.isLinked());
+											game.addVideo("turnOver", player, player.classList.contains("turnedover"));
 											// game.broadcastAll(function(player){
-												player.classList.add('out');
+											player.classList.add("out");
 											// });
 
 											player.$dieAfter();
-											player.classList.remove('fullskin2');
-											player.node.avatar2.classList.add('hidden');
+											player.classList.remove("fullskin2");
+											player.node.avatar2.classList.add("hidden");
 											// player.node.framebg.dataset.auto='silver';
 											// player.node.framebg.dataset.decoration='silver';
 										});
-										trigger.includeOut=true;
-
-
-
+										trigger.includeOut = true;
 									}
 
 									// 死透了
-									else{
-										
+									else {
 										// game.broadcastAll(function(player){
-											player.storage._miao_twins.classList.remove('out');
+										player.storage._miao_twins.classList.remove("out");
 										// });
 										player.storage._miao_twins.storage.zioy_riyuexingkong_die = true;
 										player.storage.zioy_riyuexingkong_die = true;
-										if(game.me == player.storage._miao_twins)player.die
+										if (game.me == player.storage._miao_twins) player.die();
 										player.storage._miao_twins.die();
 									}
 								},
-								ai:{
-									threaten:0.6,
-									effect:{
-										target:function(card,player,target){
-											if(get.tag(card,'damage')){
-												if(target.hp - target.storage._miao_twins.hp == 0) return 10
-												return 15*(target.hp - target.storage._miao_twins.hp);
+								ai: {
+									threaten: 0.6,
+									effect: {
+										target: function (card, player, target) {
+											if (get.attitude(player, target) >= 0) return 0;
+											if (get.tag(card, "damage")) {
+												if (target.hp - target.storage._miao_twins.hp == 0) return 10;
+												return 15 * (target.hp - target.storage._miao_twins.hp);
 											}
-										},
-									},
+										}
+									}
 								},
+								sub: true,
+								"_priority": -156156518900
 							},
-							return:{
-								trigger:{
-									player:"phaseBefore",
+							return: {
+								trigger: {
+									player: "phaseBefore"
 								},
-								forced:true,
-								charlotte:true,
-								silent:true,
-								forceDie:true,
-								forceOut:true,
-								filter:function(event,player){
+								forced: true,
+								charlotte: true,
+								silent: true,
+								forceDie: true,
+								forceOut: true,
+								filter: function (event, player) {
 									return event.player.isOut();
 								},
+								content: function () {
+									"step 0"
+									game.broadcastAll(function (player) {
+										player.classList.remove("out");
+									}, trigger.player);
+									game.log(trigger.player, "移回了游戏");
+									trigger.player.recover(trigger.player.maxHp - trigger.player.hp);
+									"step 1"
+									event.trigger("restEnd");
+								},
+								sub: true,
+								popup: false,
+								"_priority": 1
+							},
+							win: {
+								trigger: {
+									global: "phaseBefore"
+								},
+								filter: function (event, player) {
+									var flag = false;
+									for (var p of game.players) {
+										if (p != player && p != player.storage._miao_twins) {
+											flag = true;
+											break;
+										}
+									}
+									return !flag;
+								},
+								content: function () {
+									game.over(player == game.me || player.storage._miao_twins == game.me || winners.contains(game.me));
+								},
+								sub: true,
+								"_priority": 0
+							}
+						},
+						"_priority": 0
+					},
+					"zioy_jisuishengjin": {
+						enable: "phaseUse",
+						// usable: Infinity,
+						filter: function(){
+							return true;
+						},
+						init:function(player){
+							player.storage.jisuishengjin_ai = 'nb'
+						},
+						content:function(){
+							player.damage(1);
+						},
+						ai: {
+							order:99,
+							result: {
+								player: function (player) {
+									if(true){
+										if(player.countCards('h','tao')+player.countCards('h','jiu') > 0)return 9999;
+										if(player.hp<3) return -1;
+										return 9999;
+									}else if(true){
+										
+									}else{
+
+									}
+								}
+							}
+						},
+						
+						group:['zioy_jisuishengjin_draw'],
+						subSkill:{
+							draw:{
+								trigger:{
+									player:'damageEnd'
+								},
+								filter:function(){
+									return true
+								},
+								frequent:true,
 								content:function(){
 									'step 0'
-									// trigger._mbmowang_return=true;
-									game.broadcastAll(function(player){
-										player.classList.remove('out');
-									},trigger.player);
-									game.log(trigger.player,'移回了游戏');
-									// delete _status.mbmowang_return[trigger.player.playerid];
-									trigger.player.recover(trigger.player.maxHp-trigger.player.hp);
-									// game.broadcastAll(function(player){
-									// 	if(player.name1=='shichangshi'){
-									// 		player.smoothAvatar(false);
-									// 		player.node.avatar.setBackground(player.name1,'character');
-									// 	}
-									// 	if(player.name2=='shichangshi'){
-									// 		player.smoothAvatar(true);
-									// 		player.node.avatar2.setBackground(player.name2,'character');
-									// 	}
-									// },trigger.player);
+									event.num = trigger.num;
 									'step 1'
-									event.trigger('restEnd');
-								},
-								sub:true,
-								popup:false,
-								"_priority":1,
+									event.cards=get.cards(8);
+									player.chooseCardButton('获得至多4张牌',[0,4],event.cards,true).ai=function(button){
+										if(button.link == 'tao' && button.link == 'jiu'){
+											return 99;
+										}else{
+											return get.useful(button.link);
+										}
+									};
+									'step 2'
+									if(result.bool){
+										var cards1 = []
+										for(var i=0;i<result.links.length;i++){
+											cards1.push(result.links[i]);
+											event.cards.remove(result.links[i])
+										}
+										player.gain(cards1)
+									}
+									for(var i=event.cards.length-1;i>=0;i--){
+										ui.cardPile.insertBefore(event.cards[i],ui.cardPile.firstChild);
+									}
+									event.num--;
+									if(event.num > 0)event.goto(1)
+								}
 							}
 						}
 					}
@@ -8302,7 +8364,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_zhoumingchuanxuan_info":
 						"①你的攻击距离+X，使用牌（延时锦囊除外）可多指定X名角色为目标（X为你的尾数/3且向下取整）<br>②若你使用牌指定唯一其他角色为目标且你的体力上限大于1，你失去1点体力上限并获得1枚“雷殊”标记，然后清除场上非天气的全局状态<br>③若你有至少2枚“雷殊”，你可以主动发动此技能并移去所有“雷殊”并选择X名其他角色，你对其造成X点雷属性伤害（X为你移去“雷殊”的数量/1.5且向下取整）",
 					"zioy_riyuexingkong": "日月行空",
-					"zioy_riyuexingkong_info": "你加入游戏时不加入本角色，改为加入“耀阳”与“辉月”。“耀阳”与“辉月”共享攻击距离，若其中一名角色即将死亡且另一名角色未处于休整状态，你令其休整至下一轮游戏开始时，否则令“耀阳”与“辉月”死亡。"
+					"zioy_riyuexingkong_info":
+						"你加入游戏时不加入本角色，改为加入“耀阳”与“辉月”。“耀阳”与“辉月”共享攻击距离，若其中一名角色即将死亡且另一名角色未处于休整状态，你令其休整至下一轮游戏开始时，否则令“耀阳”与“辉月”死亡。",
+					"zioy_jisuishengjin": "击髓生津",
+					"zioy_jisuishengjin_info": "<br>①出牌阶段，你可以对自己造成1点伤害。<br>②当你受到1点伤害时，你可以观看牌堆顶上的8张牌并获得其中至多四张牌，将剩余的牌按原顺序放回牌堆顶。"
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
@@ -8315,28 +8380,28 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 			"character": [
 				"zioy_gaiying.jpg",
 				"test.jpg",
-				"zioy_renturtle.jpg",
-				"zioy_xuanhu.jpg",
 				"zioy_xixuegui.jpg",
 				"zioy_shuijinxiezi.jpg",
 				"zioy_zhigaotian.jpg",
+				"zioy_renturtle.jpg",
 				"zioy_yinlong.jpg",
 				"zioy_heibai.jpg",
 				"zioy_senjianmeng.jpg",
-				"zioy_huajian.jpg",
-				"zioy_pqsj.jpg",
-				"zioy_jinu.jpg",
+				"zioy_xuanhu.jpg",
 				"zioy_yilong.jpg",
 				"zioy_dreamaker.jpg",
 				"zioy_drugdoctor.jpg",
+				"zioy_huajian.jpg",
 				"zioy_shenxianxiang.jpg",
 				"zioy_peiki.jpg",
 				"zioy_xielingyun.jpg",
-				"zioy_nianshou.jpg",
 				"zioy_sose.jpg",
+				"zioy_pqsj.jpg",
+				"zioy_nianshou.jpg",
+				"zioy_jinu.jpg",
 				"zioy_diana.jpg",
-				"zioy_lanchesite.jpg",
 				"zioy_xiaozhenhe.jpg",
+				"zioy_lanchesite.jpg",
 				"zioy_badun.jpg",
 				"zioy_guanghan.jpg",
 				"zioy_xingjun.jpg",
@@ -8352,7 +8417,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 				"zioy_muxi.jpg",
 				"zioy_b7chuhaoji.jpg",
 				"zioy_morana.jpg",
-				"zioy_kailuer.jpg"
+				"zioy_kailuer.jpg",
+				"zioy_purangsigai.jpg"
 			],
 			"card": ["zioy_yueguang.jpg"],
 			"skill": [],
