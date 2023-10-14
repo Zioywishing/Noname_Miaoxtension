@@ -8112,7 +8112,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 				"zioy_b7chuhaoji.jpg",
 				"zioy_morana.jpg",
 				"zioy_kailuer.jpg",
-				"zioy_xiyueying.jpg"
+				"zioy_xiyueying.jpg",
+                "zioy_xiyueying1.jpg",
+                "zioy_xiyueying2.jpg"
 			],
 			"card": ["zioy_yueguang.jpg"],
 			"skill": [],
