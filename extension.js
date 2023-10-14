@@ -7789,9 +7789,24 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						forced:true,
 						direct:true,
+						derivation:"",
 						filter:function(event,player){
 							// return true;
 							return (event.name!='phase'||game.phaseNumber==0);
+						},
+						mod:{
+							// 共享距离
+							inRange:function(from,to){
+								if(!from.storage._miao_twins||!from.storage._miao_twins.isIn()||from.storage.zioy_riyuexingkong_inRange_flag === false) return;
+								// 防止堆栈溢出
+								from.storage._miao_twins.storage.zioy_riyuexingkong_inRange_flag = false;
+								if(from.storage._miao_twins.inRange(to)){
+									return true
+								}
+								from.storage._miao_twins.storage.zioy_riyuexingkong_inRange_flag = true;
+							},
+
+
 						},
 						content:function(){
 							"step 0"
@@ -7806,12 +7821,17 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							p.node.name.innerHTML = "辉月";
 							p.maxHp = player.maxHp
 							p.hp = player.hp
-							p.gain(get.cards(4));
+							p.directgain(get.cards(4));
+							p._trueMe = player
+							p.sex = 'female'
+
 							p.identity = player.identity;
 							p.setIdentity();
 							p.identityShown = true;
-							p._trueMe = player
-							p.sex = '女'
+
+							
+							p.storage._miao_twins = player
+							player.storage._miao_twins = p
 
 							// player.removeSkill(event.name);
 							// p.removeSkill(event.name)
@@ -7821,7 +7841,156 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}
 							// game.log(p1.sex,typeof p1.sex)
 						},
-						group:[],
+						group:["zioy_riyuexingkong_die","zioy_riyuexingkong_return"],
+						subSkill:{
+							die:{
+								trigger:{
+									player:"dieBefore",
+								},
+								filter:function(event,player){
+									return player.storage._miao_twins.hp > 0&&player.storage._miao_twins.isIn()&&event.getParent().name!='giveup'&&player.maxHp>0;
+								},
+								forced:true,
+								direct:true,
+								priority:-1561565189,
+								// group:["mbmowang_die","mbmowang_return"],
+								content:function(){
+									if(false && (_status.mbmowang_return&&_status.mbmowang_return[player.playerid])){
+										trigger.cancel();
+									}
+									else{
+										trigger.setContent(function(){
+											'step 0'
+											event.forceDie=true;
+											// if(source){
+											// 	game.log(player,'被',source,'杀害');
+											// 	if(source.stat[source.stat.length-1].kill==undefined){
+											// 		source.stat[source.stat.length-1].kill=1;
+											// 	}
+											// 	else{
+											// 		source.stat[source.stat.length-1].kill++;
+											// 	}
+											// }
+											// else{
+											// 	game.log(player,'阵亡');
+											// }
+											if(player.isIn()&&(false&&(!_status.mbmowang_return||!_status.mbmowang_return[player.playerid]))){
+												event.reserveOut=true;
+												game.log(player,'进入了修整状态');
+												game.log(player,'移出了游戏');
+												//game.addGlobalSkill('mbmowang_return');
+												// if(!_status.mbmowang_return) _status.mbmowang_return={};
+												// _status.mbmowang_return[player.playerid]=1;
+											}
+											else event.finish();
+											if(!game.countPlayer()) game.over();
+											else if(player.hp!=0){
+												player.changeHp(0-player.hp,false).forceDie=true;
+											}
+											game.broadcastAll(function(player){
+												if(player.isLinked()){
+													if(get.is.linked2(player)){
+														player.classList.toggle('linked2');
+													}
+													else{
+														player.classList.toggle('linked');
+													}
+												}
+												if(player.isTurnedOver()){
+													player.classList.toggle('turnedover');
+												}
+											},player);
+											game.addVideo('link',player,player.isLinked());
+											game.addVideo('turnOver',player,player.classList.contains('turnedover'));
+											// 'step 1'
+											// event.trigger('die');
+											// 'step 2'
+											// if(event.reserveOut){
+											// 	if(!game.reserveDead){
+											// 		for(var mark in player.marks){
+											// 			if(mark=='mbdanggu') continue;
+											// 			player.unmarkSkill(mark);
+											// 		}
+											// 		var count=1;
+											// 		var list=Array.from(player.node.marks.childNodes);
+											// 		if(list.some(i=>i.name=='mbdanggu')) count++;
+											// 		while(player.node.marks.childNodes.length>count){
+											// 			var node=player.node.marks.lastChild;
+											// 			if(node.name=='mbdanggu'){
+											// 				node=node.previousSibling;
+											// 			}
+											// 			node.remove();
+											// 		}
+											// 		game.broadcast(function(player,count){
+											// 			while(player.node.marks.childNodes.length>count){
+											// 				var node=player.node.marks.lastChild;
+											// 				if(node.name=='mbdanggu'){
+											// 					node=node.previousSibling;
+											// 				}
+											// 				node.remove();
+											// 			}
+											// 		},player,count);
+											// 	}
+											// 	for(var i in player.tempSkills){
+											// 		player.removeSkill(i);
+											// 	}
+											// 	var skills=player.getSkills();
+											// 	for(var i=0;i<skills.length;i++){
+											// 		if(lib.skill[skills[i]].temp){
+											// 			player.removeSkill(skills[i]);
+											// 		}
+											// 	}
+											// 	event.cards=player.getCards('hejsx');
+											// 	if(event.cards.length){
+											// 		player.discard(event.cards).forceDie=true;
+											// 	}
+											// }
+											// 'step 3'
+											// if(event.reserveOut){
+											// 	game.broadcastAll(function(player,list){
+											// 		player.classList.add('out');
+											// 		if(list.contains(player.name1)||player.name1=='shichangshi'){
+											// 			player.smoothAvatar(false);
+											// 			player.node.avatar.setBackground(player.name1+'_dead','character');
+											// 		}
+											// 		if(list.contains(player.name2)||player.name2=='shichangshi'){
+											// 			player.smoothAvatar(true);
+											// 			player.node.avatar2.setBackground(player.name2+'_dead','character');
+											// 		}
+											// 	},player,lib.skill.mbdanggu.changshi.map(i=>i[0]));
+											// }
+											// if(source&&lib.config.border_style=='auto'&&(lib.config.autoborder_count=='kill'||lib.config.autoborder_count=='mix')){
+											// 	switch(source.node.framebg.dataset.auto){
+											// 		case 'gold':case 'silver':source.node.framebg.dataset.auto='gold';break;
+											// 		case 'bronze':source.node.framebg.dataset.auto='silver';break;
+											// 		default:source.node.framebg.dataset.auto=lib.config.autoborder_start||'bronze';
+											// 	}
+											// 	if(lib.config.autoborder_count=='kill'){
+											// 		source.node.framebg.dataset.decoration=source.node.framebg.dataset.auto;
+											// 	}
+											// 	else{
+											// 		var dnum=0;
+											// 		for(var j=0;j<source.stat.length;j++){
+											// 			if(source.stat[j].damage!=undefined) dnum+=source.stat[j].damage;
+											// 		}
+											// 		source.node.framebg.dataset.decoration='';
+											// 		switch(source.node.framebg.dataset.auto){
+											// 			case 'bronze':if(dnum>=4) source.node.framebg.dataset.decoration='bronze';break;
+											// 			case 'silver':if(dnum>=8) source.node.framebg.dataset.decoration='silver';break;
+											// 			case 'gold':if(dnum>=12) source.node.framebg.dataset.decoration='gold';break;
+											// 		}
+											// 	}
+											// 	source.classList.add('topcount');
+											// }
+										});
+										trigger.includeOut=true;
+									}
+								},
+							},
+							return:{
+
+							}
+						}
 					}
 				},
 				translate: {
