@@ -143,6 +143,13 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 
 			// }
 
+			//更换武将头像
+			lib.element.player.changeAvatarMiao = function(imgFrom,imgTo){
+
+				path = this.node.avatar.style.backgroundImage.split(imgFrom)[0]
+
+				this.node.avatar.style.backgroundImage = path + imgTo +'")'
+			}
 			//获得限伤
 			lib.element.player.addDamageLimiter = function () {
 				if (!this.storage._damageLimiter_Miao) {
@@ -7826,9 +7833,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							"step 0"
 							game.addGlobalSkill('autoswap');
 
-							path = player.node.avatar.style.backgroundImage.split('zioy_xiyueying.jpg')[0]
-
-							player.node.avatar.style.backgroundImage = path + 'zioy_xiyueying1.jpg")'
+							// player.node.avatar.style.backgroundImage = path + 'zioy_xiyueying1.jpg")'
+							player.changeAvatarMiao('zioy_xiyueying.jpg','zioy_xiyueying1.jpg')
 							player.node.name.innerHTML = "耀阳";
 
 							
@@ -7837,7 +7843,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							//fix bug....
 							p.removeSkill("zioy_riyuexingkong")
 							p.addSkill("zioy_riyuexingkong")
-							p.node.avatar.style.backgroundImage = path + 'zioy_xiyueying2.jpg")'
+							p.changeAvatarMiao('zioy_xiyueying.jpg','zioy_xiyueying2.jpg')
 							p.node.name.innerHTML = "辉月";
 							p.maxHp = player.maxHp
 							p.hp = player.hp
