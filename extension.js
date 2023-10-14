@@ -7614,7 +7614,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							player.addMark("zioy_leimingqiangu", player.getTailCount() * 5);
 							event.trigger("addMark_zioy_leimingqiangu");
 						},
-						group: ["zioy_leimingqiangu_useCard", "zioy_leimingqiangu_addMark", "zioy_leimingqiangu_phaseDraw", "zioy_leimingqiangu_source"],
+						group: ["zioy_leimingqiangu_useCard", "zioy_leimingqiangu_addMark", "zioy_leimingqiangu_phaseDraw", "zioy_leimingqiangu_source","zioy_leimingqiangu_updateDamageLimiter"],
 						subSkill: {
 							useCard: {
 								trigger: {
@@ -7630,7 +7630,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									"step 1"
 									player.recover();
 									"step 2"
-									player.addDamageLimiter(parseInt(player.getTailCount() / 2), "zioy_leimingqiangu");
+									player.addDamageLimiter(parseInt(player.getTailCount() / 2+0.01), "zioy_leimingqiangu");
 								},
 								sub: true,
 								"_priority": 0
@@ -7655,6 +7655,18 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								sub: true,
 								"_priority": 0
+							},
+							updateDamageLimiter:{
+								trigger:{
+									player:["loseAfter","changeHp","gainMaxHpAfter","loseMaxHpAfter"],
+        							global:["equipAfter","addJudgeAfter","gainAfter","loseAsyncAfter","addToExpansionAfter"],
+								},
+								filter:function(){
+									return true;
+								},
+								content:function(){
+									player.addDamageLimiter(parseInt(player.getTailCount() / 2+0.01), "zioy_leimingqiangu");
+								}
 							},
 							phaseDraw: {
 								trigger: {
