@@ -42,22 +42,21 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				//event.trigger("changeRoundNumberEnd");
 			};
 
-
 			// 重写废除判定区相关
 			lib.element.content.enableJudge = function () {
 				"step 0"
-				if (!player.storage._disableJudge || player.storage._disableJudge == false) event.finish()
+				if (!player.storage._disableJudge || player.storage._disableJudge == false) event.finish();
 				// 多次废除恢复判断
-				if (!player.storage._disableJudge_layer){
-					player.storage._disableJudge_layer = 0
+				if (!player.storage._disableJudge_layer) {
+					player.storage._disableJudge_layer = 0;
 				}
-				player.storage._disableJudge_layer--
-				if (player.storage._disableJudge_layer < 0){
-					player.storage._disableJudge_layer = 0
-					event.finish()
+				player.storage._disableJudge_layer--;
+				if (player.storage._disableJudge_layer < 0) {
+					player.storage._disableJudge_layer = 0;
+					event.finish();
 				}
-				if(player.storage._disableJudge_layer > 0)event.finish()
-				'step 1'
+				if (player.storage._disableJudge_layer > 0) event.finish();
+				"step 1"
 				game.log(player, "恢复了判定区");
 				player.storage._disableJudge = false;
 				// player.markSkill('_disableJudge');
@@ -71,12 +70,12 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				"step 0"
 				// if (player.storage._disableJudge == true) return;
 				// 多次废除恢复判断
-				if (!player.storage._disableJudge_layer){
-					player.storage._disableJudge_layer = 0
+				if (!player.storage._disableJudge_layer) {
+					player.storage._disableJudge_layer = 0;
 				}
-				player.storage._disableJudge_layer++
-				if(player.storage._disableJudge_layer > 1){
-					event.finish()
+				player.storage._disableJudge_layer++;
+				if (player.storage._disableJudge_layer > 1) {
+					event.finish();
 				}
 				"step 1"
 				game.log(player, "废除了判定区");
@@ -1012,15 +1011,15 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						onremove: function (player) {},
 						content: function () {
 							var r = function () {
-								return [true,false].randomGet();
+								return [true, false].randomGet();
 							};
 							if (r()) {
 								player.loseHp();
 							}
 							if (r()) {
-								var n = player.countCards() - player.hp
-								if(player.countCards() > 0 && n <= 0)n = 1
-								player.chooseToDiscard(true,n);
+								var n = player.countCards() - player.hp;
+								if (player.countCards() > 0 && n <= 0) n = 1;
+								player.chooseToDiscard(true, n);
 							}
 							if (r()) {
 								player.addBuff("shuimian", null);
@@ -1757,15 +1756,16 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 			};
 
 			//并不是很好的写法
-			game.addPlayer=(position,character,character2)=>{
-				if(position<0||position>game.players.length+game.dead.length||position==undefined) position=Math.ceil(Math.random()*(game.players.length+game.dead.length));
-				const players=game.players.concat(game.dead);
-				ui.arena.setNumber(players.length+1);
-				players.forEach(value=>{
-					if(parseInt(value.dataset.position)>=position) value.dataset.position=parseInt(value.dataset.position)+1;
+			(game.addPlayer = (position, character, character2) => {
+				if (position < 0 || position > game.players.length + game.dead.length || position == undefined)
+					position = Math.ceil(Math.random() * (game.players.length + game.dead.length));
+				const players = game.players.concat(game.dead);
+				ui.arena.setNumber(players.length + 1);
+				players.forEach(value => {
+					if (parseInt(value.dataset.position) >= position) value.dataset.position = parseInt(value.dataset.position) + 1;
 				});
-				const player=ui.create.player(ui.arena).animate('start');
-				if(character) player.init(character,character2);
+				const player = ui.create.player(ui.arena).animate("start");
+				if (character) player.init(character, character2);
 				player.storage.enhancementArray = {
 					attack: 0, //攻击力
 					defend: 0, //防御力
@@ -1778,47 +1778,46 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					locked_type: null
 				};
 				game.players.push(player);
-				player.playerid = get.id()
-				game.playerMap[player.playerid] = player
+				player.playerid = get.id();
+				game.playerMap[player.playerid] = player;
 				// game.log(game.playerMap)
 				// for(var i in game.playerMap){
 				// 	game.log(i)
 				// }
 				// game.playerMap.push(player);
-				player.dataset.position=position;
+				player.dataset.position = position;
 				game.arrangePlayers();
 				return player;
-			},
-
-			lib.skill._miao_enhancement_init = {
-				/*游戏开始时设置player.storage.enhancementArray */
-				// addplayer时会出错，需要注意
-				unique: true,
-				trigger: {
-					global: "phaseBefore",
-					player: ["enterGame", "showCharacterAfter"]
-				},
-				priority: 70582140,
-				forced: true,
-				locked: true,
-				direct: true,
-				filter: function (event, player) {
-					return event.name != "phase" || game.phaseNumber == 0 || !player.storage.enhancementArray;
-				},
-				content: function () {
-					player.storage.enhancementArray = {
-						attack: 0, //攻击力
-						defend: 0, //防御力
-						miss: 0, //闪避率
-						hit: 0, //命中率
-						strike: 0, //暴击率，目前没用
-						draw: 0, //摸牌，目前没用
-						locked: false,
-						locked_end: -1,
-						locked_type: null
-					};
-				}
-			};
+			}),
+				(lib.skill._miao_enhancement_init = {
+					/*游戏开始时设置player.storage.enhancementArray */
+					// addplayer时会出错，需要注意
+					unique: true,
+					trigger: {
+						global: "phaseBefore",
+						player: ["enterGame", "showCharacterAfter"]
+					},
+					priority: 70582140,
+					forced: true,
+					locked: true,
+					direct: true,
+					filter: function (event, player) {
+						return event.name != "phase" || game.phaseNumber == 0 || !player.storage.enhancementArray;
+					},
+					content: function () {
+						player.storage.enhancementArray = {
+							attack: 0, //攻击力
+							defend: 0, //防御力
+							miss: 0, //闪避率
+							hit: 0, //命中率
+							strike: 0, //暴击率，目前没用
+							draw: 0, //摸牌，目前没用
+							locked: false,
+							locked_end: -1,
+							locked_type: null
+						};
+					}
+				});
 			lib.skill._miao_enhancement_attack = {
 				/*根据攻击与防御强化进行伤害修正 */
 				trigger: {
@@ -2220,7 +2219,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_osiris": ["male", "shu", 4, ["zioy_zhuxingwuchang", "zioy_zhufashengmie", "zioy_yongyeqingxiao", "zioy_liechenyuyou_fire"], []],
 					"zioy_morana": ["female", "jin", 6, ["zioy_lanzhiyuane", "zioy_liuzhenxiongxiang", "zioy_yinhuxiaowu"], ["hiddenSkill"]],
 					"zioy_guanghan": ["female", "wu", "2/9", ["zioy_nongying", "zioy_chanjuan"], ["des:2023中秋"]],
-					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu", "zioy_zhoumingchuanxuan"], []]
+					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu", "zioy_zhoumingchuanxuan"], []],
+					"zioy_xiyueying": ["male", "shen", 4, [], []]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2261,7 +2261,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_osiris": "奥曦里斯",
 					"zioy_morana": "莫洛娜",
 					"zioy_guanghan": "广寒",
-					"zioy_xuanhu": "翾狐"
+					"zioy_xuanhu": "翾狐",
+					"zioy_xiyueying": "曦月吟"
 				}
 			},
 			card: {
@@ -5747,14 +5748,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						filter: function (event, player) {
 							//防止一个时机重复触发
-							if(player.storage.hxcx_x1 < player.storage.hxcx_x && player.storage.hxcx_x1_flag){
+							if (player.storage.hxcx_x1 < player.storage.hxcx_x && player.storage.hxcx_x1_flag) {
 								player.storage.hxcx_x1++;
 								player.storage.hxcx_x1_flag = false;
 							}
 							// game.log(player.storage.hxcx_x1, player.storage.hxcx_x,event.getParent().name)
-							if(event.num > player.storage.hxcx_x){
-								return true
-							}else{
+							if (event.num > player.storage.hxcx_x) {
+								return true;
+							} else {
 								return false;
 							}
 						},
@@ -5765,14 +5766,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						init: function (player) {
 							var p = player;
 							p.storage.hxcx_x = 0;
-							p.storage.hxcx_x1 = -1;// 回合内满足1时机次数
-							p.storage.hxcx_x1_flag = true;// 修时机重复触发的bug
-							p.storage.hxcx_count1 = 0;// 效果1触发次数
-							p.storage.hxcx_count2 = 0;// 复活次数
-							p.storage.yzyw_count1 = 0;// 月坠计数
+							p.storage.hxcx_x1 = -1; // 回合内满足1时机次数
+							p.storage.hxcx_x1_flag = true; // 修时机重复触发的bug
+							p.storage.hxcx_count1 = 0; // 效果1触发次数
+							p.storage.hxcx_count2 = 0; // 复活次数
+							p.storage.yzyw_count1 = 0; // 月坠计数
 							p.gainShenqi = function (num) {
 								if (num > 999) num = 999;
-								if(num < 0)return;
+								if (num < 0) return;
 								var p = this;
 								var mark = "zioy_hexuchongxiang_mark";
 								var mark_count = p.countMark(mark);
@@ -5823,7 +5824,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								player.storage.hxcx_count1 = 0;
 							}
 						},
-						group: ["zioy_hexuchongxiang_revive", "zioy_hexuchongxiang_damage", "zioy_hexuchongxiang_loseMaxHpEnd", "zioy_hexuchongxiang_phaseEnd", "zioy_hexuchongxiang_useCardAfter"],
+						group: [
+							"zioy_hexuchongxiang_revive",
+							"zioy_hexuchongxiang_damage",
+							"zioy_hexuchongxiang_loseMaxHpEnd",
+							"zioy_hexuchongxiang_phaseEnd",
+							"zioy_hexuchongxiang_useCardAfter"
+						],
 						subSkill: {
 							mark: {
 								mark: false,
@@ -5853,8 +5860,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 										}
 										p = p.next;
 									}
-									if(player.storage.hxcx_count2 < 2){
-										flag = true
+									if (player.storage.hxcx_count2 < 2) {
+										flag = true;
 									}
 									// if(flag == false && player.hp <= 0 && game.globalStatus.name == "shenlou"){
 
@@ -5888,16 +5895,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									"step 2"
 									player.recover(player.maxHp - player.hp);
 									"step 3"
-									if(player.hp < 0){
+									if (player.hp < 0) {
 										player.hp = player.maxHp;
-										player.update()
+										player.update();
 									}
 								},
 								sub: true,
 								"_priority": 0
 							},
-
-							// 增伤
 							damage: {
 								trigger: {
 									player: ["loseHpBegin", "damageBegin2", "phaseDrawBegin2"],
@@ -5935,8 +5940,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								sub: true,
 								"_priority": -30172700
 							},
-
-							// 重置回合内触发效果1的计数
 							phaseEnd: {
 								trigger: {
 									player: ["phaseEnd"]
@@ -5945,28 +5948,25 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									return true;
 								},
 								priority: -30174563,
-								// forced: true,
 								charlotte: true,
 								unique: true,
 								direct: true,
 								content: function () {
 									player.storage.hxcx_x1_flag = true;
-									player.storage.hxcx_x1=-1;
+									player.storage.hxcx_x1 = -1;
 								},
 								sub: true,
 								"_priority": -301712300
 							},
-
-							useCardAfter:{
+							useCardAfter: {
 								trigger: {
-									global: ["useCardAfter","damageEnd"],
+									global: ["useCardAfter", "damageEnd"],
 									player: ["loseHpBegin", "damageBegin3"]
 								},
 								filter: function (event, player) {
 									return true;
 								},
 								priority: -301754154563,
-								// forced: true,
 								charlotte: true,
 								unique: true,
 								direct: true,
@@ -6065,9 +6065,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							order: 1,
 							result: {
 								player: function (player) {
-									if(player.countMark("zioy_hexuchongxiang_mark") == player.maxHp)return 999
-									x = player.storage.enhancementArray["attack"]
-									if(x > -1){
+									if (player.countMark("zioy_hexuchongxiang_mark") == player.maxHp) return 999;
+									x = player.storage.enhancementArray["attack"];
+									if (x > -1) {
 										return -10;
 									}
 									return 120;
@@ -7567,14 +7567,16 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							return true;
 						},
 						init: function (player) {
-							player.getTailCount = function(){
-								return this.maxHp + this.countMark('zioy_zhoumingchuanxuan')
-							}
+							player.getTailCount = function () {
+								return this.maxHp + this.countMark("zioy_zhoumingchuanxuan");
+							};
 							player.addDamageLimiter(parseInt(player.getTailCount() / 3), "zioy_leimingqiangu");
 						},
 						mark: true,
 						marktext: "鸣雷",
-						intro: {name:"鸣雷"},
+						intro: {
+							name: "鸣雷"
+						},
 						forced: true,
 						content: function () {
 							"step 0"
@@ -7674,7 +7676,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								sub: true,
 								"_priority": 0
 							},
-							loseMaxHpEnd:{
+							loseMaxHpEnd: {
 								trigger: {
 									player: ["addMark_zioy_leimingqiangu"]
 								},
@@ -7692,64 +7694,63 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"_priority": 0
 					},
 					"zioy_zhoumingchuanxuan": {
-						mod:{
-							selectTarget:function(card,player,range){
-								if(player.hasSkill("zioy_leimingqiangu") && !(['delay'].contains(get.type(card))) && range[1]!=-1) range[1] += parseInt(player.getTailCount()/3);
+						mod: {
+							selectTarget: function (card, player, range) {
+								if (player.hasSkill("zioy_leimingqiangu") && !["delay"].contains(get.type(card)) && range[1] != -1)
+									range[1] += parseInt(player.getTailCount() / 3);
 							},
-							attackFrom:function(from,to,distance){
-								if(from.hasSkill("zioy_leimingqiangu")) return distance-parseInt(from.getTailCount()/3);
-							},
+							attackFrom: function (from, to, distance) {
+								if (from.hasSkill("zioy_leimingqiangu")) return distance - parseInt(from.getTailCount() / 3);
+							}
 						},
-						trigger:{
-							player:"useCardToTarget",
+						trigger: {
+							player: "useCardToTarget"
 						},
-						forced:true,
+						forced: true,
 						mark: true,
 						marktext: "雷殊",
-						intro: {name:'雷殊'},
-						logTarget:"target",
-						filter:function(event,player){
-							return event.target&&event.target!=player&&event.targets.length==1&&player.maxHp > 1;
+						intro: {
+							name: "雷殊"
 						},
-						content:function(){
-							player.loseMaxHp(1)
-							player.addMark('zioy_zhoumingchuanxuan')
+						logTarget: "target",
+						filter: function (event, player) {
+							return event.target && event.target != player && event.targets.length == 1 && player.maxHp > 1;
 						},
-						group:['zioy_zhoumingchuanxuan_phaseUse'],
-						subSkill:{
-							phaseUse:{
-								enable:"phaseUse",
-								usable:1,
+						content: function () {
+							player.loseMaxHp(1);
+							player.addMark("zioy_zhoumingchuanxuan");
+						},
+						group: ["zioy_zhoumingchuanxuan_phaseUse"],
+						subSkill: {
+							phaseUse: {
+								enable: "phaseUse",
+								usable: 1,
 								skillAnimation: true,
 								animationColor: "thunder",
-								filter:function(event,player){
-									return player.countMark('zioy_zhoumingchuanxuan')>1;
+								filter: function (event, player) {
+									return player.countMark("zioy_zhoumingchuanxuan") > 1;
 								},
-								// filterTarget:function(card,player,target){
-								// 	return player!=target;
-								// },
-								content:function(){
-									'step 0'
-									event.num = parseInt(player.countMark('zioy_zhoumingchuanxuan')/1.5)
-									player.removeMark('zioy_zhoumingchuanxuan',player.countMark('zioy_zhoumingchuanxuan'))
-									player.chooseTarget(
-										"对至多"+event.num+"名其他角色造成" + event.num + "点伤害",
-										function (card, player, target) {
-											return target != player;
-										},
-										[
-											1,event.num
-										],
-										true
-									)
-									.set("ai", function (target) {
-										var att = get.attitude(_status.event.player, target);
-										return -att;
-									});
-									'step 1'
-									if(result.bool){
-										for(var p of result.targets){
-											p.damage(event.num,'thunder')
+								content: function () {
+									"step 0"
+									event.num = parseInt(player.countMark("zioy_zhoumingchuanxuan") / 1.5);
+									player.removeMark("zioy_zhoumingchuanxuan", player.countMark("zioy_zhoumingchuanxuan"));
+									player
+										.chooseTarget(
+											"对至多" + event.num + "名其他角色造成" + event.num + "点伤害",
+											function (card, player, target) {
+												return target != player;
+											},
+											[1, event.num],
+											true
+										)
+										.set("ai", function (target) {
+											var att = get.attitude(_status.event.player, target);
+											return -att;
+										});
+									"step 1"
+									if (result.bool) {
+										for (var p of result.targets) {
+											p.damage(event.num, "thunder");
 										}
 									}
 								},
@@ -7757,16 +7758,16 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									order: 1,
 									result: {
 										player: function (player) {
-											var n = player.countMark('zioy_zhoumingchuanxuan');
+											var n = player.countMark("zioy_zhoumingchuanxuan");
 											return 3;
-										},
-										// target:function(player,target){
-										// 	return -3
-										// }
+										}
 									}
 								},
+								sub: true,
+								"_priority": 0
 							}
-						}
+						},
+						"_priority": 0
 					}
 				},
 				translate: {
@@ -8060,7 +8061,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_leimingqiangu_info":
 						'①记你的体力上限+你拥有的“雷殊”数量为你的"尾数"，若你的"尾数"小于9，每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/3(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到200枚时你移去200枚“鸣雷”标记并回复1点体力值，若尾数达到9则使你下一次造成伤害后对受伤角色造成1点不会触发此技能③效果的雷属性伤害。<br>③当你尾数达到9时，你造成的任何伤害后获得伤害值*尾数*3点“鸣雷”标记。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。<br>⑤你的摸牌阶段摸牌数基数为你的尾数/1.5(向下取整)。',
 					"zioy_zhoumingchuanxuan": "骤明穿玄",
-					"zioy_zhoumingchuanxuan_info": "①你的攻击距离+X，使用牌（延时锦囊除外）可多指定X名角色为目标（X为你的尾数/3且向下取整）<br>②若你使用牌指定唯一其他角色为目标且你的体力上限大于1，你失去1点体力上限并获得1枚“雷殊”标记，然后清除场上非天气的全局状态<br>③若你有至少2枚“雷殊”，你可以主动发动此技能并移去所有“雷殊”并选择X名其他角色，你对其造成X点雷属性伤害（X为你移去“雷殊”的数量/1.5且向下取整）"
+					"zioy_zhoumingchuanxuan_info":
+						"①你的攻击距离+X，使用牌（延时锦囊除外）可多指定X名角色为目标（X为你的尾数/3且向下取整）<br>②若你使用牌指定唯一其他角色为目标且你的体力上限大于1，你失去1点体力上限并获得1枚“雷殊”标记，然后清除场上非天气的全局状态<br>③若你有至少2枚“雷殊”，你可以主动发动此技能并移去所有“雷殊”并选择X名其他角色，你对其造成X点雷属性伤害（X为你移去“雷殊”的数量/1.5且向下取整）"
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
@@ -8074,28 +8076,28 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 				"zioy_gaiying.jpg",
 				"test.jpg",
 				"zioy_xuanhu.jpg",
+				"zioy_xixuegui.jpg",
+				"zioy_shuijinxiezi.jpg",
 				"zioy_zhigaotian.jpg",
 				"zioy_renturtle.jpg",
 				"zioy_yinlong.jpg",
 				"zioy_heibai.jpg",
-				"zioy_xixuegui.jpg",
-				"zioy_shuijinxiezi.jpg",
 				"zioy_senjianmeng.jpg",
+				"zioy_guanghan.jpg",
+				"zioy_yilong.jpg",
+				"zioy_dreamaker.jpg",
 				"zioy_drugdoctor.jpg",
 				"zioy_huajian.jpg",
 				"zioy_shenxianxiang.jpg",
+				"zioy_xielingyun.jpg",
 				"zioy_peiki.jpg",
 				"zioy_sose.jpg",
+				"zioy_pqsj.jpg",
 				"zioy_nianshou.jpg",
 				"zioy_jinu.jpg",
-				"zioy_dreamaker.jpg",
-				"zioy_yilong.jpg",
-				"zioy_xielingyun.jpg",
-				"zioy_pqsj.jpg",
-				"zioy_guanghan.jpg",
 				"zioy_diana.jpg",
-				"zioy_lanchesite.jpg",
 				"zioy_xiaozhenhe.jpg",
+				"zioy_lanchesite.jpg",
 				"zioy_badun.jpg",
 				"zioy_xingjun.jpg",
 				"zioy_osiris.jpg",
@@ -8106,13 +8108,15 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 				"zioy_bailu.jpg",
 				"zioy_xukongchong.jpg",
 				"zioy_nike.jpg",
-				"zioy_morana.jpg",
 				"zioy_muxi.jpg",
 				"zioy_b7chuhaoji.jpg",
-				"zioy_kailuer.jpg"
+				"zioy_morana.jpg",
+				"zioy_kailuer.jpg",
+				"zioy_xiyueying.jpg"
 			],
 			"card": ["zioy_yueguang.jpg"],
-			"skill": []
+			"skill": [],
+			"audio": []
 		}
 	};
 });
