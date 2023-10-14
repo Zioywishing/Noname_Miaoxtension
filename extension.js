@@ -7943,6 +7943,17 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 										player.storage._miao_twins.die();
 									}
 								},
+								ai:{
+									threaten:0.6,
+									effect:{
+										target:function(card,player,target){
+											if(get.tag(card,'damage')){
+												if(target.hp - target.storage._miao_twins.hp == 0) return 10
+												return 15*(target.hp - target.storage._miao_twins.hp);
+											}
+										},
+									},
+								},
 							},
 							return:{
 								trigger:{
