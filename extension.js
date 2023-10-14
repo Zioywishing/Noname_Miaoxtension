@@ -13,6 +13,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				return false;
 			};
 
+
+
 			game.changeRoundNumber = function () {
 				/*接受输入num，游戏轮数+=num */
 				//event.trigger("changeRoundNumberBegin");
@@ -41,6 +43,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				game.updateRoundNumber();
 				//event.trigger("changeRoundNumberEnd");
 			};
+
 
 			// 重写废除判定区相关
 			lib.element.content.enableJudge = function () {
@@ -7823,7 +7826,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							"step 0"
 							game.addGlobalSkill('autoswap');
 
-							player.node.avatar.style.backgroundImage = 'url("extension/喵喵喵喵/zioy_xiyueying1.jpg")'
+							path = player.node.avatar.style.backgroundImage.split('zioy_xiyueying.jpg')[0]
+
+							player.node.avatar.style.backgroundImage = path + 'zioy_xiyueying1.jpg")'
 							player.node.name.innerHTML = "耀阳";
 
 							
@@ -7832,7 +7837,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							//fix bug....
 							p.removeSkill("zioy_riyuexingkong")
 							p.addSkill("zioy_riyuexingkong")
-							p.node.avatar.style.backgroundImage = 'url("extension/喵喵喵喵/zioy_xiyueying2.jpg")'
+							p.node.avatar.style.backgroundImage = path + 'zioy_xiyueying2.jpg")'
 							p.node.name.innerHTML = "辉月";
 							p.maxHp = player.maxHp
 							p.hp = player.hp
