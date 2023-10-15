@@ -167,7 +167,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					}
 				}
 
-				this.removeDamageLimiter(id);
+				this.removeDamageLimiter(id,"noUnmark");
 				var Limiter = {};
 				Limiter.id = id;
 				Limiter.num = num;
@@ -176,15 +176,19 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				this.markSkill("_DamageLimiter");
 			};
 
+			//移除限伤
 			lib.element.player.removeDamageLimiter = function () {
 				if (!this.storage._damageLimiter_Miao) {
 					this.storage._damageLimiter_Miao = [];
 				}
 				var id = _status.event.name,
+					noUnmark = false,
 					nolog = false;
 				for (var i = 0; i < arguments.length; i++) {
 					if (arguments[i] == "nolog") {
 						nolog = true;
+					} else if (arguments[i] == "noUnmark") {
+						noUnmark = true;
 					} else if (typeof arguments[i] == "string") {
 						id = arguments[i];
 					}
@@ -194,7 +198,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						this.storage._damageLimiter_Miao.splice(i, 1);
 					}
 				}
-				if (this.storage._damageLimiter_Miao.length == 0) this.unmarkSkill("_DamageLimiter");
+				if (this.storage._damageLimiter_Miao.length == 0 && noUnmark == false) this.unmarkSkill("_DamageLimiter");
 			};
 
 			lib.skill["_DamageLimiter"] = {
@@ -7663,6 +7667,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								trigger:{
 									player:["loseAfter","changeHp","gainMaxHpAfter","loseMaxHpAfter"],
 								},
+								direct:true,
 								filter:function(){
 									return true;
 								},
