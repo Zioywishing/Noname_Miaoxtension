@@ -2751,6 +2751,9 @@ return false;*/
 						forced: true,
 						content: function () {
 							//trigger.cancel();
+							if(!player.storage.yueguang){
+								player.storage.yueguang = game.createCard("zioy_yueguang", "spade", 14);
+							}
 							player.chooseUseTarget(player.storage.yueguang, true, "nopopup");
 							//player.equip(player.storage.yueguang);
 						},
@@ -7659,7 +7662,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							updateDamageLimiter:{
 								trigger:{
 									player:["loseAfter","changeHp","gainMaxHpAfter","loseMaxHpAfter"],
-        							global:["equipAfter","addJudgeAfter","gainAfter","loseAsyncAfter","addToExpansionAfter"],
 								},
 								filter:function(){
 									return true;
@@ -7851,6 +7853,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							p.node.name.innerHTML = "辉月";
 							p.maxHp = player.maxHp;
 							p.hp = player.hp;
+							p.hujia = player.hujia;
 							p.directgain(get.cards(4));
 							p._trueMe = player;
 							p.sex = "female";
