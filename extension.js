@@ -4421,7 +4421,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							return !target.hasSkill("zioy_wuya2");
 						},
 						init: function (player) {
-							player.storage.nianxi_num = 0;
+							player.addMark('zioy_wuya',2)
 						},
 						group: ["zioy_wuya4", "zioy_wuya3"],
 						content: function () {
@@ -4443,12 +4443,29 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						filterCard: function (card) {
 							return get.color(card) != "red";
 						},
-						selectCard: function () {
-							return 0;
-						},
+						// selectCard: function () {
+						// 	return 0;
+						// },
 						position: "h",
 						check: function (card) {
 							return 1000;
+						},
+						ai:{
+							order:1,
+							result:{
+								target:function(player,target){
+									var eff=get.damageEffect(target,player);
+									if(eff>=0) return 1+eff;
+									var value=0,i;
+									var cards=player.getCards('h');
+									for(i=0;i<cards.length;i++){
+										value+=get.value(cards[i]);
+									}
+									value/=player.countCards('h');
+									if(target.hp==1) return Math.min(0,value-7);
+									return Math.min(0,value-5);
+								},
+							},
 						},
 						"_priority": 0
 					},
@@ -4484,7 +4501,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							return player.countMark("zioy_wuya") > 0 && player.maxHp > 1;
 						},
 						init: function (player) {
-							player.storage.puai_flag = false;
+							player.storage.puai_flag= false;
 						},
 						content: function () {
 							"step 0"
@@ -4499,6 +4516,15 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							player.removeMark("zioy_wuya", result.control);
 							player.addSkill("zioy_puai2");
 							player.awakenSkill(event.name);
+							// player.storage.puai_flag = true
+						},
+						ai: {
+							order:1,
+							effect: {
+								player: function (card, player, target) {
+									return 10 * (player.countMark("zioy_wuya") - 2);
+								}
+							}
 						},
 						"_priority": 0
 					},
@@ -4525,6 +4551,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}
 						},
 						ai: {
+							
 							effect: {
 								target: function (card, player, target) {
 									if (get.tag(card, "damage")) {
@@ -8295,7 +8322,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_xiantong2_info": "结束阶段",
 					"zioy_wuya": "雾鸦",
 					"zioy_wuya_info":
-						"①.游戏开始时你获得2点“黑血”。②.出牌阶段，你可以失去一点体力上限并选择一名角色，你令其获得“鸦”标记。拥有“鸦”标记的角色所有技能失效。拥有“鸦”标记的角色即将受到伤害时，防止此伤害并移去“鸦”标记。拥有“鸦”标记的角色的回合开始阶段，你需将此标记转移给一名未拥有“鸦”的角色。你以此法转移“鸦”标记时，原被标记者失去一点体力。若你以此法将“鸦”标记转移到自己区域内，你失去“鸦”标记，回复X点体力，并获得X点“黑血”标记（X为此“鸦”标记转移的次数+1）",
+						"①.获得此技能时你获得2点“黑血”。②.出牌阶段，你可以失去一点体力上限并选择一名角色，你令其获得“鸦”标记。拥有“鸦”标记的角色所有技能失效。拥有“鸦”标记的角色即将受到伤害时，防止此伤害并移去“鸦”标记。拥有“鸦”标记的角色的回合开始阶段，你需将此标记转移给一名未拥有“鸦”的角色。你以此法转移“鸦”标记时，原被标记者失去一点体力。若你以此法将“鸦”标记转移到自己区域内，你失去“鸦”标记，回复X点体力，并获得X点“黑血”标记（X为此“鸦”标记转移的次数+1）",
 					"zioy_sheji": "摄脊",
 					"zioy_sheji_info": "当你使用【杀】指定一名角色为目标时，你可以失去一点“黑血”，然后令【杀】失效，你偷取目标角色一点体力值。",
 					"zioy_puai": "瀑霭",
