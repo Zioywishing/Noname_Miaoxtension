@@ -7923,20 +7923,20 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									'step 0'
 									// 休整
 									if (player.storage._miao_twins.hp > 0 && player.storage._miao_twins.isIn() && event.getParent().name != "giveup" && player.maxHp > 0) {
-										// trigger.cancel()
+										trigger.cancel()
 										trigger.setContent(function () {
 											event.forceDie = true;
 											// event.forceDie=true;
-											if (source) {
-												game.log(player, "被", source, "杀害");
-												if (source.stat[source.stat.length - 1].kill == undefined) {
-													source.stat[source.stat.length - 1].kill = 1;
-												} else {
-													source.stat[source.stat.length - 1].kill++;
-												}
-											} else {
-												game.log(player, "阵亡");
-											}
+											// if (source) {
+											// 	game.log(player, "被", source, "杀害");
+											// 	if (source.stat[source.stat.length - 1].kill == undefined) {
+											// 		source.stat[source.stat.length - 1].kill = 1;
+											// 	} else {
+											// 		source.stat[source.stat.length - 1].kill++;
+											// 	}
+											// } else {
+											// 	game.log(player, "阵亡");
+											// }
 											// if(player.isIn()&&(false&&(!_status.mbmowang_return||!_status.mbmowang_return[player.playerid]))){
 											event.reserveOut = true;
 											game.log(player, "进入了修整状态");
