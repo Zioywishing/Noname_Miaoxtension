@@ -1816,20 +1816,20 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				}
 			};
 
-			lib.element.player._miao_check_enhancement = function(){
-				if(!this.storage.enhancementArray)
+			lib.element.player._miao_check_enhancement = function () {
+				if (!this.storage.enhancementArray)
 					this.storage.enhancementArray = {
-					attack: 0, //攻击力
-					defend: 0, //防御力
-					miss: 0, //闪避率
-					hit: 0, //命中率
-					strike: 0, //暴击率，目前没用
-					draw: 0, //摸牌，目前没用
-					locked: false,
-					locked_end: -1,
-					locked_type: null
-				};
-			}
+						attack: 0, //攻击力
+						defend: 0, //防御力
+						miss: 0, //闪避率
+						hit: 0, //命中率
+						strike: 0, //暴击率，目前没用
+						draw: 0, //摸牌，目前没用
+						locked: false,
+						locked_end: -1,
+						locked_type: null
+					};
+			};
 			lib.skill._miao_enhancement_init = {
 				/*游戏开始时设置player.storage.enhancementArray */
 				// addplayer时会出错，需要注意
@@ -1873,7 +1873,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				charlotte: true,
 				unique: true,
 				content: function () {
-					if(!player.storage.enhancementArray){
+					if (!player.storage.enhancementArray) {
 						player.storage.enhancementArray = {
 							attack: 0, //攻击力
 							defend: 0, //防御力
@@ -1885,7 +1885,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 							locked_end: -1,
 							locked_type: null
 						};
-					}if(!trigger.player.storage.enhancementArray){
+					}
+					if (!trigger.player.storage.enhancementArray) {
 						player.storage.enhancementArray = {
 							attack: 0, //攻击力
 							defend: 0, //防御力
@@ -1932,7 +1933,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				charlotte: true,
 				unique: true,
 				content: function () {
-					if(!player.storage.enhancementArray){
+					if (!player.storage.enhancementArray) {
 						player.storage.enhancementArray = {
 							attack: 0, //攻击力
 							defend: 0, //防御力
@@ -1944,7 +1945,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 							locked_end: -1,
 							locked_type: null
 						};
-					}if(!trigger.player.storage.enhancementArray){
+					}
+					if (!trigger.player.storage.enhancementArray) {
 						player.storage.enhancementArray = {
 							attack: 0, //攻击力
 							defend: 0, //防御力
@@ -1987,7 +1989,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				charlotte: true,
 				unique: true,
 				content: function () {
-					if(!player.storage.enhancementArray){
+					if (!player.storage.enhancementArray) {
 						player.storage.enhancementArray = {
 							attack: 0, //攻击力
 							defend: 0, //防御力
@@ -1999,7 +2001,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 							locked_end: -1,
 							locked_type: null
 						};
-					}if(!trigger.player.storage.enhancementArray){
+					}
+					if (!trigger.player.storage.enhancementArray) {
 						player.storage.enhancementArray = {
 							attack: 0, //攻击力
 							defend: 0, //防御力
@@ -2338,7 +2341,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu", "zioy_zhoumingchuanxuan"], []],
 					"zioy_xiyueying": ["double", "shen", 4, ["zioy_riyuexingkong"], []],
 					"zioy_purangsigai": ["none", "wu", 4, ["zioy_jisuishengjin"], ["des:plus黄盖"]],
-					"zioy_bidu": ["female", "jin", "3/14/2", ["zioy_biubiubiu"], []]
+					"zioy_bidu": ["female", "jin", "3/14/2", ["zioy_biubiubiu"], []],
+					"zioy_dacongming": ["male", "qun", "6/6/6", ["zioy_shoufa"], ["des:聪明手法的角色"]]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2382,7 +2386,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_xuanhu": "翾狐",
 					"zioy_xiyueying": "曦月吟",
 					"zioy_purangsigai": "普琅斯盖",
-					"zioy_bidu": "别西卜"
+					"zioy_bidu": "别西卜",
+					"zioy_dacongming": "大聪明"
 				}
 			},
 			card: {
@@ -8262,177 +8267,219 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"_priority": 0
 					},
 					"zioy_biubiubiu": {
-                        trigger:{
-                            global:"useCardAfter",
-                        },
-                        forced:true,
-                        filter:function(event,player){
-                            return (get.type(event.card)=='trick'&&event.card.isCard)&&event.card.name != 'shandian'&&event.player.getExpansions('zioy_biubiubiu').length==0&&player.storage.zioy_biubiubiu_flag1;
-                        },
-                        init:function(player){
-                            player.storage.zioy_biubiubiu_range_unlimit = false;
-                            player.storage.zioy_biubiubiu_flag = true;
-							player.storage.zioy_biubiubiu_flag1 = true;
-                        },
-						mark: false,
-						marktext: '泡泡',
-						intro: {
-							name:'泡泡',
-							mark: function (dialog, storage, player) {
-								if(player.getExpansions('zioy_biubiubiu'))dialog.addAuto(player.getExpansions('zioy_biubiubiu'));
-							},
+						trigger: {
+							global: "useCardAfter"
 						},
-                        content:function(){
-                            'step 0'
-                            var cards=trigger.cards;
-                            event.card=cards;
-                            trigger.player.addToExpansion(event.card,'giveAuto',player).gaintag.add('zioy_biubiubiu');
-                            trigger.player.markSkill('zioy_biubiubiu')
-                        },
-                        group:["zioy_biubiubiu_uctt"],
-                        subSkill:{
-                            uctt:{
-                                trigger:{
-                                    global:"useCardToTarget",
-                                },
-                                filter:function(event,player){
-                                    return event.targets.length==1&&(event.target==player||event.player==player)&&
-                                    game.countPlayer(function(player){
-                                        return player.getExpansions('zioy_biubiubiu').length!=0
-                                    }) > 0 && player.storage.zioy_biubiubiu_flag//&&lib.filter.targetEnabled2(event.card,event.player,player);
-                                },
-                                direct:true,
-                                content:function(){
-                                    'step 0'
-                                    player.chooseTarget(get.prompt2('zioy_biubiubiu').split('②')[1],function(card,player,target){
-                                        return target.getExpansions('zioy_biubiubiu').length!=0;
-                                    }).set('ai',target=>{
-                                        return Math.random()*100;
-                                    });
-                                    'step 1'
-                                    if(result.bool){
-                                        event.target=result.targets[0];
-                                        event.card = event.target.getExpansions('zioy_biubiubiu')[0]
-                                        game.log(player,'尝试执行',event.card,'的效果')
-                                        event.target.discard(event.card)
-										event.target.unmarkSkill('zioy_biubiubiu')
-                                        if(event.card.name == 'wuxie'){
+						forced: true,
+						filter: function (event, player) {
+							return (
+								get.type(event.card) == "trick" &&
+								event.card.isCard &&
+								event.card.name != "shandian" &&
+								event.player.getExpansions("zioy_biubiubiu").length == 0 &&
+								player.storage.zioy_biubiubiu_flag1
+							);
+						},
+						init: function (player) {
+							player.storage.zioy_biubiubiu_range_unlimit = false;
+							player.storage.zioy_biubiubiu_flag = true;
+							player.storage.zioy_biubiubiu_flag1 = true;
+						},
+						mark: false,
+						marktext: "泡泡",
+						intro: {
+							name: "泡泡",
+							mark: function (dialog, storage, player) {
+								if (player.getExpansions("zioy_biubiubiu")) dialog.addAuto(player.getExpansions("zioy_biubiubiu"));
+							}
+						},
+						content: function () {
+							"step 0"
+							var cards = trigger.cards;
+							event.card = cards;
+							trigger.player.addToExpansion(event.card, "giveAuto", player).gaintag.add("zioy_biubiubiu");
+							trigger.player.markSkill("zioy_biubiubiu");
+						},
+						group: ["zioy_biubiubiu_uctt"],
+						subSkill: {
+							uctt: {
+								trigger: {
+									global: "useCardToTarget"
+								},
+								filter: function (event, player) {
+									return (
+										event.targets.length == 1 &&
+										(event.target == player || event.player == player) &&
+										game.countPlayer(function (player) {
+											return player.getExpansions("zioy_biubiubiu").length != 0;
+										}) > 0 &&
+										player.storage.zioy_biubiubiu_flag
+									); //&&lib.filter.targetEnabled2(event.card,event.player,player);
+								},
+								direct: true,
+								content: function () {
+									"step 0"
+									player
+										.chooseTarget(get.prompt2("zioy_biubiubiu").split("②")[1], function (card, player, target) {
+											return target.getExpansions("zioy_biubiubiu").length != 0;
+										})
+										.set("ai", target => {
+											return Math.random() * 100;
+										});
+									"step 1"
+									if (result.bool) {
+										event.target = result.targets[0];
+										event.card = event.target.getExpansions("zioy_biubiubiu")[0];
+										game.log(player, "尝试执行", event.card, "的效果");
+										event.target.discard(event.card);
+										event.target.unmarkSkill("zioy_biubiubiu");
+										if (event.card.name == "wuxie") {
 											// 我放弃了
-											game.log(player,'尝试执行',event.card,'失败')
-                                            // if(get.type(trigger.card)=='trick'){
-                                            //     // event.getParent(1)._trigger.neutralize();
-											// 	// event.getParent(2)._trigger.neutralize();
-											// 	// event.getParent(3)._trigger.neutralize();
-											// 	// player.storage.zioy_biubiubiu_flag1 = false;
-											// 	// player.useCard('wuxie')
-											// 	player.addSkill('zioy_biubiubiu_wuxie')
-                                            //     trigger.cancelled=true;
-                                            // }
-                                            event.skip = true;
-                                        }else if(event.card.name == 'nanman' || event.card.name == 'wanjian'){
-                                            player.storage.zioy_biubiubiu_flag = false;
-                                            for(var i of game.players){
-                                                if(player == i) continue
-                                                var next = game.createEvent(event.card.name);
-                                                next.player = player;
-                                                next.target = i;
-                                                next.setContent(lib.card[event.card.name].content)
-                                                player.line(i)
-                                            }
-                                            player.storage.zioy_biubiubiu_flag = true;
-                                            event.skip = true;
-                                        }else if(event.card.name == 'wugu'||event.card.name == 'taoyuan'){
+											game.log(player, "尝试执行", event.card, "失败");
+											// if(get.type(trigger.card)=='trick'){
+											//     // event.getParent(1)._trigger.neutralize();
+											//     // event.getParent(2)._trigger.neutralize();
+											//     // event.getParent(3)._trigger.neutralize();
+											//     // player.storage.zioy_biubiubiu_flag1 = false;
+											//     // player.useCard('wuxie')
+											//     player.addSkill('zioy_biubiubiu_wuxie')
+											//     trigger.cancelled=true;
+											// }
+											event.skip = true;
+										} else if (event.card.name == "nanman" || event.card.name == "wanjian") {
+											player.storage.zioy_biubiubiu_flag = false;
+											for (var i of game.players) {
+												if (player == i) continue;
+												var next = game.createEvent(event.card.name);
+												next.player = player;
+												next.target = i;
+												next.setContent(lib.card[event.card.name].content);
+												player.line(i);
+											}
+											player.storage.zioy_biubiubiu_flag = true;
+											event.skip = true;
+										} else if (event.card.name == "wugu" || event.card.name == "taoyuan") {
 											player.storage.zioy_biubiubiu_flag1 = false;
-                                            player.useCard(event.card,game.players)
-                                            player.line(i)
-                                            event.skip = true;
-                                        }else if(player.hasUseTarget(event.card)){
-                                            player.chooseTarget(lib.card[event.card.name].filterTarget,lib.card[event.card.name].selectTarget == -1 ? 1:lib.card[event.card.name].selectTarget,true)
-											.set('ai',target=>{
-												if(typeof lib.card[event.card.name].ai.result.target == 'function')return lib.card[event.card.name].ai.result.target(player,target)
-											});
-                                            event.skip = false;
-                                        }else{
-											game.log(player,'尝试执行',event.card,'失败')
+											player.useCard(event.card, game.players);
+											player.line(i);
+											event.skip = true;
+										} else if (player.hasUseTarget(event.card)) {
+											player
+												.chooseTarget(
+													lib.card[event.card.name].filterTarget,
+													lib.card[event.card.name].selectTarget == -1 ? 1 : lib.card[event.card.name].selectTarget,
+													true
+												)
+												.set("ai", target => {
+													if (typeof lib.card[event.card.name].ai.result.target == "function")
+														return lib.card[event.card.name].ai.result.target(player, target);
+												});
+											event.skip = false;
+										} else {
+											game.log(player, "尝试执行", event.card, "失败");
 										}
-                                    }else{
-                                        event.finish()
-                                    }
-                                    'step 2'
-                                    if(result && result.bool && !event.skip){
-                                        if(event.card.name == 'tiesuo'){
-                                            player.storage.zioy_biubiubiu_flag = false;
-                                            for(var i of result.targets){
-                                                event.target1=i;
-                                                var next = game.createEvent(event.card.name);
-                                                next.player = player;
-                                                next.target = event.target1;
-                                                next.targets = result.targets;
-                                                next.setContent(lib.card[event.card.name].content)
-                                            }
-                                            player.storage.zioy_biubiubiu_flag = true;
-                                        }else{
-                                            event.target1=result.targets[0];
-                                            var next = game.createEvent(event.card.name);
-                                            next.player = player;
-                                            next.target = event.target1;
-                                            next.targets = result.targets;
-                                            next.setContent(lib.card[event.card.name].content)
-                                        }
-                                    }else{
-                                        // event.finish()
-                                    }
-                                    'step 3'
+									} else {
+										event.finish();
+									}
+									"step 2"
+									if (result && result.bool && !event.skip) {
+										if (event.card.name == "tiesuo") {
+											player.storage.zioy_biubiubiu_flag = false;
+											for (var i of result.targets) {
+												event.target1 = i;
+												var next = game.createEvent(event.card.name);
+												next.player = player;
+												next.target = event.target1;
+												next.targets = result.targets;
+												next.setContent(lib.card[event.card.name].content);
+											}
+											player.storage.zioy_biubiubiu_flag = true;
+										} else {
+											event.target1 = result.targets[0];
+											var next = game.createEvent(event.card.name);
+											next.player = player;
+											next.target = event.target1;
+											next.targets = result.targets;
+											next.setContent(lib.card[event.card.name].content);
+										}
+									} else {
+										// event.finish()
+									}
+									"step 3"
 									player.storage.zioy_biubiubiu_flag1 = true;
-                                    'step 4'
-                                    // if(player != event.target)game.swapSeat(player,event.target)
-									if(player != event.target){
-										game.swapSeat(player,event.target)
+									"step 4"
+									// if(player != event.target)game.swapSeat(player,event.target)
+									if (player != event.target) {
+										game.swapSeat(player, event.target);
 
-										if(player.getExpansions('zioy_biubiubiu').length!=0){
-											var c = player.getExpansions('zioy_biubiubiu');
-											event.target.addToExpansion(c,'giveAuto',player).gaintag.add('zioy_biubiubiu');
-											event.target.markSkill('zioy_biubiubiu')
-											player.unmarkSkill('zioy_biubiubiu')
+										if (player.getExpansions("zioy_biubiubiu").length != 0) {
+											var c = player.getExpansions("zioy_biubiubiu");
+											event.target.addToExpansion(c, "giveAuto", player).gaintag.add("zioy_biubiubiu");
+											event.target.markSkill("zioy_biubiubiu");
+											player.unmarkSkill("zioy_biubiubiu");
 										}
 
-										if(trigger.target==player){
-											var evt=trigger.getParent();
+										if (trigger.target == player) {
+											var evt = trigger.getParent();
 											evt.triggeredTargets2.remove(player);
 											evt.targets.remove(player);
 											evt.targets.push(event.target);
 										}
 
-										if(trigger.player==player){
-											var evt=trigger.getParent();
-											evt.player = event.target
+										if (trigger.player == player) {
+											var evt = trigger.getParent();
+											evt.player = event.target;
 										}
 									}
-									'step 5'
-									for(var p of game.players){
-										if(p.getExpansions('zioy_biubiubiu').length==0){
-											p.unmarkSkill('zioy_biubiubiu')
+									"step 5"
+									for (var p of game.players) {
+										if (p.getExpansions("zioy_biubiubiu").length == 0) {
+											p.unmarkSkill("zioy_biubiubiu");
 										}
 									}
-                                },
-                            },
-							wuxie:{
-								trigger:{
-									target:"useCardToTarget",
-        							player:"addJudgeBefore",
-								},
-								direct:true,
-								filter:()=>{return true},
-								content:function(){
-									player.say('fuck')
-									// event.getParent(2)._trigger.neutralize();
-									trigger.neutralize();
-									player.removeSkill(event.name)
 								}
 							},
+							wuxie: {
+								trigger: {
+									target: "useCardToTarget",
+									player: "addJudgeBefore"
+								},
+								direct: true,
+								filter: () => {
+									return true;
+								},
+								content: function () {
+									player.say("fuck");
+									// event.getParent(2)._trigger.neutralize();
+									trigger.neutralize();
+									player.removeSkill(event.name);
+								}
+							}
+						},
+						"_priority": 0
+					},
+					"zioy_shoufa": {
+                        frequent: true,
+                        unique: true,
+                        priority: 52345,
+                        trigger: {
+                            source: "damageBegin1"
                         },
-                        "_priority": 0
-                    }
+                        filter: function (event, player) {
+                            return true;
+                        },
+                        content: function () {
+                            'step 0'
+                            player.chooseControl([1,2,3],true).set("prompt", "请选择你认为1+1=？的答案").set('ai',()=>{return '2'});
+							"step 1"
+                            if(result.control == 2){
+                                var num = 100;
+                                while(num < trigger.player.maxHp)num *= 10
+                                trigger.num = num*10-1;
+                            }
+                        },
+                        sub: true,
+                        "_priority": 5234500}
 				},
 				translate: {
 					"zioy_xixue": "汲血",
@@ -8738,7 +8785,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_huiyueyao": "辉月谣",
 					"zioy_huiyueyao_info": "占位。",
 					"zioy_biubiubiu": "Biu! ",
-					"zioy_biubiubiu_info": "①一名未拥有“泡泡”的角色使用非转化的普通锦囊牌结算后，你将此牌置于其武将牌上，称为“泡泡”。<br>②当你成为/使一名角色成为一张牌的唯一目标时，你选择一名拥有“泡泡”的角色，弃置其“泡泡”并无视距离与时机尝试执行其中内容，然后与其交换座位并令其代替你进行此牌后续结算，若你有“泡泡”则令其获得之。"
+					"zioy_biubiubiu_info":
+						"①一名未拥有“泡泡”的角色使用非转化的普通锦囊牌结算后，你将此牌置于其武将牌上，称为“泡泡”。<br>②当你成为/使一名角色成为一张牌的唯一目标时，你选择一名拥有“泡泡”的角色，弃置其“泡泡”并无视距离与时机尝试执行其中内容，然后与其交换座位并令其代替你进行此牌后续结算，若你有“泡泡”则令其获得之。",
+					"zioy_shoufa": "手法",
+					"zioy_shoufa_info": "当你即将造成伤害时，你可以表演计算1+1，若你计算出正确答案，此伤害等于999。"
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
@@ -8749,26 +8799,26 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 		},
 		files: {
 			"character": [
-				"test.jpg",
 				"zioy_gaiying.jpg",
-				"zioy_yinlong.jpg",
-				"zioy_heibai.jpg",
-				"zioy_xuanhu.jpg",
+				"test.jpg",
 				"zioy_xixuegui.jpg",
 				"zioy_shuijinxiezi.jpg",
-				"zioy_renturtle.jpg",
 				"zioy_zhigaotian.jpg",
+				"zioy_renturtle.jpg",
+				"zioy_yinlong.jpg",
+				"zioy_heibai.jpg",
 				"zioy_senjianmeng.jpg",
-				"zioy_shenxianxiang.jpg",
-				"zioy_peiki.jpg",
-				"zioy_pqsj.jpg",
-				"zioy_drugdoctor.jpg",
+				"zioy_xuanhu.jpg",
 				"zioy_yilong.jpg",
-				"zioy_huajian.jpg",
 				"zioy_dreamaker.jpg",
+				"zioy_drugdoctor.jpg",
+				"zioy_huajian.jpg",
+				"zioy_shenxianxiang.jpg",
 				"zioy_xielingyun.jpg",
-				"zioy_nianshou.jpg",
+				"zioy_peiki.jpg",
 				"zioy_sose.jpg",
+				"zioy_pqsj.jpg",
+				"zioy_nianshou.jpg",
 				"zioy_jinu.jpg",
 				"zioy_diana.jpg",
 				"zioy_xiaozhenhe.jpg",
@@ -8778,6 +8828,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 				"zioy_xingjun.jpg",
 				"zioy_purangsigai.jpg",
 				"zioy_xiyueying.jpg",
+				"zioy_bidu.jpg",
 				"zioy_osiris.jpg",
 				"zioy_titan.jpg",
 				"zioy_yenglish.jpg",
@@ -8787,9 +8838,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 				"zioy_xukongchong.jpg",
 				"zioy_nike.jpg",
 				"zioy_muxi.jpg",
-				"zioy_b7chuhaoji.jpg",
 				"zioy_morana.jpg",
+				"zioy_b7chuhaoji.jpg",
 				"zioy_kailuer.jpg",
+				"zioy_dacongming.jpg"
 			],
 			"card": ["zioy_yueguang.jpg"],
 			"skill": [],
