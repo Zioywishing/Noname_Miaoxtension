@@ -1816,6 +1816,20 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				}
 			};
 
+			lib.element.player._miao_check_enhancement = function(){
+				if(!this.storage.enhancementArray)
+					this.storage.enhancementArray = {
+					attack: 0, //攻击力
+					defend: 0, //防御力
+					miss: 0, //闪避率
+					hit: 0, //命中率
+					strike: 0, //暴击率，目前没用
+					draw: 0, //摸牌，目前没用
+					locked: false,
+					locked_end: -1,
+					locked_type: null
+				};
+			}
 			lib.skill._miao_enhancement_init = {
 				/*游戏开始时设置player.storage.enhancementArray */
 				// addplayer时会出错，需要注意
@@ -1859,6 +1873,31 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				charlotte: true,
 				unique: true,
 				content: function () {
+					if(!player.storage.enhancementArray){
+						player.storage.enhancementArray = {
+							attack: 0, //攻击力
+							defend: 0, //防御力
+							miss: 0, //闪避率
+							hit: 0, //命中率
+							strike: 0, //暴击率，目前没用
+							draw: 0, //摸牌，目前没用
+							locked: false,
+							locked_end: -1,
+							locked_type: null
+						};
+					}if(!trigger.player.storage.enhancementArray){
+						player.storage.enhancementArray = {
+							attack: 0, //攻击力
+							defend: 0, //防御力
+							miss: 0, //闪避率
+							hit: 0, //命中率
+							strike: 0, //暴击率，目前没用
+							draw: 0, //摸牌，目前没用
+							locked: false,
+							locked_end: -1,
+							locked_type: null
+						};
+					}
 					var numDamage = trigger.num,
 						numAtk = player.storage.enhancementArray["attack"],
 						numDfd = trigger.player.storage.enhancementArray["defend"];
@@ -1893,6 +1932,31 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				charlotte: true,
 				unique: true,
 				content: function () {
+					if(!player.storage.enhancementArray){
+						player.storage.enhancementArray = {
+							attack: 0, //攻击力
+							defend: 0, //防御力
+							miss: 0, //闪避率
+							hit: 0, //命中率
+							strike: 0, //暴击率，目前没用
+							draw: 0, //摸牌，目前没用
+							locked: false,
+							locked_end: -1,
+							locked_type: null
+						};
+					}if(!trigger.player.storage.enhancementArray){
+						player.storage.enhancementArray = {
+							attack: 0, //攻击力
+							defend: 0, //防御力
+							miss: 0, //闪避率
+							hit: 0, //命中率
+							strike: 0, //暴击率，目前没用
+							draw: 0, //摸牌，目前没用
+							locked: false,
+							locked_end: -1,
+							locked_type: null
+						};
+					}
 					event.miss_skill_miaomiao = true;
 					var numMis = player.storage.enhancementArray["miss"],
 						numHit = trigger.player.storage.enhancementArray["hit"];
@@ -1923,6 +1987,31 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				charlotte: true,
 				unique: true,
 				content: function () {
+					if(!player.storage.enhancementArray){
+						player.storage.enhancementArray = {
+							attack: 0, //攻击力
+							defend: 0, //防御力
+							miss: 0, //闪避率
+							hit: 0, //命中率
+							strike: 0, //暴击率，目前没用
+							draw: 0, //摸牌，目前没用
+							locked: false,
+							locked_end: -1,
+							locked_type: null
+						};
+					}if(!trigger.player.storage.enhancementArray){
+						player.storage.enhancementArray = {
+							attack: 0, //攻击力
+							defend: 0, //防御力
+							miss: 0, //闪避率
+							hit: 0, //命中率
+							strike: 0, //暴击率，目前没用
+							draw: 0, //摸牌，目前没用
+							locked: false,
+							locked_end: -1,
+							locked_type: null
+						};
+					}
 					var numDamage = trigger.num,
 						num = player.storage.enhancementArray["strike"];
 					if (num * 0.05 > Math.random()) {
@@ -2293,7 +2382,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_xuanhu": "翾狐",
 					"zioy_xiyueying": "曦月吟",
 					"zioy_purangsigai": "普琅斯盖",
-					"zioy_bidu": "哔嘟"
+					"zioy_bidu": "别西卜"
 				}
 			},
 			card: {
