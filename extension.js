@@ -8047,7 +8047,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									"step 0"
 									// 休整
 									if (player.storage._miao_twins.hp > 0 && player.storage._miao_twins.isIn() && event.getParent().name != "giveup" && player.maxHp > 0) {
-										trigger.cancel();
+										// trigger.cancel();
 										trigger.setContent(function () {
 											event.forceDie = true;
 											// event.forceDie=true;
