@@ -2248,7 +2248,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_guanghan": ["female", "wu", "2/9", ["zioy_nongying", "zioy_chanjuan"], ["des:2023中秋"]],
 					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu", "zioy_zhoumingchuanxuan"], []],
 					"zioy_xiyueying": ["double", "shen", 4, ["zioy_riyuexingkong"], []],
-					"zioy_purangsigai": ["none", "wu", 4, ["zioy_jisuishengjin"], ["des:plus黄盖"]]
+					"zioy_purangsigai": ["none", "wu", 4, ["zioy_jisuishengjin"], ["des:plus黄盖"]],
+					"zioy_noname1": ["female", "jin", "3/14/2", ["zioy_noname1"], []]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2291,7 +2292,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_guanghan": "广寒",
 					"zioy_xuanhu": "翾狐",
 					"zioy_xiyueying": "曦月吟",
-					"zioy_purangsigai": "普琅斯盖"
+					"zioy_purangsigai": "普琅斯盖",
+					"zioy_noname1": "占位"
 				}
 			},
 			card: {
@@ -4421,7 +4423,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							return !target.hasSkill("zioy_wuya2");
 						},
 						init: function (player) {
-							player.addMark('zioy_wuya',2)
+							player.addMark("zioy_wuya", 2);
 						},
 						group: ["zioy_wuya4", "zioy_wuya3"],
 						content: function () {
@@ -4443,29 +4445,27 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						filterCard: function (card) {
 							return get.color(card) != "red";
 						},
-						// selectCard: function () {
-						// 	return 0;
-						// },
 						position: "h",
 						check: function (card) {
 							return 1000;
 						},
-						ai:{
-							order:1,
-							result:{
-								target:function(player,target){
-									var eff=get.damageEffect(target,player);
-									if(eff>=0) return 1+eff;
-									var value=0,i;
-									var cards=player.getCards('h');
-									for(i=0;i<cards.length;i++){
-										value+=get.value(cards[i]);
+						ai: {
+							order: 1,
+							result: {
+								target: function (player, target) {
+									var eff = get.damageEffect(target, player);
+									if (eff >= 0) return 1 + eff;
+									var value = 0,
+										i;
+									var cards = player.getCards("h");
+									for (i = 0; i < cards.length; i++) {
+										value += get.value(cards[i]);
 									}
-									value/=player.countCards('h');
-									if(target.hp==1) return Math.min(0,value-7);
-									return Math.min(0,value-5);
-								},
-							},
+									value /= player.countCards("h");
+									if (target.hp == 1) return Math.min(0, value - 7);
+									return Math.min(0, value - 5);
+								}
+							}
 						},
 						"_priority": 0
 					},
@@ -4501,7 +4501,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							return player.countMark("zioy_wuya") > 0 && player.maxHp > 1;
 						},
 						init: function (player) {
-							player.storage.puai_flag= false;
+							player.storage.puai_flag = false;
 						},
 						content: function () {
 							"step 0"
@@ -4519,7 +4519,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							// player.storage.puai_flag = true
 						},
 						ai: {
-							order:1,
+							order: 1,
 							effect: {
 								player: function (card, player, target) {
 									return 10 * (player.countMark("zioy_wuya") - 2);
@@ -4551,7 +4551,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}
 						},
 						ai: {
-							
 							effect: {
 								target: function (card, player, target) {
 									if (get.tag(card, "damage")) {
@@ -7855,14 +7854,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						forced: true,
 						direct: true,
-						derivation: ["zioy_yaoyangsong","zioy_huiyueyao"],
+						derivation: ["zioy_yaoyangsong", "zioy_huiyueyao"],
 						filter: function (event, player) {
 							// return true;
 							return event.name != "phase" || game.phaseNumber == 0;
 						},
 						mod: {
 							inRange: function (from, to) {
-								if (!from.storage._miao_twins || !from.storage._miao_twins.isIn() || from.storage.zioy_riyuexingkong_inRange_flag === false) return ;
+								if (!from.storage._miao_twins || !from.storage._miao_twins.isIn() || from.storage.zioy_riyuexingkong_inRange_flag === false) return;
 								// 防止堆栈溢出
 								from.storage._miao_twins.storage.zioy_riyuexingkong_inRange_flag = false;
 								from.storage.zioy_riyuexingkong_inRange_flag = false;
@@ -7872,17 +7871,17 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								}
 								from.storage._miao_twins.storage.zioy_riyuexingkong_inRange_flag = true;
 								from.storage.zioy_riyuexingkong_inRange_flag = true;
-								return res
+								return res;
 							},
-							globalFrom:function(from,to,distance){
+							globalFrom: function (from, to, distance) {
 								if (!from.storage._miao_twins || !from.storage._miao_twins.isIn() || from.storage.zioy_riyuexingkong_inRange_flag === false) return distance;
 								from.storage._miao_twins.storage.zioy_riyuexingkong_inRange_flag = false;
 								from.storage.zioy_riyuexingkong_inRange_flag = false;
-								num =  Math.min(get.distance(from,to),get.distance(from.storage._miao_twins,to));
+								num = Math.min(get.distance(from, to), get.distance(from.storage._miao_twins, to));
 								from.storage._miao_twins.storage.zioy_riyuexingkong_inRange_flag = true;
 								from.storage.zioy_riyuexingkong_inRange_flag = true;
-								return num
-							},
+								return num;
+							}
 						},
 						content: function () {
 							"step 0"
@@ -7893,7 +7892,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 
 							// game.log((parseInt(player.dataset.position) + parseInt((parseInt(player.dataset.position) + game.players.length + 0.01)/2+0.01)+1)%game.players.length, player.name)
 
-							var p = game.addPlayer((parseInt(player.dataset.position) + parseInt((parseInt(player.dataset.position) + game.players.length + 0.01)/2+0.01)+1)%game.players.length, player.name);
+							var p = game.addPlayer(
+								(parseInt(player.dataset.position) + parseInt((parseInt(player.dataset.position) + game.players.length + 0.01) / 2 + 0.01) + 1) %
+									game.players.length,
+								player.name
+							);
 
 							//fix bug....
 							for (var s of player.getSkills()) {
@@ -7902,8 +7905,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								p.removeSkill(s);
 								p.addSkill(s);
 							}
-							player.addSkill('zioy_yaoyangsong')
-							p.addSkill('zioy_huiyueyao')
+							player.addSkill("zioy_yaoyangsong");
+							p.addSkill("zioy_huiyueyao");
 							p.changeAvatarMiao("zioy_xiyueying.jpg", "zioy_xiyueying2.jpg");
 							p.node.name.innerHTML = "辉月";
 							p.maxHp = player.maxHp;
@@ -7922,7 +7925,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 
 							"step 1"
 							player.storage._miao_twins._trueMe = player;
-							'step 2'
+							"step 2"
 							game.addGlobalSkill("autoswap");
 
 							// player.removeSkill(event.name);
@@ -7947,22 +7950,22 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								direct: true,
 								priority: -1561565189,
 								content: function () {
-									'step 0'
+									"step 0"
 									// 休整
 									if (player.storage._miao_twins.hp > 0 && player.storage._miao_twins.isIn() && event.getParent().name != "giveup" && player.maxHp > 0) {
-										trigger.cancel()
+										trigger.cancel();
 										trigger.setContent(function () {
 											event.forceDie = true;
 											// event.forceDie=true;
 											// if (source) {
-											// 	game.log(player, "被", source, "杀害");
-											// 	if (source.stat[source.stat.length - 1].kill == undefined) {
-											// 		source.stat[source.stat.length - 1].kill = 1;
-											// 	} else {
-											// 		source.stat[source.stat.length - 1].kill++;
-											// 	}
+											//     game.log(player, "被", source, "杀害");
+											//     if (source.stat[source.stat.length - 1].kill == undefined) {
+											//         source.stat[source.stat.length - 1].kill = 1;
+											//     } else {
+											//         source.stat[source.stat.length - 1].kill++;
+											//     }
 											// } else {
-											// 	game.log(player, "阵亡");
+											//     game.log(player, "阵亡");
 											// }
 											// if(player.isIn()&&(false&&(!_status.mbmowang_return||!_status.mbmowang_return[player.playerid]))){
 											event.reserveOut = true;
@@ -7991,9 +7994,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 											// game.broadcastAll(function(player){
 											player.classList.add("out");
 											// });
-											
+
 											// if(game.me == player){
-											// 	game.me = player.storage._miao_twins;
+											//     game.me = player.storage._miao_twins;
 											// }
 
 											// player.$dieAfter();
@@ -8004,7 +8007,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 											// player.node.framebg.dataset.decoration='silver';
 										});
 										trigger.includeOut = true;
-										event.finish()
+										event.finish();
 									}
 
 									// 死透了
@@ -8016,8 +8019,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 										player.storage.zioy_riyuexingkong_die = true;
 										// game.me = player
 										//主公死晚一点
-										if(game.zhu == player.storage._miao_twins){
-											game.zhu = player
+										if (game.zhu == player.storage._miao_twins) {
+											game.zhu = player;
 										}
 										player.storage._miao_twins.die();
 										// player.die()
@@ -8027,8 +8030,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									threaten: 0.6,
 									effect: {
 										target: function (card, player, target) {
-											for(var p of target.getEnemies()){
-												if(p == player){
+											for (var p of target.getEnemies()) {
+												if (p == player) {
 													if (target.hp - target.storage._miao_twins.hp == 0) return 10;
 													return 15 * (target.hp - target.storage._miao_twins.hp);
 												}
@@ -8036,8 +8039,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 											// if(target.storage._miao_twins.hp == 0) return;
 											// if (get.attitude(player, target) >= 0) return -10;
 											// if (get.tag(card, "damage")) {
-											// 	if (target.hp - target.storage._miao_twins.hp == 0) return 1;
-											// 	return 15 * (target.hp - target.storage._miao_twins.hp);
+											//     if (target.hp - target.storage._miao_twins.hp == 0) return 1;
+											//     return 15 * (target.hp - target.storage._miao_twins.hp);
 											// }
 										}
 									}
@@ -8163,8 +8166,143 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						"_priority": 0
 					},
-					"zioy_yaoyangsong": {},
-					"zioy_huiyueyao": {}
+					"zioy_yaoyangsong": {
+						"_priority": 0
+					},
+					"zioy_huiyueyao": {
+						"_priority": 0
+					},
+					"zioy_noname1": {
+                        trigger:{
+                            global:"useCardAfter",
+                        },
+                        filter:function(event,player){
+                            return (get.type(event.card)=='trick'&&event.card.isCard)&&event.card.name != 'shandian'&&event.player.getExpansions('zioy_noname1').length==0;
+                        },
+                        init:function(player){
+                            player.storage.zioy_noname1_range_unlimit = false;
+                            player.storage.zioy_noname1_flag = true;
+                        },
+                        content:function(){
+                            'step 0'
+                            var cards=trigger.cards;
+
+                            event.card=cards;
+                            trigger.player.addToExpansion(event.card,'giveAuto',player).gaintag.add('zioy_noname1');
+                            trigger.player.markSkill('zioy_noname1')
+                        },
+                        forced:true,
+                        mark: false,
+                        markText:'泡泡',
+						intro: {
+                            name:'泡泡',
+							mark: function (dialog, storage, player) {
+								dialog.addAuto(player.getExpansions('zioy_noname1'));
+							},
+						},
+                        group:["zioy_noname1_uctt"],
+                        subSkill:{
+                            uctt:{
+                                trigger:{
+                                    global:"useCardToTarget",
+                                },
+                                filter:function(event,player){
+                                    return event.targets.length==1&&(event.target==player||event.player==player)&&
+                                    game.countPlayer(function(player){
+                                        return player.getExpansions('zioy_noname1').length!=0
+                                    }) > 0 && player.storage.zioy_noname1_flag//&&lib.filter.targetEnabled2(event.card,event.player,player);
+                                },
+                                direct:true,
+                                content:function(){
+                                    'step 0'
+                                    player.chooseTarget(get.prompt2('zioy_noname1').split('②')[1],function(card,player,target){
+                                        return target.getExpansions('zioy_noname1').length!=0;
+                                    }).set('ai',target=>{
+                                        return Math.random()*100-50;
+                                    });
+                                    'step 1'
+                                    if(result.bool){
+                                        event.target=result.targets[0];
+                                        event.card = event.target.getExpansions('zioy_noname1')[0]
+                                        game.log(player,'执行了',event.card,'的效果')
+                                        event.target.discard(event.card)
+                                        if(event.card.name == 'wuxie'){
+                                            if(get.type(trigger.card)=='trick'){
+                                                trigger.untrigger();
+                                                trigger.cancelled=true;
+                                            }
+                                            event.skip = true;
+                                        }else if(event.card.name == 'nanman' || event.card.name == 'wanjian'){
+                                            player.storage.zioy_noname1_flag = false;
+                                            for(var i of game.players){
+                                                if(player == i) continue
+                                                var next = game.createEvent(event.card.name);
+                                                next.player = player;
+                                                next.target = i;
+                                                next.setContent(lib.card[event.card.name].content)
+                                                player.line(i)
+                                            }
+                                            player.storage.zioy_noname1_flag = true;
+                                            event.skip = true;
+                                        }else if(event.card.name == 'wugu'){
+                                            player.useCard(event.card,game.players)
+                                            player.line(i)
+                                            event.skip = true;
+                                        }else if(player.hasUseTarget(event.card)){
+                                            player.chooseTarget(lib.card[event.card.name].filterTarget,lib.card[event.card.name].selectTarget == -1 ? 1:lib.card[event.card.name].selectTarget,true);
+                                            event.skip = false;
+                                        }
+                                    }else{
+                                        event.finish()
+                                    }
+                                    'step 2'
+                                    if(result && result.bool && !event.skip){
+                                        if(event.card.name == 'tiesuo'){
+                                            player.storage.zioy_noname1_flag = false;
+                                            for(var i of result.targets){
+                                                event.target1=i;
+                                                var next = game.createEvent(event.card.name);
+                                                next.player = player;
+                                                next.target = event.target1;
+                                                next.targets = result.targets;
+                                                next.setContent(lib.card[event.card.name].content)
+                                            }
+                                            player.storage.zioy_noname1_flag = true;
+                                        }else{
+                                            event.target1=result.targets[0];
+                                            var next = game.createEvent(event.card.name);
+                                            next.player = player;
+                                            next.target = event.target1;
+                                            next.targets = result.targets;
+                                            next.setContent(lib.card[event.card.name].content)
+                                        }
+                                    }else{
+                                        // event.finish()
+                                    }
+                                    'step 3'
+                                    event.target.unmarkSkill('zioy_noname1')
+                                    'step 4'
+                                    if(player != event.target)game.swapSeat(player,event.target)
+                                    if(player.getExpansions('zioy_noname1').length!=0){
+                                        var c = player.getExpansions('zioy_noname1');
+                                        event.target.addToExpansion(c,'giveAuto',player).gaintag.add('zioy_noname1');
+                                        event.target.markSkill('zioy_noname1')
+                                        player.unmarkSkill('zioy_noname1')
+                                    }
+                                    if(trigger.target==player){
+                                        var evt=trigger.getParent();
+                                        evt.triggeredTargets2.remove(player);
+                                        evt.targets.remove(player);
+                                        evt.targets.push(event.target);
+                                    }else{
+                                        var evt=trigger.getParent();
+                                        evt.player = target
+                                    }
+                                }
+                            }
+                        },
+                        "_priority": 0
+                    }
 				},
 				translate: {
 					"zioy_xixue": "汲血",
@@ -8468,7 +8606,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yaoyangsong": "耀阳颂",
 					"zioy_yaoyangsong_info": "占位。",
 					"zioy_huiyueyao": "辉月谣",
-					"zioy_huiyueyao_info": "占位。"
+					"zioy_huiyueyao_info": "占位。",
+					"zioy_noname1": "占位",
+					"zioy_noname1_info": "①一名未拥有“泡泡”的角色使用非转化的普通锦囊牌结算后，你将此牌置于其武将牌上，称为“泡泡”。<br>②当你成为/使一名角色成为一张牌的唯一目标时，你选择一名拥有“泡泡”的角色，弃置其“泡泡”并无视距离与时机执行其中内容，然后与其交换座位并令其代替你成为此牌结算过程中的角色，若你有“泡泡”则令其获得之。"
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
@@ -8481,32 +8621,32 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 			"character": [
 				"test.jpg",
 				"zioy_gaiying.jpg",
-				"zioy_renturtle.jpg",
+				"zioy_yinlong.jpg",
+				"zioy_heibai.jpg",
 				"zioy_xuanhu.jpg",
 				"zioy_xixuegui.jpg",
 				"zioy_shuijinxiezi.jpg",
+				"zioy_renturtle.jpg",
 				"zioy_zhigaotian.jpg",
-				"zioy_yinlong.jpg",
-				"zioy_heibai.jpg",
 				"zioy_senjianmeng.jpg",
-				"zioy_nianshou.jpg",
-				"zioy_yilong.jpg",
-				"zioy_drugdoctor.jpg",
-				"zioy_dreamaker.jpg",
 				"zioy_shenxianxiang.jpg",
-				"zioy_huajian.jpg",
 				"zioy_peiki.jpg",
-				"zioy_xielingyun.jpg",
-				"zioy_sose.jpg",
 				"zioy_pqsj.jpg",
+				"zioy_drugdoctor.jpg",
+				"zioy_yilong.jpg",
+				"zioy_huajian.jpg",
+				"zioy_dreamaker.jpg",
+				"zioy_xielingyun.jpg",
+				"zioy_nianshou.jpg",
+				"zioy_sose.jpg",
 				"zioy_jinu.jpg",
 				"zioy_diana.jpg",
 				"zioy_xiaozhenhe.jpg",
 				"zioy_lanchesite.jpg",
 				"zioy_badun.jpg",
-				"zioy_purangsigai.jpg",
 				"zioy_guanghan.jpg",
 				"zioy_xingjun.jpg",
+				"zioy_purangsigai.jpg",
 				"zioy_xiyueying.jpg",
 				"zioy_osiris.jpg",
 				"zioy_titan.jpg",
@@ -8519,7 +8659,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 				"zioy_muxi.jpg",
 				"zioy_b7chuhaoji.jpg",
 				"zioy_morana.jpg",
-				"zioy_kailuer.jpg"
+				"zioy_kailuer.jpg",
+				"zioy_noname1.jpg"
 			],
 			"card": ["zioy_yueguang.jpg"],
 			"skill": [],
