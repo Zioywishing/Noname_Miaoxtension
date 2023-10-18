@@ -2249,7 +2249,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu", "zioy_zhoumingchuanxuan"], []],
 					"zioy_xiyueying": ["double", "shen", 4, ["zioy_riyuexingkong"], []],
 					"zioy_purangsigai": ["none", "wu", 4, ["zioy_jisuishengjin"], ["des:plus黄盖"]],
-					"zioy_noname1": ["female", "jin", "3/14/2", ["zioy_noname1"], []]
+					"zioy_bidu": ["female", "jin", "3/14/2", ["zioy_biubiubiu"], []]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2293,7 +2293,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_xuanhu": "翾狐",
 					"zioy_xiyueying": "曦月吟",
 					"zioy_purangsigai": "普琅斯盖",
-					"zioy_noname1": "占位"
+					"zioy_bidu": "哔嘟"
 				}
 			},
 			card: {
@@ -8172,35 +8172,35 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_huiyueyao": {
 						"_priority": 0
 					},
-					"zioy_noname1": {
+					"zioy_biubiubiu": {
                         trigger:{
                             global:"useCardAfter",
                         },
+                        forced:true,
                         filter:function(event,player){
-                            return (get.type(event.card)=='trick'&&event.card.isCard)&&event.card.name != 'shandian'&&event.player.getExpansions('zioy_noname1').length==0;
+                            return (get.type(event.card)=='trick'&&event.card.isCard)&&event.card.name != 'shandian'&&event.player.getExpansions('zioy_biubiubiu').length==0&&player.storage.zioy_biubiubiu_flag1;
                         },
                         init:function(player){
-                            player.storage.zioy_noname1_range_unlimit = false;
-                            player.storage.zioy_noname1_flag = true;
+                            player.storage.zioy_biubiubiu_range_unlimit = false;
+                            player.storage.zioy_biubiubiu_flag = true;
+							player.storage.zioy_biubiubiu_flag1 = true;
                         },
+						mark: false,
+						marktext: '泡泡',
+						intro: {
+							name:'泡泡',
+							mark: function (dialog, storage, player) {
+								if(player.getExpansions('zioy_biubiubiu'))dialog.addAuto(player.getExpansions('zioy_biubiubiu'));
+							},
+						},
                         content:function(){
                             'step 0'
                             var cards=trigger.cards;
-
                             event.card=cards;
-                            trigger.player.addToExpansion(event.card,'giveAuto',player).gaintag.add('zioy_noname1');
-                            trigger.player.markSkill('zioy_noname1')
+                            trigger.player.addToExpansion(event.card,'giveAuto',player).gaintag.add('zioy_biubiubiu');
+                            trigger.player.markSkill('zioy_biubiubiu')
                         },
-                        forced:true,
-                        mark: false,
-                        markText:'泡泡',
-						intro: {
-                            name:'泡泡',
-							mark: function (dialog, storage, player) {
-								dialog.addAuto(player.getExpansions('zioy_noname1'));
-							},
-						},
-                        group:["zioy_noname1_uctt"],
+                        group:["zioy_biubiubiu_uctt"],
                         subSkill:{
                             uctt:{
                                 trigger:{
@@ -8209,31 +8209,39 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                                 filter:function(event,player){
                                     return event.targets.length==1&&(event.target==player||event.player==player)&&
                                     game.countPlayer(function(player){
-                                        return player.getExpansions('zioy_noname1').length!=0
-                                    }) > 0 && player.storage.zioy_noname1_flag//&&lib.filter.targetEnabled2(event.card,event.player,player);
+                                        return player.getExpansions('zioy_biubiubiu').length!=0
+                                    }) > 0 && player.storage.zioy_biubiubiu_flag//&&lib.filter.targetEnabled2(event.card,event.player,player);
                                 },
                                 direct:true,
                                 content:function(){
                                     'step 0'
-                                    player.chooseTarget(get.prompt2('zioy_noname1').split('②')[1],function(card,player,target){
-                                        return target.getExpansions('zioy_noname1').length!=0;
+                                    player.chooseTarget(get.prompt2('zioy_biubiubiu').split('②')[1],function(card,player,target){
+                                        return target.getExpansions('zioy_biubiubiu').length!=0;
                                     }).set('ai',target=>{
-                                        return Math.random()*100-50;
+                                        return Math.random()*100;
                                     });
                                     'step 1'
                                     if(result.bool){
                                         event.target=result.targets[0];
-                                        event.card = event.target.getExpansions('zioy_noname1')[0]
-                                        game.log(player,'执行了',event.card,'的效果')
+                                        event.card = event.target.getExpansions('zioy_biubiubiu')[0]
+                                        game.log(player,'尝试执行',event.card,'的效果')
                                         event.target.discard(event.card)
+										event.target.unmarkSkill('zioy_biubiubiu')
                                         if(event.card.name == 'wuxie'){
-                                            if(get.type(trigger.card)=='trick'){
-                                                trigger.untrigger();
-                                                trigger.cancelled=true;
-                                            }
+											// 我放弃了
+											game.log(player,'尝试执行',event.card,'失败')
+                                            // if(get.type(trigger.card)=='trick'){
+                                            //     // event.getParent(1)._trigger.neutralize();
+											// 	// event.getParent(2)._trigger.neutralize();
+											// 	// event.getParent(3)._trigger.neutralize();
+											// 	// player.storage.zioy_biubiubiu_flag1 = false;
+											// 	// player.useCard('wuxie')
+											// 	player.addSkill('zioy_biubiubiu_wuxie')
+                                            //     trigger.cancelled=true;
+                                            // }
                                             event.skip = true;
                                         }else if(event.card.name == 'nanman' || event.card.name == 'wanjian'){
-                                            player.storage.zioy_noname1_flag = false;
+                                            player.storage.zioy_biubiubiu_flag = false;
                                             for(var i of game.players){
                                                 if(player == i) continue
                                                 var next = game.createEvent(event.card.name);
@@ -8242,23 +8250,29 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                                                 next.setContent(lib.card[event.card.name].content)
                                                 player.line(i)
                                             }
-                                            player.storage.zioy_noname1_flag = true;
+                                            player.storage.zioy_biubiubiu_flag = true;
                                             event.skip = true;
-                                        }else if(event.card.name == 'wugu'){
+                                        }else if(event.card.name == 'wugu'||event.card.name == 'taoyuan'){
+											player.storage.zioy_biubiubiu_flag1 = false;
                                             player.useCard(event.card,game.players)
                                             player.line(i)
                                             event.skip = true;
                                         }else if(player.hasUseTarget(event.card)){
-                                            player.chooseTarget(lib.card[event.card.name].filterTarget,lib.card[event.card.name].selectTarget == -1 ? 1:lib.card[event.card.name].selectTarget,true);
+                                            player.chooseTarget(lib.card[event.card.name].filterTarget,lib.card[event.card.name].selectTarget == -1 ? 1:lib.card[event.card.name].selectTarget,true)
+											.set('ai',target=>{
+												if(typeof lib.card[event.card.name].ai.result.target == 'function')return lib.card[event.card.name].ai.result.target(player,target)
+											});
                                             event.skip = false;
-                                        }
+                                        }else{
+											game.log(player,'尝试执行',event.card,'失败')
+										}
                                     }else{
                                         event.finish()
                                     }
                                     'step 2'
                                     if(result && result.bool && !event.skip){
                                         if(event.card.name == 'tiesuo'){
-                                            player.storage.zioy_noname1_flag = false;
+                                            player.storage.zioy_biubiubiu_flag = false;
                                             for(var i of result.targets){
                                                 event.target1=i;
                                                 var next = game.createEvent(event.card.name);
@@ -8267,7 +8281,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                                                 next.targets = result.targets;
                                                 next.setContent(lib.card[event.card.name].content)
                                             }
-                                            player.storage.zioy_noname1_flag = true;
+                                            player.storage.zioy_biubiubiu_flag = true;
                                         }else{
                                             event.target1=result.targets[0];
                                             var next = game.createEvent(event.card.name);
@@ -8280,26 +8294,53 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                                         // event.finish()
                                     }
                                     'step 3'
-                                    event.target.unmarkSkill('zioy_noname1')
+									player.storage.zioy_biubiubiu_flag1 = true;
                                     'step 4'
-                                    if(player != event.target)game.swapSeat(player,event.target)
-                                    if(player.getExpansions('zioy_noname1').length!=0){
-                                        var c = player.getExpansions('zioy_noname1');
-                                        event.target.addToExpansion(c,'giveAuto',player).gaintag.add('zioy_noname1');
-                                        event.target.markSkill('zioy_noname1')
-                                        player.unmarkSkill('zioy_noname1')
-                                    }
-                                    if(trigger.target==player){
-                                        var evt=trigger.getParent();
-                                        evt.triggeredTargets2.remove(player);
-                                        evt.targets.remove(player);
-                                        evt.targets.push(event.target);
-                                    }else{
-                                        var evt=trigger.getParent();
-                                        evt.player = target
-                                    }
-                                }
-                            }
+                                    // if(player != event.target)game.swapSeat(player,event.target)
+									if(player != event.target){
+										game.swapSeat(player,event.target)
+
+										if(player.getExpansions('zioy_biubiubiu').length!=0){
+											var c = player.getExpansions('zioy_biubiubiu');
+											event.target.addToExpansion(c,'giveAuto',player).gaintag.add('zioy_biubiubiu');
+											event.target.markSkill('zioy_biubiubiu')
+											player.unmarkSkill('zioy_biubiubiu')
+										}
+
+										if(trigger.target==player){
+											var evt=trigger.getParent();
+											evt.triggeredTargets2.remove(player);
+											evt.targets.remove(player);
+											evt.targets.push(event.target);
+										}
+
+										if(trigger.player==player){
+											var evt=trigger.getParent();
+											evt.player = event.target
+										}
+									}
+									'step 5'
+									for(var p of game.players){
+										if(p.getExpansions('zioy_biubiubiu').length==0){
+											p.unmarkSkill('zioy_biubiubiu')
+										}
+									}
+                                },
+                            },
+							wuxie:{
+								trigger:{
+									target:"useCardToTarget",
+        							player:"addJudgeBefore",
+								},
+								direct:true,
+								filter:()=>{return true},
+								content:function(){
+									player.say('fuck')
+									// event.getParent(2)._trigger.neutralize();
+									trigger.neutralize();
+									player.removeSkill(event.name)
+								}
+							},
                         },
                         "_priority": 0
                     }
@@ -8607,8 +8648,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yaoyangsong_info": "占位。",
 					"zioy_huiyueyao": "辉月谣",
 					"zioy_huiyueyao_info": "占位。",
-					"zioy_noname1": "占位",
-					"zioy_noname1_info": "①一名未拥有“泡泡”的角色使用非转化的普通锦囊牌结算后，你将此牌置于其武将牌上，称为“泡泡”。<br>②当你成为/使一名角色成为一张牌的唯一目标时，你选择一名拥有“泡泡”的角色，弃置其“泡泡”并无视距离与时机执行其中内容，然后与其交换座位并令其代替你成为此牌结算过程中的角色，若你有“泡泡”则令其获得之。"
+					"zioy_biubiubiu": "Biu! ",
+					"zioy_biubiubiu_info": "①一名未拥有“泡泡”的角色使用非转化的普通锦囊牌结算后，你将此牌置于其武将牌上，称为“泡泡”。<br>②当你成为/使一名角色成为一张牌的唯一目标时，你选择一名拥有“泡泡”的角色，弃置其“泡泡”并无视距离与时机尝试执行其中内容，然后与其交换座位并令其代替你进行此牌后续结算，若你有“泡泡”则令其获得之。"
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
@@ -8660,7 +8701,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 				"zioy_b7chuhaoji.jpg",
 				"zioy_morana.jpg",
 				"zioy_kailuer.jpg",
-				"zioy_noname1.jpg"
 			],
 			"card": ["zioy_yueguang.jpg"],
 			"skill": [],
