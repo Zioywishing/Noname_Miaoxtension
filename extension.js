@@ -3738,7 +3738,7 @@ return false;*/
 									target.update();
 									game.zhu = target;
 								}
-								player.loseHp(Infinity);
+								// player.loseHp(Infinity);
 								player.die();
 							}
 						},
