@@ -4461,15 +4461,19 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							event.cs = player.getExpansions("zioy_xiantong");
 							if (event.cs.length == 0) event.finish();
 							"step 1"
-							var c = event.cs[0];
 							var ts = game.players;
 							var target = player;
+							event.target = target
 							do {
 								target = ts.randomGet();
 							} while (target == player);
-							player.gain(c);
-							target.damage(2, "thunder");
 							player.line(target, "red");
+							target.damage(2, "thunder");
+							"step 2"
+							var c = event.cs[0];
+							// if(event.target.hp > 0){
+								player.gain(c)
+							// }
 							event.goto(0);
 						},
 						"_priority": 200
