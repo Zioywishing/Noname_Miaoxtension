@@ -7051,7 +7051,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						mod: {
 							maxHandcardBase: function (player, num) {
-								num -= 4;
+								num -= 1;
 								if (num < 3) num = 3;
 								return num;
 							}
@@ -7170,6 +7170,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								content: function () {
 									player.removeMark("zioy_pinghuqiuyue", 1);
+									player.draw(2)
 								},
 								sub: true,
 								"_priority": 52341500
@@ -7190,7 +7191,17 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"_priority": 5234500
 					},
 					"zioy_yurangzhijian": {
-						enable: "phaseUse",
+						enable: ["chooseToUse"],
+						filter:function(event,player){
+							if(event.type=='dying'){
+								if(player!=event.dying) return false;
+								return true;
+							}
+							else if(event.parent.name=='phaseUse'){
+								return true;
+							}
+							return false;
+						},
 						usable: 1,
 						unique: true,
 						init: function (player) {
@@ -7230,11 +7241,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								player.addSkill("zioy_yurangzhijian_chengsheng");
 								player.addMark("zioy_yurangzhijian_chengsheng", 1);
 							}
-							player.storage.yurangzhijian_nuqi += nuqi / 3;
+							player.storage.yurangzhijian_nuqi += nuqi / 3+0.001;
+							player.draw(Math.min(parseInt(nuqi +0.001),7))
 							player.storage.yurangzhijian_count += 1.5;
 						},
 						ai: {
 							order: 1,
+							save:true,
 							result: {
 								player: function (player) {
 									x = player.storage.yurangzhijian_count;
@@ -7246,6 +7259,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									}
 									if (player.hp < 3 && y > 0) {
 										return 100;
+									}
+									if(player.hp <= 0){
+										return 999;
 									}
 									return Math.min(y, player.maxHp - player.hp) - 1;
 								}
@@ -7294,7 +7310,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									},
 									canBeDiscarded: function (card) {
 										if (get.position(card) == "e") return false;
-									}
+									},
+									attackFrom:function(from,to,distance){
+										if(!from.getEquip(1)) return Infinity;
+									},
 								},
 								group: ["zioy_yurangzhijian_wushuang", "zioy_yurangzhijian_damageEnd", "zioy_yurangzhijian_damageBegin"],
 								sub: true,
@@ -7313,14 +7332,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									var id = trigger.target.playerid;
 									var map = trigger.getParent().customArgs;
 									if (!map[id]) map[id] = {};
+									n = parseInt(player.countMark("zioy_yurangzhijian_chengsheng") / 2.3);
+									if (n == 0) {
+										n = 1;
+									}
 									if (typeof map[id].shanRequired == "number") {
-										n = parseInt(player.countMark("zioy_yurangzhijian_chengsheng") / 2.3);
-										if (n == 0) {
-											n = 1;
-										}
 										map[id].shanRequired += n;
 									} else {
-										map[id].shanRequired = 2;
+										map[id].shanRequired = n+1;
 									}
 								},
 								ai: {
@@ -7349,7 +7368,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 											trigger.player,
 											"hej",
 											true,
-											Math.min(trigger.player.countCards("hej"), parseInt(trigger.num * 0.15 * player.countMark("zioy_yurangzhijian_chengsheng")))
+											Math.min(trigger.player.countCards("hej"), player.countMark("zioy_yurangzhijian_chengsheng"))
 										);
 								},
 								sub: true,
@@ -7733,6 +7752,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						intro: {
 							name: "鸣雷"
 						},
+						unique:true,
 						forced: true,
 						content: function () {
 							"step 0"
@@ -7747,12 +7767,28 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						group: [
 							"zioy_leimingqiangu_useCard",
+							"zioy_leimingqiangu_damageBegin",
 							"zioy_leimingqiangu_addMark",
 							"zioy_leimingqiangu_phaseDraw",
 							"zioy_leimingqiangu_source",
 							"zioy_leimingqiangu_updateDamageLimiter"
 						],
 						subSkill: {
+							damageBegin:{
+								trigger: {
+									source: ["damageBegin"]
+								},
+								filter: function (event, player) {
+									return player.getTailCount() >= 9;
+								},
+								forced: true,
+								content: function () {
+									"step 0"
+									trigger.num += 2;
+								},
+								sub: true,
+								"_priority": 0
+							},
 							useCard: {
 								trigger: {
 									player: ["useCard"]
@@ -8745,10 +8781,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"血脉技，免疫失效。<br>①令你获得“泷之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“燚之神佑”的角色造成的伤害+1。",
 					"zioy_pinghuqiuyue": "平湖秋月",
 					"zioy_pinghuqiuyue_info":
-						"①限制你受到的伤害最大为2点。<br>②当你流失体力后，防止你于本轮游戏流失体力。<br>③你的手牌上限-4且不小于3。<br>④你对拥有护甲的角色造成的伤害+1。<br>⑤触发限伤效果/击破一名角色护甲/令一名角色进入濒死状态时获得7点怒气，受到/造成伤害时获得等额怒气。<br>⑥你的回合结束阶段，你失去1点怒气。",
+						"①限制你受到的伤害最大为2点。<br>②当你流失体力后，防止你于本轮游戏流失体力。<br>③你的手牌上限-1且不小于3。<br>④你对拥有护甲的角色造成的伤害+1。<br>⑤触发限伤效果/击破一名角色护甲/令一名角色进入濒死状态时获得7点怒气，受到/造成伤害时获得等额怒气。<br>⑥你的回合结束阶段，若你有怒气，你失去1点怒气并摸2张牌。",
 					"zioy_yurangzhijian": "与浪之间",
 					"zioy_yurangzhijian_info":
-						"出牌阶段限一次，依次结算以下效果：<br>①消耗你所有“怒气”，减少你至多3层“盛怒”层数（最多减少至1层）。<br>②召唤5轮“细雨”天气，获得5回合全异常免疫。<br>③令Y=M-1.5X+N/3（向下取整），若Y大于零则回复Y点体力，否则弃置-Y张牌（X为本局游戏〖与浪之间〗累计使用次数，N为本次消耗怒气值，M为本次消耗“盛怒”层数）。<br>④若累计记录消耗怒气数+N达到10点则进入盛怒状态并获得1点“盛怒”层数，此效果一局游戏限1次。<br>⑤盛怒状态下使你下一次受到的伤害基础值等于0。<br>⑥记录N/3点消耗怒气数。<br>盛怒状态：盛怒状态最多达到7层，盛怒状态中每次使用伤害类型牌时获得1层“盛怒”层数，盛怒状态为你提供以下增益：<br>>①你出牌阶段可以多使用X*0.43（向下取整）张【杀】<br>>②你使用【杀】时对方需多使用X*0.43（向下取整且至少为1）张【闪】<br>>③你的【杀】造成的伤害+X*0.58（向下取整）<br>>④造成伤害时你回复0.05*X*伤害值（向下取整）点伤害值并弃置受伤角色0.15*X*伤害值（向下取整）张牌。<br>>⑤你装备区的牌无法被弃置。",
+						"当你处于濒死阶段时或出牌阶段限一次，依次结算以下效果：<br>①消耗你所有“怒气”，减少你至多3层“盛怒”层数（最多减少至1层）。<br>②召唤5轮“细雨”天气，获得5回合全异常免疫。<br>③令Y=M-1.5X+N/3（向下取整），若Y大于零则回复Y点体力，否则弃置-Y张牌（X为本局游戏〖与浪之间〗累计使用次数，N为本次消耗怒气值，M为本次消耗“盛怒”层数）。<br>④若累计记录消耗怒气数+N达到10点则进入盛怒状态并获得1点“盛怒”层数，此效果一局游戏限1次。<br>⑤盛怒状态下使你下一次受到的伤害基础值等于0。<br>⑥记录N/3点消耗怒气数并摸N（至多为7）张牌。<br>盛怒状态：盛怒状态最多达到7层，盛怒状态中每次使用伤害类型牌时获得1层“盛怒”层数，盛怒状态为你提供以下增益：<br>>①你出牌阶段可以多使用X*0.43（向下取整）张【杀】<br>>②你使用【杀】时对方需多使用X*0.43（向下取整且至少为1）张【闪】<br>>③你的【杀】造成的伤害+X*0.58（向下取整）<br>>④造成伤害时你回复0.05*X*伤害值（向下取整）点伤害值并弃置受伤角色X张牌。<br>>⑤你装备区的牌无法被弃置。<br>>⑥当你没有装备武器时，你的攻击范围为无穷大。",
 					"zioy_liechenyuyou_fire": "列辰御佑",
 					"zioy_liechenyuyou_fire_info":
 						"血脉技，免疫失效。<br>①令你获得“燚之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“苏之神佑”的角色造成的伤害+1。",
@@ -8774,10 +8810,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yinhuxiaowu_info": "测试是否有更新",
 					"zioy_leimingqiangu": "雷鸣千古",
 					"zioy_leimingqiangu_info":
-						'①记你的体力上限+你拥有的“雷殊”数量为你的"尾数"，若你的"尾数"小于9，每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/3(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到200枚时你移去200枚“鸣雷”标记并回复1点体力值，若尾数达到9则使你下一次造成伤害后对受伤角色造成1点不会触发此技能③效果的雷属性伤害。<br>③当你尾数达到9时，你造成的任何伤害后获得伤害值*尾数*3点“鸣雷”标记。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。<br>⑤你的摸牌阶段摸牌数基数为你的尾数/1.5(向下取整)。',
+						'①记你的体力上限+你拥有的“雷殊”数量为你的"尾数"，若你的"尾数"小于9，每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/3(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到200枚时你移去200枚“鸣雷”标记并回复1点体力值，若尾数达到9则使你下一次造成伤害后对受伤角色造成1点不会触发此技能③效果的雷属性伤害。<br>③当你尾数达到9时，你为伤害来源的任何伤害数值+2，你造成任何伤害后获得伤害值*尾数*3点“鸣雷”标记。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。<br>⑤你的摸牌阶段摸牌数基数为你的尾数/1.5(向下取整)。',
 					"zioy_zhoumingchuanxuan": "骤明穿玄",
 					"zioy_zhoumingchuanxuan_info":
-						"①你的攻击距离+X，使用牌（延时锦囊除外）可多指定X名角色为目标（X为你的尾数/3且向下取整）<br>②若你使用牌指定唯一其他角色为目标且你的体力上限大于1，你失去1点体力上限并获得1枚“雷殊”标记，然后清除场上非天气的全局状态<br>③若你有至少2枚“雷殊”，你可以主动发动此技能并移去所有“雷殊”并选择X名其他角色，你对其造成X点雷属性伤害（X为你移去“雷殊”的数量/1.5且向下取整）",
+						"①你的攻击距离+X，使用牌（延时锦囊除外）可多指定X名角色为目标（X为你的尾数/3且向下取整）<br>②若你使用牌指定唯一其他角色为目标且你的体力上限大于1，你失去1点体力上限并获得1枚“雷殊”标记，然后清除场上非天气的全局状态<br>③若你有至少2枚“雷殊”，你可以主动发动此技能，移去所有“雷殊”并选择X名其他角色，你对其造成X点雷属性伤害（X为你移去“雷殊”的数量/1.5且向下取整）",
 					"zioy_riyuexingkong": "日月行空",
 					"zioy_riyuexingkong_info":
 						"你加入游戏时不加入本角色，改为加入“耀阳”与“辉月”。“耀阳”与“辉月”共享攻击距离与范围计算，若其中一名角色即将死亡且另一名角色未处于休整状态，你令其休整至其下一回合开始时，否则令“耀阳”与“辉月”死亡。",
