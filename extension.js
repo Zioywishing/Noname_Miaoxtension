@@ -1355,9 +1355,9 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						}
 					}
 					//若已免疫此buff则continue
-					for (let i = 0; i < this.storage.immuneBuffArray.length; i++) {
-						if (lib.buffMiao[this.storage.immuneBuffArray[i]] == lib.buffMiao[b]) {
-							var n = this.storage.immuneBuffArray[i];
+					for (let j = 0; j < this.storage.immuneBuffArray.length; j++) {
+						if (lib.buffMiao[this.storage.immuneBuffArray[j]] == lib.buffMiao[b]) {
+							var n = this.storage.immuneBuffArray[j];
 							if (this.storage.immuneBuffRemover[b].type != type || this.storage.immuneBuffRemover[b].num >= num) {
 								flag = false;
 								break;
@@ -1516,6 +1516,12 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					skill: "zioy_status_ranshao",
 					type: "damage",
 					intro: "balabala"
+				},
+				"mad":{
+					translation: "混乱",
+					skill: "mad",
+					type: "damage",
+					intro:"角色陷入混乱"
 				}
 			};
 
@@ -1608,6 +1614,32 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					}
 				}
 			};
+
+			lib.element.player.goMad_old = lib.element.player.goMad
+			lib.element.player.goMad = function(end ,force){
+				console.log(this, this.storage )
+				if (!this.storage.buffArray) {
+					this.storage.buffArray = [];
+				}
+				if (!this.storage.immuneBuffArray) {
+					//Translated by deepl
+					this.storage.immuneBuffArray = [];
+				}
+				if (!this.storage.immuneBuffRemover) {
+					//Translated by deepl
+					this.storage.immuneBuffRemover = {};
+				}
+				for (let i = 0; i < this.storage.immuneBuffArray.length; i++) {
+					if (force == true) break;
+					//若免疫此buff则return
+					if (lib.buffMiao[this.storage.immuneBuffArray[i]] == lib.buffMiao['mad']) {
+						game.log(this, "免疫<span class='yellowtext'>" + lib.buffMiao['mad'].translation + "</span>异常");
+						return;
+					}
+				}
+				this.goMad_old(end)
+
+			}
 			/*---------------------------------------------------------------以下部分为强化相关---------------------------------------------------------------*/
 
 			lib.element.player.changeEnhancement = function () {
@@ -5975,7 +6007,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							player.gainShenqi(num1);
 							trigger.num = player.storage.hxcx_x - player.storage.hxcx_x1;
 							if (player.storage.hxcx_count1 > player.storage.hxcx_x + 1) {
-								player.storage.hxcx_x *= 2;
+								// player.storage.hxcx_x *= 2;
+								player.storage.hxcx_x += 1;
 								if (player.storage.hxcx_x == 0) player.storage.hxcx_x++;
 								player.storage.hxcx_count1 = 0;
 							}
@@ -7312,7 +7345,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 										if (get.position(card) == "e") return false;
 									},
 									attackFrom:function(from,to,distance){
-										if(!from.getEquip(1)) return Infinity;
+										if(!from.getEquip(1)) return -Infinity;
 									},
 								},
 								group: ["zioy_yurangzhijian_wushuang", "zioy_yurangzhijian_damageEnd", "zioy_yurangzhijian_damageBegin"],
@@ -8749,7 +8782,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"锁定技<br>①防止你在已损失体力时死亡，你在未损失体力时进入濒死状态。<br>②你不以此法失去体力与受到伤害均改为回复体力，不以此法回复体力均改为失去体力。<br>③除开始阶段与结束阶段，你的回合阶段执行顺序与正常顺序相反。<br>④你的手牌上限等于你已损失体力。",
 					"zioy_hexuchongxiang": "鹤墟重香",
 					"zioy_hexuchongxiang_info":
-						"清香更何用，犹发去年枝。<br>①将你即将受到伤害/流失体力时伤害/流失值超过X-N点的部分转化为“蜃气”，触发此效果超过X+1次后令X翻倍（若X=0则令X加1）并重置计数（获得此技能时令X=0，N为本回合满足〖鹤墟重香①〗的时机次数-1且不超过X）<br>②当你死亡时，若你体力值大于0则改为失去所有体力，否则：若你体力上限不为场上唯一最多或于体力值不大于0时发动〖鹤墟重香①〗次数小于2，你复活，获得N+1点体力上限，回复所有体力，移去所有“蜃气”并获得等量护盾，摸等量的牌，令X等于N-1，重置①效果计数，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加80%（向下取整）（N为〖鹤墟重香②〗发动的次数）<br>③你的“蜃气”数量不会超过你体力上限，获得“蜃气”时根据你是否受伤将多余的“蜃气”转换为体力值或“海市蜃楼”天气回合数。",
+						"清香更何用，犹发去年枝。<br>①将你即将受到伤害/流失体力时伤害/流失值超过X-N点的部分转化为“蜃气”，触发此效果超过X+1次后令X加1并重置计数（获得此技能时令X=0，N为本回合满足〖鹤墟重香①〗的时机次数-1且不超过X）<br>②当你死亡时，若你体力值大于0则改为失去所有体力，否则：若你体力上限不为场上唯一最多或于体力值不大于0时发动〖鹤墟重香①〗次数小于2，你复活，获得N+1点体力上限，回复所有体力，移去所有“蜃气”并获得等量护盾，摸等量的牌，令X等于N-1，重置①效果计数，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加80%（向下取整）（N为〖鹤墟重香②〗发动的次数）<br>③你的“蜃气”数量不会超过你体力上限，获得“蜃气”时根据你是否受伤将多余的“蜃气”转换为体力值或“海市蜃楼”天气回合数。",
 					"zioy_hexuchongxiang_mark": "鹤墟重香③",
 					"zioy_hexuchongxiang_revive": "鹤墟重香②",
 					"zioy_yuezhuiyunwei": "月坠云微",
