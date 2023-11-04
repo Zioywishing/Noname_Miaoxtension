@@ -1502,7 +1502,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					translation: "睡眠",
 					skill: "zioy_buff_shuimian",
 					type: "control",
-					intro: "始终跳过出牌阶段，每轮游戏开始时有25*n%概率移除此状态,受到伤害时立即移除此状态。（n为异常状态已持续轮数）"
+					intro: "始终跳过出牌阶段，无法使用或打出任何牌，每轮游戏开始时有25*n%概率移除此状态,受到伤害时立即移除此状态。（n为异常状态已持续轮数）"
 				},
 				"bingdong": {
 					translation: "冰冻",
@@ -1576,12 +1576,23 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						content: function () {
 							trigger.cancel(null, null, "notrigger");
 						},
+						mod:{
+							cardEnabled:function(card,player){
+								return false;
+							},
+							cardRespondable:function(card,player){
+								return false;
+							},
+							// cardSavable:function(card,player){
+							// 	return false;
+							// },
+						},
 						group: ["zioy_buff_shuimian_awake1", "zioy_buff_shuimian_awake2"],
 						intro: {
 							name: "睡眠",
 							mark: function (dialog, storage, player) {
 								n = player.storage.shuimian_count + 1;
-								return "始终跳过出牌阶段，下轮游戏开始时有" + 25 * n + "%概率移除此状态,受到伤害后立即移除此状态。";
+								return "始终跳过出牌阶段，无法使用或打出任何牌，下轮游戏开始时有" + 25 * n + "%概率移除此状态,受到伤害后立即移除此状态。";
 							}
 						}
 					},
@@ -7871,7 +7882,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									return true;
 								},
 								content: function () {
-									player.addDamageLimiter(parseInt(player.getTailCount() / 2 + 0.01), "zioy_leimingqiangu");
+									player.addDamageLimiter(parseInt(player.getTailCount() / 3 + 0.01), "zioy_leimingqiangu");
 								},
 								sub: true,
 								"_priority": 0
