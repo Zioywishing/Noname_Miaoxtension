@@ -2378,7 +2378,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_b7chuhaoji": ["female", "qun", 3, ["zioy_v07yuxie", "zioy_f42chongzai"], []],
 					"zioy_badun": ["male", "qun", "8/8/8", ["zioy_yuemai"], []],
 					"zioy_nemesis": ["female", "wu", "4/7", ["zioy_pinghuqiuyue", "zioy_yurangzhijian", "zioy_liechenyuyou_water"], []],
-					"zioy_osiris": ["male", "shu", 4, ["zioy_zhuxingwuchang", "zioy_zhufashengmie", "zioy_yongyeqingxiao", "zioy_liechenyuyou_fire"], []],
+					"zioy_osiris": ["male", "shu", 5, ["zioy_zhuxingwuchang", "zioy_zhufashengmie", "zioy_yongyeqingxiao", "zioy_liechenyuyou_fire"], []],
 					"zioy_morana": ["female", "jin", 6, ["zioy_lanzhiyuane", "zioy_liuzhenxiongxiang", "zioy_yinhuxiaowu"], ["hiddenSkill"]],
 					"zioy_guanghan": ["female", "wu", "2/9", ["zioy_nongying", "zioy_chanjuan"], ["des:2023中秋"]],
 					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu", "zioy_zhoumingchuanxuan"], []],
@@ -3234,11 +3234,13 @@ return false;*/
 					"zioy_chuixing": {
 						init: function (player) {
 							player.storage.yynum = [1];
+							player.storage.yyUseable = true;
 						},
 						trigger: {
 							player: "useCardEnd"
 						},
 						filter: function (event, player) {
+							if(!player.storage.yyUseable) return false
 							if (event.getParent().name == "zioy_chuixing") return false;
 							if (event.card.name != "sha" && event.card.name != "huosha" && event.card.name != "leisha") return false;
 							return true;
@@ -3247,26 +3249,46 @@ return false;*/
 						marktext: "吹星",
 						intro: {
 							name: "吹星",
-							content: "你已累计使用#张【杀】",
+							content: function(storage,player){
+								return player.storage.yynum;
+							},
 							onunmark: true
 						},
 						priority: 1,
 						forced: true,
 						content: function () {
 							"step 0"
-							player.addMark("zioy_chuixing", 1);
-							var i = 0;
-							player.storage.yynum[0]++;
-							//while(i < player.storage.yynum.length){
-							if (player.storage.yynum[i] % (2 + i) == 0) {
-								player.chooseUseTarget({ name: "sha", nature: "fire" }, false, false, "nodistance");
-								if (i + 1 == player.storage.yynum.length) {
-									player.storage.yynum.push(0);
+							player.storage.yyUseable = false;
+							"step 1"
+							player.storage.yynum[0]+=1;
+							for(var i = 0;i < player.storage.yynum.length;i+=1){
+								if(player.storage.yynum[i] == 2){
+									player.storage.yynum[i] = 0
+									if(i == player.storage.yynum.length-1){
+										player.storage.yynum.push(1)
+									}else{
+										player.storage.yynum[i+1] += 1
+									}
+									for(var j = 0;j < 3**i;j+=1){
+										player.chooseUseTarget({ name: "sha", nature: "fire" }, false, false, "nodistance");
+									}
 								}
-								player.storage.yynum[i + 1]++;
-								//player.say('i = ' + i + '::' + player.storage.yynum[i]);
 							}
-							i++;
+							"step 2"
+							player.storage.yyUseable = true;
+							// player.addMark("zioy_chuixing", 1);
+							// var i = 0;
+							// player.storage.yynum[0]++;
+							// //while(i < player.storage.yynum.length){
+							// if (player.storage.yynum[i] % (2 + i) == 0) {
+							// 	player.chooseUseTarget({ name: "sha", nature: "fire" }, false, false, "nodistance");
+							// 	if (i + 1 == player.storage.yynum.length) {
+							// 		player.storage.yynum.push(0);
+							// 	}
+							// 	player.storage.yynum[i + 1]++;
+							// 	//player.say('i = ' + i + '::' + player.storage.yynum[i]);
+							// }
+							// i++;
 							//}
 						},
 						ai: {
@@ -7510,9 +7532,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}
 							"step 2"
 							if (game.roundNumber % 2 == 1) {
-								game.changeGlobalStatus("rerang", 2);
+								game.changeGlobalStatus("rerang", 3);
 							} else {
-								game.changeGlobalStatus("huoshan", 2);
+								game.changeGlobalStatus("huoshan", 3);
 							}
 						},
 						group: ["zioy_zhuxingwuchang_damageBegin", "zioy_zhuxingwuchang_damageEnd", "zioy_zhuxingwuchang_useCard"],
@@ -7789,7 +7811,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							player.getTailCount = function () {
 								return this.maxHp + this.countMark("zioy_zhoumingchuanxuan");
 							};
-							player.addDamageLimiter(parseInt(player.getTailCount() / 3), "zioy_leimingqiangu");
+							player.addDamageLimiter(parseInt(player.getTailCount() / 3 + 0.001), "zioy_leimingqiangu");
 						},
 						mark: true,
 						marktext: "鸣雷",
@@ -8828,15 +8850,15 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"①限制你受到的伤害最大为2点。<br>②当你流失体力后，防止你于本轮游戏流失体力。<br>③你的手牌上限-1且不小于3。<br>④你对拥有护甲的角色造成的伤害+1。<br>⑤触发限伤效果/击破一名角色护甲/令一名角色进入濒死状态时获得7点怒气，受到/造成伤害时获得等额怒气。<br>⑥你的回合结束阶段，若你有怒气，你失去1点怒气并摸2张牌。",
 					"zioy_yurangzhijian": "与浪之间",
 					"zioy_yurangzhijian_info":
-						"当你处于濒死阶段时或出牌阶段限一次，依次结算以下效果：<br>①消耗你所有“怒气”，减少你至多3层“盛怒”层数（最多减少至1层）。<br>②召唤5轮“细雨”天气，获得5回合全异常免疫。<br>③令Y=M-1.5X+N/3（向下取整），若Y大于零则回复Y点体力，否则弃置-Y张牌（X为本局游戏〖与浪之间〗累计使用次数，N为本次消耗怒气值，M为本次消耗“盛怒”层数）。<br>④若累计记录消耗怒气数+N达到10点则进入盛怒状态并获得1点“盛怒”层数，此效果一局游戏限1次。<br>⑤盛怒状态下使你下一次受到的伤害基础值等于0。<br>⑥记录N/3点消耗怒气数并摸N（至多为7）张牌。<br>盛怒状态：盛怒状态最多达到7层，盛怒状态中每次使用伤害类型牌时获得1层“盛怒”层数，盛怒状态为你提供以下增益：<br>>①你出牌阶段可以多使用X*0.43（向下取整）张【杀】<br>>②你使用【杀】时对方需多使用X*0.43（向下取整且至少为1）张【闪】<br>>③你的【杀】造成的伤害+X*0.58（向下取整）<br>>④造成伤害时你回复0.05*X*伤害值（向下取整）点伤害值并弃置受伤角色X张牌。<br>>⑤你装备区的牌无法被弃置。<br>>⑥当你没有装备武器时，你的攻击范围为无穷大。",
+						"当你处于濒死阶段时或出牌阶段限一次，依次结算以下效果：<br>①消耗你所有“怒气”，减少你至多3层“盛怒”层数（最多减少至1层）。<br>②召唤5轮“细雨”天气，获得5回合全异常免疫。<br>③令Y=M-1.5X+N/3（向下取整），若Y大于零则回复Y点体力，否则弃置-Y张牌（X为本局游戏〖与浪之间〗累计使用次数，N为本次消耗怒气值，M为本次消耗“盛怒”层数）。<br>④若累计记录消耗怒气数+N达到10点则进入盛怒状态并获得1点“盛怒”层数，此效果一局游戏限1次。<br>⑤盛怒状态下使你下一次受到的伤害基础值等于0。<br>⑥记录N/3点消耗怒气数并摸N（至多为7）张牌。<br>盛怒状态：盛怒状态最多达到7层，盛怒状态中每次使用伤害类型牌时获得1层“盛怒”层数，盛怒状态为你提供以下增益：<br>>①你出牌阶段可以多使用X*0.43（向下取整）张【杀】<br>>②你使用【杀】时对方需多使用X*0.43（向下取整且至少为1）张【闪】<br>>③你的【杀】造成的伤害+X*0.58（向下取整）<br>>④造成伤害时你回复0.05*X*伤害值（向下取整）点体力值并弃置受伤角色X张牌。<br>>⑤你装备区的牌无法被弃置。<br>>⑥当你没有装备武器时，你的攻击范围为无穷大。",
 					"zioy_liechenyuyou_fire": "列辰御佑",
 					"zioy_liechenyuyou_fire_info":
 						"血脉技，免疫失效。<br>①令你获得“燚之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“苏之神佑”的角色造成的伤害+1。",
 					"zioy_zhuxingwuchang": "诸行无常",
 					"zioy_zhuxingwuchang_info":
-						"锁定技，若场上为天气，你使用的牌视为火属性且造成伤害后弃置受伤角色1张牌；若场上为环境，你的牌不可被响应；若你没有“无瞋”：造成伤害后你失去1点体力然后恢复2点体力，“风林火山”环境下提升至4点，若当前为奇数轮则召唤2轮“热浪”天气，否则召唤2轮“风林火山”环境。。",
+						"锁定技，若场上为天气，你使用的牌视为火属性且造成伤害后弃置受伤角色1张牌；若场上为环境，你的牌不可被响应；若你没有“无瞋”：造成伤害后你失去1点体力然后恢复2点体力，“风林火山”环境下提升至4点，若当前为奇数轮则召唤3轮“热浪”天气，否则召唤3轮“风林火山”环境。。",
 					"zioy_zhufashengmie": "诸法生灭",
-					"zioy_zhufashengmie_info": "一局游戏限一次，你死亡时，取消之，然后你令你的体力值等于体力上限并锁定体力直到你的下个出牌阶段结束。",
+					"zioy_zhufashengmie_info": "一局游戏限一次，你死亡时，取消之，然后你令你的体力值等于体力上限并锁定体力直到你的出牌阶段结束。",
 					"zioy_yongyeqingxiao": "永夜清宵",
 					"zioy_yongyeqingxiao_info":
 						"①获得此技能时你获得5个“无瞋”标记。若你有“无瞋”，你使用牌结算后需弃置1张牌（没有则不弃）并失去1个“无瞋”。<br>②出牌阶段，若你有“无瞋”标记且不为5个，你可以将“无瞋”补至5个，记补充数量为X，你摸X*1.25（向下取整）张牌，回复X/2（向下取整）点体力（回复体力效果每回合限1次），获得X轮异常免疫，若当前为奇数轮则召唤X轮“热浪”天气，否则召唤X轮“风林火山”环境。<br>③若你没有“无瞋”，你废弃你的判定区，永久获得全异常免疫，攻击距离+1。",
