@@ -586,8 +586,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						// game.addGlobalSkill("globalStatusRemover1");
 					}
 					game.globalStatus.name = status;
-					game.globalStatus.end = game.roundNumber + num;
-					game.globalStatus.locked_end = game.roundNumber + locked_num;
+					game.globalStatus.end = Math.max(game.roundNumber + num,game.globalStatus.end);
+					game.globalStatus.locked_end = Math.max(game.roundNumber + locked_num,game.globalStatus.locked_end)
 					game.globalStatus.source = source;
 					game.globalStatus.timing_type = timing_type;
 					game.globalStatus.locked_timing_type = locked_timing_type;
@@ -3259,6 +3259,7 @@ return false;*/
 						content: function () {
 							"step 0"
 							player.storage.yyUseable = false;
+							event.count = 0
 							"step 1"
 							player.storage.yynum[0]+=1;
 							for(var i = 0;i < player.storage.yynum.length;i+=1){
@@ -3269,13 +3270,45 @@ return false;*/
 									}else{
 										player.storage.yynum[i+1] += 1
 									}
-									for(var j = 0;j < 3**i;j+=1){
-										player.chooseUseTarget({ name: "sha", nature: "fire" }, false, false, "nodistance");
-									}
+									event.count += 3**i
+									// for(var j = 0;j < 3**i;j+=1){
+									// 	event.count++
+									// }
 								}
 							}
 							"step 2"
+							if(event.count > 0){
+								// for(var j = 0;j < event.count;j++){
+								// 	player.chooseUseTarget({ name: "sha", nature: "fire" }, false, false, "nodistance");
+								// }
+								player
+									.chooseTarget(1, true, "对一名角色使用"+event.count+"张【杀】", function (card, player, target) {
+									return target != player;
+								})
+								.set("ai", function (target) {
+									var player = _status.event.player;
+									return -1;
+								});
+							}
+							else{
+								player.storage.yyUseable = true;
+								event.finish()
+							}
+							'step 3'
+							var target = result.targets[0];
+							while(event.count > 0){
+								if(target.isAlive()){
+									player.useCard({ name: "sha", nature: "fire" }, target);
+									event.count-=1
+								}else{
+									event.goto(2);
+									break;
+								}
+							}
+							// target.damage(event.count,player,'fire')
+							"step 4"
 							player.storage.yyUseable = true;
+							event.finish()
 							// player.addMark("zioy_chuixing", 1);
 							// var i = 0;
 							// player.storage.yynum[0]++;
@@ -8658,7 +8691,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yuyan": "驭煙",
 					"zioy_yuyan_info": "锁定技，你废除你的坐骑栏，你与其他角色的距离-1，其他角色与你的距离+1。",
 					"zioy_chuixing": "吹星",
-					"zioy_chuixing_info": "你每使用两张【杀】，就可以视为使用一张无实体牌且无视距离的【火杀】，你初始视为使用过一张【杀】。",
+					"zioy_chuixing_info": "游戏开始时记数组A=[1]，当你使用杀时A[0]+=1，之后令Y=0，遍历数组，对于A[i]，若A[i]==2，你令A[i]=0，令Y+=3 ^ i，之后你选择一名角色，你视为对其使用Y张火【杀】。",
 					"zioy_zhijin": "掷金",
 					"zioy_zhijin_info": "当你不因〖掷金〗而获得牌时，你随机摸一定数量的牌，该数量与你本次摸牌数成正相关且可能等于零。",
 					"zioy_xuanzhuan": "璇转",
