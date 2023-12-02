@@ -2385,7 +2385,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_xiyueying": ["double", "shen", 4, ["zioy_riyuexingkong"], []],
 					"zioy_purangsigai": ["none", "wu", 4, ["zioy_jisuishengjin"], ["des:plus黄盖"]],
 					"zioy_bidu": ["female", "jin", "3/14/2", ["zioy_biubiubiu"], []],
-					"zioy_dacongming": ["male", "qun", "6/6/6", ["zioy_shoufa"], ["des:聪明手法的角色"]]
+					"zioy_dacongming": ["male", "qun", "6/6/6", ["zioy_shoufa"], ["des:聪明手法的角色"]],
+					"zioy_exchel": ["female", "qun", "8", ["zioy_liechenyuyou_wood"], []]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2430,7 +2431,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_xiyueying": "曦月吟",
 					"zioy_purangsigai": "普琅斯盖",
 					"zioy_bidu": "别西卜",
-					"zioy_dacongming": "大聪明"
+					"zioy_dacongming": "大聪明",
+					"zioy_exchel":"伊珂玺尔"
 				}
 			},
 			card: {
@@ -8620,7 +8622,62 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                             }
                         },
                         sub: true,
-                        "_priority": 5234500}
+                        "_priority": 5234500
+					},
+					"zioy_liechenyuyou_wood": {
+						init: function (player) {
+							player.storage.kami_protect = "wood";
+						},
+						forced: true,
+						unique: true,
+						charlotte: true,
+						locked: true,
+						priority: 52345,
+						trigger: {
+							player: "phaseDrawBegin"
+						},
+						content: function () {
+							trigger.num += 2;
+						},
+						group: ["zioy_liechenyuyou_wood_draw1", "zioy_liechenyuyou_wood_damage"],
+						subSkill: {
+							"draw1": {
+								forced: true,
+								unique: true,
+								charlotte: true,
+								locked: true,
+								priority: 52345,
+								trigger: {
+									player: ["phaseEnd", "roundStart"]
+								},
+								content: function () {
+									player.draw(1);
+								},
+								sub: true,
+								"_priority": 5234500
+							},
+							damage: {
+								forced: true,
+								unique: true,
+								charlotte: true,
+								locked: true,
+								priority: 52345,
+								trigger: {
+									source: "damageBegin1"
+								},
+								filter: function (event, player) {
+									if (event.player.group == "shen") return false;
+									return !event.player.storage.kami_protect || event.player.storage.kami_protect == "water";
+								},
+								content: function () {
+									trigger.num += 1;
+								},
+								sub: true,
+								"_priority": 5234500
+							}
+						},
+						"_priority": 5234500
+					},
 				},
 				translate: {
 					"zioy_xixue": "汲血",
@@ -8929,7 +8986,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_biubiubiu_info":
 						"①一名未拥有“泡泡”的角色使用非转化的普通锦囊牌结算后，你将此牌置于其武将牌上，称为“泡泡”。<br>②当你成为/使一名角色成为一张牌的唯一目标时，你选择一名拥有“泡泡”的角色，弃置其“泡泡”并无视距离与时机尝试执行其中内容，然后与其交换座位并令其代替你进行此牌后续结算，若你有“泡泡”则令其获得之。",
 					"zioy_shoufa": "手法",
-					"zioy_shoufa_info": "当你即将造成伤害时，你可以表演计算1+1，若你计算出正确答案，此伤害等于999。"
+					"zioy_shoufa_info": "当你即将造成伤害时，你可以表演计算1+1，若你计算出正确答案，此伤害等于999。",
+					"zioy_liechenyuyou_wood": "列辰御佑",
+					"zioy_liechenyuyou_wood_info":
+						"血脉技，免疫失效。<br>①令你获得“苏之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“泷之神佑”的角色造成的伤害+1。",
+					
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
