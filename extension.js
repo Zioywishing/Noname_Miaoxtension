@@ -6984,6 +6984,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 										player.recover(player.storage.zioy_f42chongzai_hp);
 										player.storage.zioy_f42chongzai_hp = 0;
 									}
+									player.update()
 								},
 								ai: {
 									order: 1,
