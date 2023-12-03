@@ -2386,7 +2386,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_purangsigai": ["none", "wu", 4, ["zioy_jisuishengjin"], ["des:plus黄盖"]],
 					"zioy_bidu": ["female", "jin", "3/14/2", ["zioy_biubiubiu"], []],
 					"zioy_dacongming": ["male", "qun", "6/6/6", ["zioy_shoufa"], ["des:聪明手法的角色"]],
-					"zioy_exchel": ["female", "qun", "8", ["zioy_liechenyuyou_wood"], []]
+					"zioy_exchel": ["female", "qun", "8", ["zioy_liwuyaomiao","zioy_zhifenghuifang","zioy_liechenyuyou_wood"], []]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -8990,7 +8990,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_liechenyuyou_wood": "列辰御佑",
 					"zioy_liechenyuyou_wood_info":
 						"血脉技，免疫失效。<br>①令你获得“苏之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“泷之神佑”的角色造成的伤害+1。",
-					
+					"zioy_zhifenghuifang":"栉风绘芳",
+					"zioy_zhifenghuifang_info":"占位",
+					"zioy_liwuyaomiao":"鹂舞要眇",
+					"zioy_liwuyaomiao_info":"占位",
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
