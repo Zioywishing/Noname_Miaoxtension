@@ -6678,8 +6678,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						intro: {
 							name: "驭械",
 							mark: function (dialog, storage, player) {
-								if (player.countCards("h") < player.hp) return "当前处于冷却状态";
-								return "当前处于暴走状态";
+								if (player.countCards("h") < player.hp) return "当前处于<span style='color:blue;'>冷却</span>状态";
+								return "当前处于<span style='color:red;'>暴走</span>状态";
 							}
 						},
 						init: function (player) {
@@ -6918,8 +6918,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							"step 1"
 							game.players[event.i].damage(1, "nosource", "nocard");
 							player.line(game.players[event.i]);
-							event.i++;
-							"step 2"
+							'step 2'
+							if(game.players[event.i].isAlive())event.i++;
+							"step 3"
 							if (event.i < game.players.length) {
 								event.goto(1);
 							} else {
