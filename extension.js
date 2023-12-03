@@ -6914,14 +6914,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						content: function () {
 							"step 0"
-							event.i = 0;
+							// event.i = 0;
+							event.players = [...game.players].reverse()
 							"step 1"
-							game.players[event.i].damage(1, "nosource", "nocard");
-							player.line(game.players[event.i]);
-							'step 2'
-							if(game.players[event.i].isAlive())event.i++;
-							"step 3"
-							if (event.i < game.players.length) {
+							var p = event.players.pop()
+							p.damage(1, "nosource", "nocard");
+							player.line(p);
+							"step 2"
+							if (event.players.length != 0) {
 								event.goto(1);
 							} else {
 								player.draw(3);
