@@ -930,6 +930,12 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					type: "weather",
 					intro: "回合结束阶段清除当前角色的所有异常状态。"
 				},
+				"fenfang": {
+					translation: "芬芳",
+					skill: "zioy_status_fenfang",
+					type: "weather",
+					intro: "回合结束阶段令所有体力值小于2的角色回复1点体力。"
+				},
 				"shenlou": {
 					translation: "海市蜃楼",
 					skill: "zioy_status_shenlou",
@@ -956,6 +962,12 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					skill: "zioy_status_huoshan",
 					type: "environment",
 					intro: "回复体力时令回复体力值减半（向下取整）。"
+				},
+				"senluowanxiang": {
+					translation: "森罗万象",
+					skill: "zioy_status_senluowanxiang",
+					type: "environment",
+					intro: "束缚相关？。"
 				},
 
 				/*以下为其他状态 */
