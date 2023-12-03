@@ -5642,7 +5642,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							if (player.storage.shulin_juexing == false) {
 								player.recover();
 								trigger.num -= 1;
-								event.finish();
+								event.count = 0;
 							} else {
 								player.storage.huangyi_locked = true;
 								if (trigger.player.storage.enhancementArray["locked"] == true) {
@@ -5650,18 +5650,143 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								}
 							}
 							"step 1"
-							target = trigger.player;
-							num = 0;
-							c = ["strike", "attack", "defend", "miss", "hit"];
-							for (var i = 0; i < c.length; ++i) {
-								if (Math.abs(trigger.player.storage.enhancementArray[c[i]]) != 0) num++;
-								trigger.player.changeEnhancement(c[i], -2 * trigger.player.storage.enhancementArray[c[i]]);
+							if(player.storage.shulin_juexing == false){
+								if(trigger.player){
+									var target = trigger.player
+									var targets=game.filterPlayer(current=>{
+										if(current==target) return false;
+										var hs=target.getCards('h');
+										if(hs.length) return true;
+										var js=target.getCards('j');
+										for(var i=0;i<js.length;i++){
+											if(current.canAddJudge(js[i])) return true;
+										}
+										if(current.isMin()) return false;
+										var es=target.getCards('e');
+										for(var i=0;i<es.length;i++){
+											if(current.canEquip(es[i])) return true;
+										}
+										return false;
+									});
+									if(targets.length){
+										var next=player.chooseTarget(function(card,player,target){
+											return _status.event.targets.contains(target);
+										});
+										next.set('from',target);
+										next.set('targets',targets);
+										next.set('ai',function(target){
+											var player=_status.event.player;
+											var att=get.attitude(player,target);
+											var sgnatt=get.sgn(att);
+											var from=_status.event.from;
+											var es=from.getCards('e');
+											var i;
+											var att2=get.sgn(get.attitude(player,from));
+											for(i=0;i<es.length;i++){
+												if(sgnatt!=0&&att2!=0&&sgnatt!=att2&&
+													get.sgn(get.value(es[i],from))==-att2&&
+													get.sgn(get.effect(target,es[i],player,target))==sgnatt&&
+													target.canEquip(es[i])){
+													return Math.abs(att);
+												}
+											}
+											if(i==es.length&&(!from.countCards('j',function(card){
+												return target.canAddJudge(card);
+											})||att2<=0)){
+												if(from.countCards('h')>0) return att;
+												return 0;
+											}
+											return -att*att2;
+										});
+										next.set('targetprompt','移动目标');
+										next.set('prompt','是否移动'+get.translation(target)+'的一张牌？');
+									}
+									else event.finish();
+								}
+								else{
+									event.finish();
+								}
+							}else{
+								target = trigger.player;
+								num = 0;
+								c = ["strike", "attack", "defend", "miss", "hit"];
+								for (var i = 0; i < c.length; ++i) {
+									if (Math.abs(trigger.player.storage.enhancementArray[c[i]]) != 0) num++;
+									trigger.player.changeEnhancement(c[i], -2 * trigger.player.storage.enhancementArray[c[i]]);
+								}
+								trigger.num += num;
 							}
-							trigger.num += num;
-							// trigger.player.damage(trigger.num, trigger.nature);
 							"step 2"
-							player.storage.huangyi_locked = false;
-							// trigger.cancel();
+							if(player.storage.shulin_juexing == false){
+								if(result.bool){
+									var target2=result.targets[0];
+									var target = trigger.player
+									event.targets=[target,target2];
+									player.line2(event.targets,'green');
+								}else{
+									event.finish()
+									return;
+								}
+							}else{
+								player.storage.huangyi_locked = false;
+								event.finish()
+								return;
+							}
+							"step 3"
+							if(targets.length==2){
+								player.choosePlayerCard('hej',"visible",true,function(button){
+									var player=_status.event.player;
+									var targets0=_status.event.targets0;
+									var targets1=_status.event.targets1;
+									if(get.attitude(player,targets0)>0&&get.attitude(player,targets1)<0){
+										if(get.position(button.link)=='j') return 12;
+										if(get.value(button.link,targets0)<0&&get.effect(targets1,button.link,player,targets1)>0) return 10;
+										return 0;
+									}
+									else{
+										if(get.position(button.link)=='j') return -10;
+										if(get.position(button.link)=='h') return 10;
+										return get.value(button.link)*get.effect(targets1,button.link,player,targets1);
+									}
+								},targets[0]).set('targets0',targets[0]).set('targets1',targets[1]).set('filterButton',function(button){
+									var targets1=_status.event.targets1;
+									if(get.position(button.link)=='h'){
+										return true;
+									}
+									else if(get.position(button.link)=='j'){
+										return targets1.canAddJudge(button.link);
+									}
+									else{
+										return targets1.canEquip(button.link);
+									}
+								});
+							}
+							else{
+								event.finish();
+								return
+							}
+							'step 4'
+							if(result.bool&&result.links.length){
+								var link=result.links[0];
+								if(get.position(link)=='h'){
+									event.targets[1].gain(link);
+								}
+								else if(get.position(link)=='e'){
+									event.targets[1].equip(link);
+								}
+								else if(link.viewAs){
+									event.targets[1].addJudge({name:link.viewAs},[link]);
+								}
+								else{
+									event.targets[1].addJudge(link);
+								}
+								event.targets[0].$give(link,event.targets[1],false);
+								game.log(event.targets[0],'的',link,'被移动给了',event.targets[1]);
+								event.count++
+								if(event.count < 2){
+									event.goto(1)
+								}
+							}
 						},
 						"_priority": 0
 					},
@@ -6925,7 +7050,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								event.goto(1);
 							} else {
 								player.draw(3);
-								if (player.hp == player.maxHp) {
+								if (player.hp != 1) {
 									player.hp -= 1;
 									player.storage.zioy_f42chongzai_hp += 1;
 								}
@@ -6933,6 +7058,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.changeHujia(-1);
 									player.storage.zioy_f42chongzai_hujia += 1;
 								}
+								player.update()
 							}
 						},
 						ai: {
@@ -8901,7 +9027,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"觉醒技，每局游戏限2次。出牌阶段开始时，你可以回复所有已损失体力并进入觉醒状态。再次使用此技能时回复X点体力并将多出的回复值转化为摸牌数，然后你退出觉醒状态并失去〖煌熠〗（X为觉醒状态持续时间）",
 					"zioy_huangyi": "煌熠",
 					"zioy_huangyi_info":
-						"锁定技，你即将造成伤害时，未觉醒状态下你令伤害-1并回复1点体力，觉醒状态下若目标角色强化锁定则解除锁定，然后倒置目标角色强化，令伤害+X(X为你以此法倒置的强化项数之和)",
+						"锁定技，你即将造成伤害时，未觉醒状态下你令此伤害-1并回复1点体力，然后你可以移动受伤角色区域内至多2张牌，觉醒状态下若目标角色强化锁定则解除锁定，然后倒置目标角色强化，令伤害+X(X为你以此法倒置的强化项数之和)",
 					"zioy_t": "测试",
 					"zioy_t_info": "测试技能",
 					"zioy_t1": "测试",
@@ -8934,7 +9060,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"①游戏开始时你获得4点护甲并进入“驭械”状态，当你的护甲被击破时你退出“驭械”状态。<br>②“驭械”状态为你提供以下增益：<br>1.你的手牌上限+X(X为你的护甲值)。<br><br>·>当你手牌数不小于体力值时，你为暴走状态，获得以下增益：<br>1.你的进攻距离+2。<br>2.你的【杀】无法被响应。<br>3.你使用牌没有次数限制。<br>4.你使用牌时需额外弃置1张牌。<br><br>·>当你手牌数小于体力值时，你为冷却状态，获得以下增益：<br>1.你使用锦囊牌指定角色为目标时，你可以弃置目标角色至多2张牌。<br>2.你使用非装备牌结算完成后，你收回此牌。每回合限1次，获得手牌时若手牌数大于体力值则重置此计数。每张牌每回合限1次。<br>3.你即将受到超过1点的伤害时令此伤害值-1并恢复你1点体力。<br><br>③非“驭械”状态下限制你受到的伤害不超过1点。<br>④进入或退出“驭械”状态时清除自身任何强化与异常状态并获得判定区内的所有牌。",
 					"zioy_f42chongzai": "F42-重载",
 					"zioy_f42chongzai_info":
-						"出牌阶段各限1次：<br>①若你为“驭械”状态，你令所有角色受到1点无来源伤害，然后你摸3张牌，然后若你未损失体力则储存1点体力，若你拥有护甲则储存1点护甲。<br>②若你不为“驭械”状态，你可以弃置任意张花色各不相同的手牌，根据你弃置的手牌数执行以下效果：<br>不为4张：你获得等同于弃置手牌数-1枚“能量”标记。<br>4张：你获得4枚“能量”标记。<br>然后将当前体力值超过1的部分转化为等量“能量”标记，之后释放你储存的体力值。使用此技能后的每个的回合结束阶段，根据你的“能量”标记数量，执行以下效果：<br>小于体力上限：你获得1枚“能量”标记并回复1点体力。<br>不小于体力上限：你弃置所有“能量”标记，获得等量护甲并释放储存的护甲，进入“驭械”状态，若你以此法获得的护甲值大于你的体力上限，你获得1点体力上限。",
+						"出牌阶段各限1次：<br>①若你为“驭械”状态，你令所有角色受到1点无来源伤害，然后你摸3张牌，然后若你体力不为1则储存1点体力，若你拥有护甲则储存1点护甲。<br>②若你不为“驭械”状态，你可以弃置任意张花色各不相同的手牌，根据你弃置的手牌数执行以下效果：<br>不为4张：你获得等同于弃置手牌数-1枚“能量”标记。<br>4张：你获得4枚“能量”标记。<br>然后将当前体力值超过1的部分转化为等量“能量”标记，之后释放你储存的体力值。使用此技能后的每个的回合结束阶段，根据你的“能量”标记数量，执行以下效果：<br>小于体力上限：你获得1枚“能量”标记并回复1点体力。<br>不小于体力上限：你弃置所有“能量”标记，获得等量护甲并释放储存的护甲，进入“驭械”状态，若你以此法获得的护甲值大于你的体力上限，你获得1点体力上限。",
 					"zioy_yuemai": "岳衇",
 					"zioy_yuemai_info":
 						"锁定技，①你造成伤害后，若场上没有环境，则尝试召唤“迷嶂”环境8轮，召唤成功则获得2点护甲。<br>②“迷嶂”环境中你进攻距离+1，“迷嶂”环境下你获得50%免伤。",
