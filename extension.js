@@ -5640,7 +5640,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						trigger: {
 							source: "damageBegin1"
 						},
-						priority: 0,
+						priority: -70582141,
 						forced: true,
 						locked: true,
 						filter: function (card, player, target) {
