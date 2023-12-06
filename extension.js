@@ -2358,7 +2358,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_xixuegui": ["male", "qun", 4, ["zioy_xixue"], []],
 					"zioy_yilong": ["female", "qun", "2/2/2", ["zioy_shiyi"], []],
 					"zioy_shuijinxiezi": ["male", "qun", 3, ["zioy_jinjia", "zioy_jinsui"], []],
-					"zioy_dreamaker": ["female", "jin", 3, ["zioy_chenmeng", "zioy_xiaoxiang"], []],
+					"zioy_dreamaker": ["female", "jin", 4, ["zioy_chenmeng", "zioy_xiaoxiang"], []],
 					"zioy_drugdoctor": ["male", "qun", 4, ["zioy_heiyi"], []],
 					"zioy_zhigaotian": ["female", "shen", 3, ["zioy_eye", "zioy_damie"], ["hiddenSkill"]],
 					"zioy_huajian": ["female", "jin", "3/7/4", ["zioy_huashou", "zioy_longyue"], []],
@@ -2367,7 +2367,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_yinlong": ["male", "wu", 4, ["zioy_qianlong", "zioy_jianlong", "zioy_kanglong2"], ["des:新春特典"]],
 					"zioy_peiki": ["male", "shu", 3, ["zioy_yixiang", "zioy_chuixing", "zioy_yuyan"], ["des:新春特典"]],
 					"zioy_xielingyun": ["female", "daqin", "3/5", ["zioy_zhijin", "zioy_xuanzhuan"], []],
-					"zioy_heibai": ["male", "qun", 4, ["zioy_leiye1", "zioy_mosha", "zioy_shuangsha", "zioy_lieying"], ["des:新春特典"]],
+					"zioy_chuxi": ["male", "qun", 5, ["zioy_leiye1", "zioy_mosha", "zioy_shuangsha", "zioy_lieying"], ["des:新春特典"]],
 					"zioy_sose": ["male", "wei", "1/1/7", ["zioy_wrjzc", "zioy_zsyhj"], ["des:新春特典"]],
 					"zioy_pqsj": ["none", "qun", 1, ["zioy_weixiang"], []],
 					"zioy_nianshou": ["none", "shu", 1, ["zioy_fansheng", "zioy_nianxi"], ["des:新春特典"]],
@@ -2383,7 +2383,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_xukongchong": ["female", "jin", 5, ["zioy_longzi", "zioy_yingyuan"], ["hiddenSkill"]],
 					"zioy_muxi": ["female", "jin", "-3/3", ["zioy_shuohui"], []],
 					"zioy_kailuer": ["female", "qun", 4, ["zioy_hey", "zioy_ya", "zioy_ha"], []],
-					"zioy_nike": ["none", "shen", 5, ["zioy_cuiyi", "zioy_shihong", "zioy_huangyi", "zioy_shulin"], []],
+					"zioy_nike": ["none", "shen", 6, ["zioy_cuiyi", "zioy_shihong", "zioy_huangyi", "zioy_shulin"], []],
 					"zioy_bailu": ["female", "shen", 2, ["zioy_hexuchongxiang", "zioy_yuezhuiyunwei"], ["forbidai"]],
 					test: ["male", "", 3, ["zioy_t"], []],
 					"zioy_lanchesite": ["none", "shu", "4/4/1", ["zioy_yujin", "zioy_xumie"], []],
@@ -2413,7 +2413,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_yinlong": "胤龙",
 					"zioy_peiki": "派琦",
 					"zioy_xielingyun": "谢灵运",
-					"zioy_heibai": "除夕",
+					"zioy_chuxi": "除夕",
 					"zioy_sose": "SO-SE",
 					"zioy_pqsj": "皮丘什金",
 					"zioy_nianshou": "年",
@@ -2623,6 +2623,7 @@ target.storage.jss.changeHujia(1);
 						filter: function (event, player) {
 							return event.source == player.storage.chenmengsource;
 						},
+						forced: true,
 						content: function () {
 							player.gainMaxHp();
 							player.storage.chenmengsource.loseMaxHp();
@@ -5572,6 +5573,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								var p1 = p;
 								do {
 									if (p1.countMark("zioy_cuiyi") > 0) {
+										p1.recover()
 										c = ["strike", "attack", "defend", "miss", "hit"];
 										p1.changeEnhancement(c[(2 * game.roundNumber - 1) % 5], c[(2 * game.roundNumber) % 5], 1);
 									}
@@ -5640,7 +5642,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						trigger: {
 							source: "damageBegin1"
 						},
-						priority: -70582141,
+						priority: -70582140451,
 						forced: true,
 						locked: true,
 						filter: function (card, player, target) {
@@ -9153,7 +9155,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 				"zioy_zhigaotian.jpg",
 				"zioy_renturtle.jpg",
 				"zioy_yinlong.jpg",
-				"zioy_heibai.jpg",
+				"zioy_chuxi.jpg",
 				"zioy_senjianmeng.jpg",
 				"zioy_xuanhu.jpg",
 				"zioy_yilong.jpg",
