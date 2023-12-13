@@ -4403,13 +4403,15 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							var target = player.next;
 							player.awakenSkill(event.name);
 							while (target != player) {
-								player.storage.cmnum--;
-								target.removeSkill("zioy_chenmeng1");
-								target.removeMark("zioy_chenmeng");
-								target.turnOver();
-								//player.gainMaxHp();
-								player.recover();
-								player.update();
+								if(target.hasSkill("zioy_chenmeng1")){
+									player.storage.cmnum--;
+									target.removeSkill("zioy_chenmeng1");
+									target.removeMark("zioy_chenmeng");
+									target.turnOver();
+									//player.gainMaxHp();
+									player.recover();
+									player.update();
+								}
 								target = target.next;
 							}
 						},
@@ -9051,14 +9053,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"锁定技<br>①防止你在已损失体力时死亡，你在未损失体力时进入濒死状态。<br>②你不以此法失去体力与受到伤害均改为回复体力，不以此法回复体力均改为失去体力。<br>③除开始阶段与结束阶段，你的回合阶段执行顺序与正常顺序相反。<br>④你的手牌上限等于你已损失体力。",
 					"zioy_hexuchongxiang": "鹤墟重香",
 					"zioy_hexuchongxiang_info":
-						"清香更何用，犹发去年枝。<br>①将你即将受到伤害/流失体力时伤害/流失值超过X-N点的部分转化为“蜃气”，触发此效果超过X+1次后令X加1并重置计数（获得此技能时令X=0，N为本回合满足〖鹤墟重香①〗的时机次数-1且不超过X）<br>②当你死亡时，若你体力值大于0则改为失去所有体力，否则：若你体力上限不为场上唯一最多或于体力值不大于0时发动〖鹤墟重香①〗次数小于2，你复活，获得N+1点体力上限，回复所有体力，移去所有“蜃气”并获得等量护盾，摸等量的牌，令X等于N-1，重置①效果计数，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加80%（向下取整）（N为〖鹤墟重香②〗发动的次数）<br>③你的“蜃气”数量不会超过你体力上限，获得“蜃气”时根据你是否受伤将多余的“蜃气”转换为体力值或“海市蜃楼”天气回合数。",
+						"清香更何用，犹发去年枝。<br>①将你即将受到伤害/流失体力时伤害/流失值超过X-N点的部分转化为“蜃气”，触发此效果超过X+1次后令X加1并重置计数（获得此技能时令X=0，N为本回合满足〖鹤墟重香①〗的时机次数-1且不超过X）<br>②当你死亡时，若你体力值大于0则改为失去所有体力，否则：若你体力上限不为场上唯一最多或发动〖鹤墟重香②〗的次数小于2，你复活，获得N+1点体力上限，回复所有体力，移去所有“蜃气”并获得等量护盾，摸等量的牌，令X等于N-1，重置①效果计数，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加80%（向下取整）（N为〖鹤墟重香②〗发动的次数）<br>③你的“蜃气”数量不会超过你体力上限，获得“蜃气”时根据你是否受伤将多余的“蜃气”转换为体力值或“海市蜃楼”天气回合数。",
 					"zioy_hexuchongxiang_mark": "鹤墟重香③",
 					"zioy_hexuchongxiang_revive": "鹤墟重香②",
 					"zioy_yuezhuiyunwei": "月坠云微",
 					"zioy_yuezhuiyunwei_info":
 						"梦回芳草思依依，天远雁声稀。<br>①根据当前“蜃气”的数量执行下列效果：<br>不大于50%体力上限：一名角色的回合开始阶段你失去1级防御，攻击强化，你的判定区视为被废除，你免疫任何异常状态，你的武将牌始终正面向上。<br>大于25%体力上限：当你成为其他角色使用牌的目标时，其弃置一张与此牌同名的手牌（没有则不弃）<br>大于6：当你造成超过1点伤害后，你失去1点体力上限并令其获得1点体力上限，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加20%（与〖鹤墟重香〗同乘区）。<br>等于体力上限：每局游戏限一次，发动〖鹤墟重香②〗或〖月坠云微②〗时重置计数。当你使用牌对指定一名角色为唯一目标时，你与其交换体力与体力上限。以此法交换的体力和体力上限不超过X点（X为你发动〖鹤墟重香③〗的次数）<br>②每回合限1次，出牌阶段，若你有“蜃气”，你可以主动发动此技能：你失去所有“蜃气”，倒置负面强化并清除所有异常状态，召唤等量回合的“海市蜃楼”天气，令一名角色获得等量护盾，令一名角色回复等量体力，令一名角色摸等量牌（X=你的体力上限/2且向下取整）<br>③你永久免疫“睡眠”异常，永久免疫“海市蜃楼”的任何效果。",
 					"zioy_zhumingxiangan": "烛明香暗",
-					"zioy_zhumingxiangan_info": "凭阑半日独无言，依旧竹声新月似当年。<br>①若你",
+					"zioy_zhumingxiangan_info": "凭阑半日独无言，依旧竹声新月似当年。<br>转换技：①若你",
 					"zioy_hanbosuliu": "寒波泝流",
 					"zioy_hanbosuliu_info": "琼窗春断双蛾皱，回首边头。",
 					"zioy_pianhongxiusao": "片红休埽",
