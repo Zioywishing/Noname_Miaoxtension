@@ -1098,7 +1098,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 								player.addBuff("shuimian", null);
 							}
 						},
-						mod: {}
+						mod: {},
+						"_priority": 6485
 					},
 					huoshan: {
 						trigger: {
@@ -1119,6 +1120,40 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						},
 						mod: {},
 						"_priority": 685
+					},
+					fenfang: {
+						trigger: {
+							global: "phaseEnd"
+						},
+						sub: true,
+						forced: true,
+						direct: true,
+						unique: true,
+						charlotte: true,
+						filter: function (event, player) {
+							return true;
+						},
+						init: function (player) {},
+						onremove: function (player) {},
+						content: function () {},
+						mod: {},
+					},
+					senluowanxiang: {
+						trigger: {
+							global: "phaseEnd"
+						},
+						sub: true,
+						forced: true,
+						direct: true,
+						unique: true,
+						charlotte: true,
+						filter: function (event, player) {
+							return true;
+						},
+						init: function (player) {},
+						onremove: function (player) {},
+						content: function () {},
+						mod: {},
 					},
 					test: {
 						sub: true,
@@ -1236,7 +1271,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				for (let i = 0; i < this.storage.immuneBuffArray.length; i++) {
 					if (force == true) break;
 					//若免疫此buff则return
-					if (lib.buffMiao[this.storage.immuneBuffArray[i]] == lib.buffMiao[buff]) {
+					if (lib.buffMiao[this.storage.immuneBuffArray[i].name] == lib.buffMiao[buff]) {
 						game.log(this, "免疫<span class='yellowtext'>" + lib.buffMiao[buff].translation + "</span>异常");
 						return;
 					}
@@ -1317,7 +1352,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				}
 				if (!this.storage.immuneBuffRemover) {
 					//Translated by deepl
-					this.storage.immuneBuffRemover = {};
+					this.storage.immuneBuffRemover = [];
 				}
 				var buff = [],
 					num = Infinity,
@@ -1332,6 +1367,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						type = "phase";
 					} else if (arguments[i] == "round") {
 						type = "round";
+					} else if (typeof arguments[i] == "string" && arguments[i].substring(0,3) == "id=") {
+						id = arguments[i].substring(3)
 					} else if (arguments[i] == true) {
 						clear = true;
 					} else if (typeof arguments[i] == "number") {
@@ -1346,7 +1383,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				}
 				if (all == true) {
 					for (let i in lib.buffMiao) {
-						this.addBuffImmune(i, clear, num, type);
+						this.addBuffImmune(i, clear, num, type, 'id='+id);
 					}
 					return;
 				}
@@ -1366,27 +1403,56 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 							}
 						}
 					}
-					//若已免疫此buff则continue
-					for (let j = 0; j < this.storage.immuneBuffArray.length; j++) {
-						if (lib.buffMiao[this.storage.immuneBuffArray[j]] == lib.buffMiao[b]) {
-							var n = this.storage.immuneBuffArray[j];
-							if (this.storage.immuneBuffRemover[b].type != type || this.storage.immuneBuffRemover[b].num >= num) {
-								flag = false;
-								break;
-							}
+					var getmax = function(arr){
+						var max = -1
+						for(let i of arr){
+
 						}
 					}
-					if (flag == false) continue;
-
-					if (!this.storage.immuneBuffArray.includes(b)) this.storage.immuneBuffArray.push(b);
-					this.storage.immuneBuffRemover[b] = {};
-					this.storage.immuneBuffRemover[b].num = num;
-					this.storage.immuneBuffRemover[b].type = type;
-					this.storage.immuneBuffRemover[b].id = id;
+					// //若已免疫此buff则continue
+					// for (let j = 0; j < this.storage.immuneBuffArray.length; j++) {
+					// 	if (lib.buffMiao[this.storage.immuneBuffArray[j].name] == lib.buffMiao[b]) {
+					// 		var n = this.storage.immuneBuffArray[j].name;
+					// 		for(let ibr of this.storage.immuneBuffRemover){
+					// 			if(ibr.id == id && ibr.num > num && ibr.type == type){
+					// 				flag = false
+					// 			}
+					// 		}
+					// 		if (flag == false) break;
+					// 		// if (this.storage.immuneBuffRemover[b].type != type || this.storage.immuneBuffRemover[b].num >= num) {
+					// 		// 	flag = false;
+					// 		// 	break;
+					// 		// }
+					// 	}
+					// }
+					// if (flag == false) continue;
+					if (this.storage.immuneBuffArray.filter(v=>v.name == b && v.id == id).length == 0) this.storage.immuneBuffArray.push({"name":b,"id":id});
+					// this.storage.immuneBuffRemover[b] = {};
+					// this.storage.immuneBuffRemover[b].num = num;
+					// this.storage.immuneBuffRemover[b].type = type;
+					// this.storage.immuneBuffRemover[b].id = id;
 					if (_status.event.getParent()["triggername"] == "phaseBegin" && type == "phase") {
 						/*回合开始阶段修正 */
-						this.storage.immuneBuffRemover[b].num += 1;
+						num += 1;
 					}
+					flag = false
+					for(let v of this.storage.immuneBuffRemover){
+						if(v.name == b && v.type == type && v.id == id){
+							if(v.num < num)v.num = num
+							flag = true
+						}
+					}
+					console.log(flag,id)
+					if(flag == false)this.storage.immuneBuffRemover.push({
+						"name":b,
+						"num":num,
+						"type":type,
+						"id":id
+					})
+					if (_status.event.getParent()["triggername"] == "phaseBegin" && type == "phase") {
+						num -= 1;
+					}
+					console.log(id)
 					var str = "获得<span class='yellowtext'>" + lib.buffMiao[b].translation + "</span>免疫";
 					if (num != Infinity) {
 						str = str + '<span class="yellowtext">' + num;
@@ -1412,16 +1478,20 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				}
 				if (!this.storage.immuneBuffRemover) {
 					//Translated by deepl
-					this.storage.immuneBuffRemover = {};
+					this.storage.immuneBuffRemover = [];
 				}
 				var buff = [],
-					source = null;
+					source = null,
+					id = _status.event.name // 区分不同来源的异常免疫
+					// all_flag = false
 				for (var i = 0; i < arguments.length; i++) {
 					if (arguments[i] == "all" || arguments[i] == "All") {
 						for (let i in lib.buffMiao) {
-							this.removeBuffImmune(i);
+							// this.removeBuffImmune(i,source,"id="+id);
+							buff.push(i)
 						}
-						return;
+					} else if (typeof arguments[i] == "string" && arguments[i].substring(0,3) == "id=") {
+						id = arguments[i].substring(3)
 					} else if (typeof arguments[i] == "object") {
 						for (var j = 0; j < arguments[i].length; j++) {
 							buff.push(arguments[i][j]);
@@ -1434,10 +1504,18 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						force = true;
 					}
 				}
+				console.log(buff,id,this.storage.immuneBuffArray)
+				// if(all_flag){
+				// 	for (let i in lib.buffMiao) {
+				// 		this.removeBuffImmune(i,source,"id="+id);
+				// 	}
+				// 	return;
+				// }
 
 				var flag = true;
-				for (var i = 0; i < buff.length; i++) {
-					var b = buff[i];
+				for (var b of buff) {
+					// var b = buff[i];
+					console.log(b)
 					flag = true;
 					if (b == null || !lib.buffMiao[b]) {
 						game.log("buff not found_4");
@@ -1446,17 +1524,19 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 
 					//若未免疫此buff则continue
 					for (let i = 0; i < this.storage.immuneBuffArray.length; i++) {
-						if (lib.buffMiao[this.storage.immuneBuffArray[i]] == lib.buffMiao[b]) {
+						if (lib.buffMiao[this.storage.immuneBuffArray[i].name] == lib.buffMiao[b]) {
 							flag = false;
 							break;
 						}
 					}
 					if (flag == true) continue;
-
-					for (var i = 0; i < this.storage.immuneBuffArray.length; i++) {
-						if (this.storage.immuneBuffArray[i] == b) this.storage.immuneBuffArray.splice(i, 1);
+					// 失去免疫
+					this.storage.immuneBuffArray = this.storage.immuneBuffArray.filter(i=>i.name != b || i.id != id)
+					this.storage.immuneBuffRemover = this.storage.immuneBuffRemover.filter(i=>i.name != b || i.id != id)
+					if(this.storage.immuneBuffArray.filter(v=>v.name == b).length == 0){
+						game.log(this, "失去<span class='yellowtext'>" + lib.buffMiao[b].translation + "</span>免疫");
 					}
-					game.log(this, "失去<span class='yellowtext'>" + lib.buffMiao[b].translation + "</span>免疫");
+					// console.log('123')
 				}
 				if (this.storage.immuneBuffArray.length == 0) this.unmarkSkill("zioy_buff_mianyi");
 			};
@@ -1473,15 +1553,33 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				charlotte: true,
 				unique: true,
 				content: function () {
-					for (var i in player.storage.immuneBuffRemover) {
+					// 检查是否所有计时器都结束
+					var checkRemovable=name=>{
+						for(let v of player.storage.immuneBuffRemover){
+							if(v.name == name && v.num > 0)return false
+						}
+						return true
+					}
+					let i = 0
+					while(i < player.storage.immuneBuffRemover.length) {
+						console.log(player.storage.immuneBuffRemover[i],player.storage.immuneBuffRemover,i)
 						if (player.storage.immuneBuffRemover[i].type == "round") {
 							player.storage.immuneBuffRemover[i].num -= 1;
 							if (player.storage.immuneBuffRemover[i].num == 0) {
-								flag = true;
-								player.removeBuffImmune(i);
+								var name = player.storage.immuneBuffRemover[i].name
+								if(checkRemovable(name)){
+									player.removeBuffImmune(player.storage.immuneBuffRemover[i].name,"id="+player.storage.immuneBuffRemover[i].id);
+								}else{
+									i++
+								}
+							}else{
+								i++
 							}
+						}else{
+							i++
 						}
 					}
+					player.storage.immuneBuffRemover=player.storage.immuneBuffRemover.filter(v=>v.num > 0)
 				}
 			};
 
@@ -1497,14 +1595,33 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					return player.storage.immuneBuffRemover;
 				},
 				content: function () {
-					for (var i in player.storage.immuneBuffRemover) {
+					// 检查是否所有计时器都结束
+					var checkRemovable=name=>{
+						for(let v of player.storage.immuneBuffRemover){
+							if(v.name == name && v.num > 0)return false
+						}
+						return true
+					}
+					let i = 0
+					while(i < player.storage.immuneBuffRemover.length) {
+						console.log(player.storage.immuneBuffRemover[i],player.storage.immuneBuffRemover,i)
 						if (player.storage.immuneBuffRemover[i].type == "phase") {
 							player.storage.immuneBuffRemover[i].num -= 1;
 							if (player.storage.immuneBuffRemover[i].num == 0) {
-								player.removeBuffImmune(i);
+								var name = player.storage.immuneBuffRemover[i].name
+								if(checkRemovable(name)){
+									player.removeBuffImmune(player.storage.immuneBuffRemover[i].name,"id="+player.storage.immuneBuffRemover[i].id);
+								}else{
+									i++
+								}
+							}else{
+								i++
 							}
+						}else{
+							i++
 						}
 					}
+					player.storage.immuneBuffRemover=player.storage.immuneBuffRemover.filter(v=>v.num > 0)
 				}
 			};
 
@@ -1549,24 +1666,66 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 								var flag = 0,
 									str = "",
 									buff_name="";
-								for (var i = 0; i < player.storage.immuneBuffArray.length; i++) {
-									var a = player.storage.immuneBuffArray[i];
-									if (player.storage.immuneBuffRemover[a].num != Infinity) {
-										buff_name = lib.buffMiao[a].translation + ":" + player.storage.immuneBuffRemover[a].num;
-									} else {
-										buff_name = lib.buffMiao[a].translation + ":∞";
+								var getn = (name,type)=>{
+									var arr = player.storage.immuneBuffRemover
+									var max = -1
+									for(let i of arr){
+										// console.log(i.name , name , i.type , type)
+										if(i.name == name && i.type == type){
+											var n = i.num
+											// if(i.type == 'round'){
+											// 	n *= game.players.length
+											// }
+											if(n > max)max = n
+										}
 									}
-									if (player.storage.immuneBuffRemover[a].type == "round") {
-										buff_name = buff_name + "轮";
-									} else {
-										buff_name = buff_name + "回合";
+									return max
+								}
+								function unique(arr) {
+									return arr.filter(function(item, index, arr) {
+									  return arr.indexOf(item, 0) === index;
+									});
+								}
+								var ls = unique(player.storage.immuneBuffArray.map(v=>v.name))
+								for (let a of ls) {
+									// var a = player.storage.immuneBuffArray[i].name;
+									for(let typei of ['round','phase']){
+										var n = getn(a,typei)
+										if (n == -1)continue
+										if (n != Infinity) {
+											// buff_name = lib.buffMiao[a].translation + ":" + player.storage.immuneBuffRemover[a].num;
+											buff_name = lib.buffMiao[a].translation + ":" + n;
+										} else {
+											buff_name = lib.buffMiao[a].translation + ":∞";
+										}
+										if (typei == "round") {
+											buff_name = buff_name + "轮";
+										} else {
+											buff_name = buff_name + "回合";
+										}
+										if (flag % 2 == 0 && flag != 0) str += "<br>";
+										else {
+											if (flag != 0) str += ",";
+										}
+										flag++;
+										str += buff_name;
 									}
-									if (flag % 2 == 0 && flag != 0) str += "<br>";
-									else {
-										if (flag != 0) str += ",";
-									}
-									flag++;
-									str += buff_name;
+									// if (player.storage.immuneBuffRemover[a].num != Infinity) {
+									// 	buff_name = lib.buffMiao[a].translation + ":" + player.storage.immuneBuffRemover[a].num;
+									// } else {
+									// 	buff_name = lib.buffMiao[a].translation + ":∞";
+									// }
+									// // if (player.storage.immuneBuffRemover[a].type == "round") {
+									// 	// buff_name = buff_name + "轮";
+									// // } else {
+									// 	buff_name = buff_name + "回合";
+									// // }
+									// if (flag % 2 == 0 && flag != 0) str += "<br>";
+									// else {
+									// 	if (flag != 0) str += ",";
+									// }
+									// flag++;
+									// str += buff_name;
 								}
 								return str;
 							}
@@ -1651,12 +1810,12 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				}
 				if (!this.storage.immuneBuffRemover) {
 					//Translated by deepl
-					this.storage.immuneBuffRemover = {};
+					this.storage.immuneBuffRemover = [];
 				}
 				for (let i = 0; i < this.storage.immuneBuffArray.length; i++) {
 					if (force == true) break;
 					//若免疫此buff则return
-					if (lib.buffMiao[this.storage.immuneBuffArray[i]] == lib.buffMiao['mad']) {
+					if (lib.buffMiao[this.storage.immuneBuffArray[i].name] == lib.buffMiao['mad']) {
 						game.log(this, "免疫<span class='yellowtext'>" + lib.buffMiao['mad'].translation + "</span>异常");
 						return;
 					}
@@ -3251,13 +3410,13 @@ return false;*/
 					"zioy_chuixing": {
 						init: function (player) {
 							player.storage.yynum = [1];
-							player.storage.yyUseable = true;
+							player.storage.yyUsable = true;
 						},
 						trigger: {
 							player: "useCardEnd"
 						},
 						filter: function (event, player) {
-							if(!player.storage.yyUseable) return false
+							if(!player.storage.yyUsable) return false
 							if (event.getParent().name == "zioy_chuixing") return false;
 							if (event.card.name != "sha" && event.card.name != "huosha" && event.card.name != "leisha") return false;
 							return true;
@@ -3275,7 +3434,7 @@ return false;*/
 						forced: true,
 						content: function () {
 							"step 0"
-							player.storage.yyUseable = false;
+							player.storage.yyUsable = false;
 							event.count = 0
 							"step 1"
 							player.storage.yynum[0]+=1;
@@ -3308,7 +3467,7 @@ return false;*/
 								});
 							}
 							else{
-								player.storage.yyUseable = true;
+								player.storage.yyUsable = true;
 								event.finish()
 							}
 							'step 3'
@@ -3324,7 +3483,7 @@ return false;*/
 							}
 							// target.damage(event.count,player,'fire')
 							"step 4"
-							player.storage.yyUseable = true;
+							player.storage.yyUsable = true;
 							event.finish()
 							// player.addMark("zioy_chuixing", 1);
 							// var i = 0;
@@ -5817,10 +5976,25 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							return true;
 						},
 						content: function () {
-							player.addDamageMitigationer(0.25, "zioy_t");
-							if ([true, false].randomGet()) {
-								player.removeDamageMitigationer("zioy_t");
+							'step 0'
+							player.chooseControl([1,2,3,4,5])
+							'step 1'
+							var c = result.control
+							if(c == 1){
+								player.addBuffImmune("all",2)
+							}else if(c == 2){
+								player.removeBuffImmune("all",'id=testtest')
+							}else if(c == 3){
+								console.log(player.storage.immuneBuffArray,player.storage.immuneBuffRemover)
+							}else if(c == 4){
+								player.addBuffImmune("all",2,'id=testtest')
+							}else if(c == 5){
+								player.changeHujia(999)
 							}
+							// player.addDamageMitigationer(0.25, "zioy_t");
+							// if ([true, false].randomGet()) {
+							// 	player.removeDamageMitigationer("zioy_t");
+							// }
 							// player.addMark("zioy_t",0.5)
 							// game.log(player.countMark('zioy_t'))
 							// game.changeGlobalStatus("test", 2, false)
@@ -6879,7 +7053,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									if (cards.length) {
 										player.gain(cards);
 									}
-									player.removeBuffImmune("all", Infinity);
+									player.removeBuffImmune("all", Infinity,'id=zioy_v07yuxie');
 									game.log(player, "已退出驭械状态");
 								},
 								mod: {
@@ -7245,7 +7419,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						unique: true,
 						charlotte: true,
 						locked: true,
-						priority: 52345,
+						silent:false,
+						priority: 523451,
 						trigger: {
 							player: "phaseDrawBegin"
 						},
@@ -7259,7 +7434,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								unique: true,
 								charlotte: true,
 								locked: true,
-								priority: 52345,
+								silent:false,
+								priority: 523452,
 								trigger: {
 									player: ["phaseEnd", "roundStart"]
 								},
@@ -7267,14 +7443,15 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.draw(1);
 								},
 								sub: true,
-								"_priority": 5234500
+								"_priority": 5234500457
 							},
 							damage: {
 								forced: true,
 								unique: true,
 								charlotte: true,
 								locked: true,
-								priority: 52345,
+								silent:false,
+								priority: 523453,
 								trigger: {
 									source: "damageBegin1"
 								},
@@ -7286,10 +7463,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									trigger.num += 1;
 								},
 								sub: true,
-								"_priority": 5234500
+								"_priority": 5234501
 							}
 						},
-						"_priority": 5234500
+						"_priority": 5234502
 					},
 					"zioy_pinghuqiuyue": {
 						init: function (player) {
@@ -7311,7 +7488,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						forced: true,
 						direct: true,
-						priority: 52345,
+						silent:false,
+						priority: 523445,
 						mark: true,
 						marktext: "怒气",
 						intro: {
@@ -7341,12 +7519,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								forced: true,
 								direct: true,
-								priority: 52345,
+								silent:false,
+								priority: 523455,
 								content: function () {
 									trigger.cancel();
 								},
 								sub: true,
-								"_priority": 5234500
+								"_priority": 52345001
 							},
 							"damage2hujia": {
 								trigger: {
@@ -7369,7 +7548,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									source: "damageEnd"
 								},
 								forced: true,
-								priority: 52345,
+								priority: 523456,
 								filter: function (event, player) {
 									return true;
 								},
@@ -7383,7 +7562,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.addMark("zioy_pinghuqiuyue", trigger.num);
 								},
 								sub: true,
-								"_priority": 5234500
+								"_priority": 52345002
 							},
 							damageEndP: {
 								trigger: {
@@ -7444,7 +7623,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								"_priority": 541500
 							}
 						},
-						"_priority": 5234500
+						"_priority": 523450045
 					},
 					"zioy_yurangzhijian": {
 						enable: ["chooseToUse"],
@@ -7656,7 +7835,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						unique: true,
 						charlotte: true,
 						locked: true,
-						priority: 52345,
+						priority: 523457,
 						trigger: {
 							player: "phaseDrawBegin"
 						},
@@ -7670,7 +7849,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								unique: true,
 								charlotte: true,
 								locked: true,
-								priority: 52345,
+								priority: 523458,
 								trigger: {
 									player: ["phaseEnd", "roundStart"]
 								},
@@ -7678,14 +7857,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.draw(1);
 								},
 								sub: true,
-								"_priority": 5234500
+								"_priority": 5234500456
 							},
 							damage: {
 								forced: true,
 								unique: true,
 								charlotte: true,
 								locked: true,
-								priority: 52345,
+								priority: 523459,
 								trigger: {
 									source: "damageBegin1"
 								},
@@ -7697,10 +7876,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									trigger.num += 1;
 								},
 								sub: true,
-								"_priority": 5234500
+								"_priority": 5234500457
 							}
 						},
-						"_priority": 5234500
+						"_priority": 5234500786
 					},
 					"zioy_zhuxingwuchang": {
 						filter: function (event, player) {
@@ -8758,7 +8937,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_shoufa": {
                         frequent: true,
                         unique: true,
-                        priority: 52345,
+                        priority: 5234105,
                         trigger: {
                             source: "damageBegin1"
                         },
@@ -8776,7 +8955,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
                             }
                         },
                         sub: true,
-                        "_priority": 5234500
+                        "_priority": 52345004248
 					},
 					"zioy_liechenyuyou_wood": {
 						init: function (player) {
@@ -8786,7 +8965,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						unique: true,
 						charlotte: true,
 						locked: true,
-						priority: 52345,
+						priority: 5234511,
 						trigger: {
 							player: "phaseDrawBegin"
 						},
@@ -8800,7 +8979,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								unique: true,
 								charlotte: true,
 								locked: true,
-								priority: 52345,
+								priority: 5234512,
 								trigger: {
 									player: ["phaseEnd", "roundStart"]
 								},
@@ -8808,14 +8987,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.draw(1);
 								},
 								sub: true,
-								"_priority": 5234500
+								"_priority": 523450078578
 							},
 							damage: {
 								forced: true,
 								unique: true,
 								charlotte: true,
 								locked: true,
-								priority: 52345,
+								priority: 5234135,
 								trigger: {
 									source: "damageBegin1"
 								},
@@ -8827,30 +9006,111 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									trigger.num += 1;
 								},
 								sub: true,
-								"_priority": 5234500
+								"_priority": 523450075878
 							}
 						},
-						"_priority": 5234500
+						"_priority": 5234500697
 					},
 					"zioy_zhifenghuifang":{
 						enable: "phaseUse",
-						// skillAnimation: true,
-						// animationColor: "thunder",
 						filter: function (event, player) {
 							return true
 						},
+						usable:1,
 						content: function () {
 							"step 0"
-							
+							if(game.roundNumber%2 == 1){game.changeGlobalStatus("fenfang",3)}
+							else if(game.globalStatus.name == 'fenfang'){
+								game.changeGlobalStatus("senluowanxiang",true,3)
+							}
+							"step 1"
+							var str = ''
+							if(get.status(game.globalStatus.name).type == 'weather'){
+								str = '选择一名角色令其获得“华予”'
+							}else if(get.status(game.globalStatus.name).type == 'environment'){
+								str = '选择一名角色令其获得“篁蔓”'
+							}else{
+								return event.finish()
+							}
+							player.chooseTarget(str,1,false)
+							"step 2"
+							if(result.bool){
+								var target = result.targets[0]
+								if(get.status(game.globalStatus.name).type == 'weather'){
+									var hj = target.hujia
+									target.changeHujia(-hj)
+									target.recover(hj+1)
+									target.draw(3)
+									lib.skill['zioy_zhifenghuifang'].addH('huayu',target)
+								}else if(get.status(game.globalStatus.name).type == 'environment'){
+									var hp = target.hp
+									target.loseHp(hp-1)
+									target.changeHujia(hp-1)
+									player.discardPlayerCard(target,[1,Math.min(target.countCards("hej"),3)],"hej")
+									lib.skill['zioy_zhifenghuifang'].addH('huangman',target)
+								}
+							}
+						},
+						addH:function(type,player){
+							if(type == "huayu"){
+								if(player.hasSkill('zioy_zhifenghuifang_huangman')){
+									player.removeSkill("zioy_zhifenghuifang_huangman")
+								}
+								player.addSkill('zioy_zhifenghuifang_huayu')
+								game.log(player,"获得了<span style='color:yellow'>华予</span>")
+							}else{
+								if(player.hasSkill('zioy_zhifenghuifang_huayu')){
+									player.removeSkill("zioy_zhifenghuifang_huayu")
+								}
+								player.addSkill('zioy_zhifenghuifang_huangman')
+							}
 						},
 						ai: {
 							order: 1,
 						},
 						sub: true,
-						group: [],
+						group: ['zioy_zhifenghuifang_gainHuayuPhaseBegin'],
 						subSkill: {
+							"gainHuayuPhaseBegin":{
+								forced: true,
+								unique: true,
+								charlotte: true,
+								locked: true,
+								priority: 52344135,
+								trigger: {
+									global: "phaseBegin"
+								},
+								filter: function (event, player) {
+									return !player.hasSkill('zioy_zhifenghuifang_huayu')
+								},
+								content: function () {
+									lib.skill['zioy_zhifenghuifang'].addH('huayu',player)
+								},
+								sub: true,
+								"_priority": 523075878
+							},
+							"huayu":{
+								mark:true,
+								marktext:'华予',
+								intro: {
+									name: "华予"
+								},
+								init:function(player){
+									player.addBuffImmune("all", Infinity,'id=huayu');
+								},
+								onremove:function(player){
+									player.removeBuffImmune("all", Infinity,'id=huayu');
+								},
+							},
+							"huangman":{
+								mark:true,
+								marktext:'篁蔓',
+								intro: {
+									name: "篁蔓"
+								},
+							},
 						},
-						"_priority": 5234500
+						"_priority": 52345007865
 					},
 					"zioy_liwuyaomiao":{},
 				},
@@ -9166,7 +9426,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_liechenyuyou_wood_info":
 						"血脉技，免疫失效。<br>①令你获得“苏之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“泷之神佑”的角色造成的伤害+1。",
 					"zioy_zhifenghuifang":"栉风绘芳",
-					"zioy_zhifenghuifang_info":"<br>①出牌阶段限1次，若为奇数轮则尝试召唤3轮“芬芳”，若场上为“芬芳”且为偶数轮，则强制召唤3轮“森罗万象”。然后若当前场上存在天气，则你可以选择任意名角色，你令其获得“华予”，失去所有护盾，回复等同于失去护盾量+1点体力，摸3张牌。若当前场上存在环境，则你可以选择则你可以选择任意名角色，你令其获得“篁蔓”，失去体力至1点并获得等量的护盾，弃置手牌至1张牌。一名角色获得“华予”/“篁蔓”时会自动失去“篁蔓”/“华予”。<br>②一名角色的回合开始时，若你未拥有“华予”，你获得“华予”。<br>③防止你的“华予”失效。<br>“华予”:①你永久获得全异常免疫。②你的回合开始阶段，你回复1点体力。③当你即将受到伤害时",
+					"zioy_zhifenghuifang_info":"<br>①出牌阶段限1次，若为奇数轮则尝试召唤3轮“芬芳”，若场上为“芬芳”且为偶数轮，则强制召唤3轮“森罗万象”。然后若当前场上存在天气，则你可以选择1名角色，你令其获得“华予”，失去所有护盾，回复等同于失去护盾量+1点体力，摸3张牌。若当前场上存在环境，则你可以选择则你可以选择1名角色，你令其获得“篁蔓”，失去体力至1点并获得等量的护盾，弃置手牌至1张牌。一名角色获得“华予”/“篁蔓”时会自动失去“篁蔓”/“华予”。<br>②一名角色的回合开始时，若你未拥有“华予”，你获得“华予”。<br>③防止你的“华予”失效。<br>·“华予”状态下使拥有者获得以下效果:<br>>>①你获得全异常免疫。<br>>>②受到伤害后，你回复1点体力。<br>>>③当你即将受到伤害时，若此伤害值不小于你当前体力值，限制你受到的伤害不超过1直到任意伤害结算完成。<br>>>④当你受到伤害后，伤害来源获得“篁蔓”。<br>·“篁蔓”状态下使拥有者获得以下效果:<br>>>①你计算与其他角色的距离+2。<br>>>②若你本回合造成过伤害，你无法打出任何伤害类型牌。<br>>>③当你造成伤害后，受伤角色获得“华予”。",
 					"zioy_liwuyaomiao":"鹂舞要眇",
 					"zioy_liwuyaomiao_info":"占位",
 				}
