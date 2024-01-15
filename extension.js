@@ -1442,7 +1442,6 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 							flag = true
 						}
 					}
-					console.log(flag,id)
 					if(flag == false)this.storage.immuneBuffRemover.push({
 						"name":b,
 						"num":num,
@@ -1452,7 +1451,6 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					if (_status.event.getParent()["triggername"] == "phaseBegin" && type == "phase") {
 						num -= 1;
 					}
-					console.log(id)
 					var str = "获得<span class='yellowtext'>" + lib.buffMiao[b].translation + "</span>免疫";
 					if (num != Infinity) {
 						str = str + '<span class="yellowtext">' + num;
@@ -1504,7 +1502,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						force = true;
 					}
 				}
-				console.log(buff,id,this.storage.immuneBuffArray)
+				// console.log(buff,id,this.storage.immuneBuffArray)
 				// if(all_flag){
 				// 	for (let i in lib.buffMiao) {
 				// 		this.removeBuffImmune(i,source,"id="+id);
@@ -1515,7 +1513,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				var flag = true;
 				for (var b of buff) {
 					// var b = buff[i];
-					console.log(b)
+					// console.log(b)
 					flag = true;
 					if (b == null || !lib.buffMiao[b]) {
 						game.log("buff not found_4");
@@ -1562,7 +1560,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					}
 					let i = 0
 					while(i < player.storage.immuneBuffRemover.length) {
-						console.log(player.storage.immuneBuffRemover[i],player.storage.immuneBuffRemover,i)
+						// console.log(player.storage.immuneBuffRemover[i],player.storage.immuneBuffRemover,i)
 						if (player.storage.immuneBuffRemover[i].type == "round") {
 							player.storage.immuneBuffRemover[i].num -= 1;
 							if (player.storage.immuneBuffRemover[i].num == 0) {
@@ -1604,7 +1602,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					}
 					let i = 0
 					while(i < player.storage.immuneBuffRemover.length) {
-						console.log(player.storage.immuneBuffRemover[i],player.storage.immuneBuffRemover,i)
+						// console.log(player.storage.immuneBuffRemover[i],player.storage.immuneBuffRemover,i)
 						if (player.storage.immuneBuffRemover[i].type == "phase") {
 							player.storage.immuneBuffRemover[i].num -= 1;
 							if (player.storage.immuneBuffRemover[i].num == 0) {
@@ -2559,7 +2557,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_purangsigai": ["none", "wu", 4, ["zioy_jisuishengjin"], ["des:plus黄盖"]],
 					"zioy_bidu": ["female", "jin", "3/14/2", ["zioy_biubiubiu"], []],
 					"zioy_dacongming": ["male", "qun", "6/6/6", ["zioy_shoufa"], ["des:聪明手法的角色"]],
-					"zioy_exchel": ["female", "qun", "8", ["zioy_liwuyaomiao","zioy_zhifenghuifang","zioy_liechenyuyou_wood"], []]
+					"zioy_exchel": ["female", "qun", "6", ["zioy_liwuyaomiao","zioy_zhifenghuifang","zioy_liechenyuyou_wood"], []]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -8018,11 +8016,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						mod: {
 							globalFrom: function (from, to, distance) {
-								if (from.countMark("zioy_yongyeqingxiao") == 0) return distance - 1;
+								if (from.countMark("zioy_yongyeqingxiao") == 0) return distance - 4;
 							},
 							cardUsable: function (card, player, num) {
-								// if(player.countMark("zioy_yongyeqingxiao") == 0)
-								//     if(card.name=='sha') return num+1;
+								if(player.countMark("zioy_yongyeqingxiao") == 0)
+								    if(card.name=='sha') return num+1;
 							}
 						},
 						ai: {
@@ -9056,6 +9054,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								if(player.hasSkill('zioy_zhifenghuifang_huangman')){
 									player.removeSkill("zioy_zhifenghuifang_huangman")
 								}
+								player.storage.huayu_index = 0.75
 								player.addSkill('zioy_zhifenghuifang_huayu')
 								game.log(player,"获得了<span style='color:yellow'>华予</span>")
 							}else{
@@ -9093,21 +9092,87 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								mark:true,
 								marktext:'华予',
 								intro: {
-									name: "华予"
+									name: "华予",
+									mark: function (dialog, storage, player) {
+										return ">>①你获得全异常免疫。<br>>>②受到伤害后，你有"+parseInt(player.storage.huayu_index*100+0.001)+"%几率回复1点体力。<br>>>③当你即将受到伤害时，若此伤害值不小于你当前体力值，限制你受到的伤害不超过1直到任意伤害结算完成。<br>>>④当你受到伤害后，伤害来源获得“篁蔓”。"
+									}
 								},
 								init:function(player){
-									player.addBuffImmune("all", Infinity,'id=huayu');
+									player.addBuffImmune("all", Infinity,'id=zioy_zhifenghuifang_huayu');
 								},
 								onremove:function(player){
-									player.removeBuffImmune("all", Infinity,'id=huayu');
+									player.removeBuffImmune("all", Infinity,'id=zioy_zhifenghuifang_huayu');
 								},
+								trigger: {
+									player: ["damageBegin3"]
+								},
+								filter: function (event, player) {
+									var min = Infinity;
+									if(player.storage._damageLimiter_Miao){
+										for (var i = 0; i < player.storage._damageLimiter_Miao.length; ++i) {
+											var limiter = player.storage._damageLimiter_Miao[i];
+											if (player.storage._damageLimiter_Miao[i].num < min) min = player.storage._damageLimiter_Miao[i].num;
+										}
+									}
+									return Math.min(event.num,min) >= player.hp;
+								},
+								priority: -705830,
+								forced: true,
+								charlotte: true,
+								unique: true,
+								content: function () {
+									player.addDamageLimiter(1,'zioy_zhifenghuifang_huayu')
+								},
+								group:['zioy_zhifenghuifang_huayu_damageEnd']
+							},
+							"huayu_damageEnd":{
+								trigger: {
+									player: ["damageEnd"]
+								},
+								filter: function (event, player) {
+									return true
+								},
+								priority: 67452453,
+								forced: true,
+								charlotte: true,
+								unique: true,
+								content: function () {
+									player.removeDamageLimiter('zioy_zhifenghuifang_huayu')
+									if(Math.random() < player.storage.huayu_index){
+										player.recover(1)
+										player.storage.huayu_index *= 0.75
+									}
+									if(trigger.source)lib.skill['zioy_zhifenghuifang'].addH('huangman',trigger.source)
+								}
 							},
 							"huangman":{
 								mark:true,
 								marktext:'篁蔓',
 								intro: {
-									name: "篁蔓"
+									name: "篁蔓",
+									mark:function (dialog, storage, player) {
+										return ">>①你计算与其他角色的距离+2。<br>>>②当你造成伤害后，你弃置等同于你本回合造成过伤害值总和数量的牌。<br>>>③当你造成伤害后，受伤角色获得“华予”"
+									}
 								},
+								mod:{
+									globalFrom(from,to,distance){
+										return distance+2;
+									},
+								},
+								trigger: {
+									source: ["damageEnd"]
+								},
+								filter: function (event, player) {
+									return true
+								},
+								priority: 674523,
+								forced: true,
+								charlotte: true,
+								unique: true,
+								content: function () {
+									lib.skill['zioy_zhifenghuifang'].addH('huayu',trigger.player)
+									if(player.countCards('he') > 0)player.chooseToDiscard('he',Math.min(player.countCards('he'),player.getStat('damage')),true)
+								}
 							},
 						},
 						"_priority": 52345007865
@@ -9388,7 +9453,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_zhufashengmie_info": "一局游戏限一次，你死亡时，取消之，然后你令你的体力值等于体力上限并锁定体力直到你的出牌阶段结束。",
 					"zioy_yongyeqingxiao": "永夜清宵",
 					"zioy_yongyeqingxiao_info":
-						"①获得此技能时你获得5个“无瞋”标记。若你有“无瞋”，你使用牌结算后需弃置1张牌（没有则不弃）并失去1个“无瞋”。<br>②出牌阶段，若你有“无瞋”标记且不为5个，你可以将“无瞋”补至5个，记补充数量为X，你摸X*1.25（向下取整）张牌，回复X/2（向下取整）点体力（回复体力效果每回合限1次），获得X轮异常免疫，若当前为奇数轮则召唤X轮“热浪”天气，否则召唤X轮“风林火山”环境。<br>③若你没有“无瞋”，你废弃你的判定区，永久获得全异常免疫，攻击距离+1。",
+						"①获得此技能时你获得5个“无瞋”标记。若你有“无瞋”，你使用牌结算后需弃置1张牌（没有则不弃）并失去1个“无瞋”。<br>②出牌阶段，若你有“无瞋”标记且不为5个，你可以将“无瞋”补至5个，记补充数量为X，你摸X*1.25（向下取整）张牌，回复X/2（向下取整）点体力（回复体力效果每回合限1次），获得X轮异常免疫，若当前为奇数轮则召唤X轮“热浪”天气，否则召唤X轮“风林火山”环境。<br>③若你没有“无瞋”，你废弃你的判定区，永久获得全异常免疫，攻击距离+4，出牌阶段可以额外使用1张【杀】。",
 					"zioy_nongying": "弄影",
 					"zioy_nongying_info":
 						"起舞弄清影，何似在人间。<br>①你手牌中的【闪】均视为【杀】，当你需要使用或打出【闪】时，你可以视为打出一张【闪】。<br>②每当你发动〖弄影①〗或将【闪】视为【杀】使用或打出时，若你已受伤，你失去1点体力上限并恢复1点体力，否则你获得1点体力上限并失去1点体力。",
@@ -9426,7 +9491,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_liechenyuyou_wood_info":
 						"血脉技，免疫失效。<br>①令你获得“苏之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“泷之神佑”的角色造成的伤害+1。",
 					"zioy_zhifenghuifang":"栉风绘芳",
-					"zioy_zhifenghuifang_info":"<br>①出牌阶段限1次，若为奇数轮则尝试召唤3轮“芬芳”，若场上为“芬芳”且为偶数轮，则强制召唤3轮“森罗万象”。然后若当前场上存在天气，则你可以选择1名角色，你令其获得“华予”，失去所有护盾，回复等同于失去护盾量+1点体力，摸3张牌。若当前场上存在环境，则你可以选择则你可以选择1名角色，你令其获得“篁蔓”，失去体力至1点并获得等量的护盾，弃置手牌至1张牌。一名角色获得“华予”/“篁蔓”时会自动失去“篁蔓”/“华予”。<br>②一名角色的回合开始时，若你未拥有“华予”，你获得“华予”。<br>③防止你的“华予”失效。<br>·“华予”状态下使拥有者获得以下效果:<br>>>①你获得全异常免疫。<br>>>②受到伤害后，你回复1点体力。<br>>>③当你即将受到伤害时，若此伤害值不小于你当前体力值，限制你受到的伤害不超过1直到任意伤害结算完成。<br>>>④当你受到伤害后，伤害来源获得“篁蔓”。<br>·“篁蔓”状态下使拥有者获得以下效果:<br>>>①你计算与其他角色的距离+2。<br>>>②若你本回合造成过伤害，你无法打出任何伤害类型牌。<br>>>③当你造成伤害后，受伤角色获得“华予”。",
+					"zioy_zhifenghuifang_info":"<br>①出牌阶段限1次，若为奇数轮则尝试召唤3轮“芬芳”，若场上为“芬芳”且为偶数轮，则强制召唤3轮“森罗万象”。然后若当前场上存在天气，则你可以选择1名角色，你令其获得“华予”，失去所有护盾，回复等同于失去护盾量+1点体力，摸3张牌。若当前场上存在环境，则你可以选择则你可以选择1名角色，你令其获得“篁蔓”，失去体力至1点并获得等量的护盾，弃置手牌至1张牌。一名角色获得“华予”/“篁蔓”时会自动失去“篁蔓”/“华予”。<br>②一名角色的回合开始时，若你未拥有“华予”，你获得“华予”。<br>·“华予”状态下使拥有者获得以下效果:<br>>>①你获得全异常免疫。<br>>>②受到伤害后，你有100*0.75^(N+1)%几率回复1点体力(N为此效果触发次数，每次获得“华予”时重置为0)<br>>>③当你即将受到伤害时，若此伤害值不小于你当前体力值，限制你受到的伤害不超过1直到任意伤害结算完成。<br>>>④当你受到伤害后，伤害来源获得“篁蔓”。<br>·“篁蔓”状态下使拥有者获得以下效果:<br>>>①你计算与其他角色的距离+2。<br>>>②当你造成伤害后，你弃置等同于你本回合造成过伤害值总和数量的牌。<br>>>③当你造成伤害后，受伤角色获得“华予”。",
 					"zioy_liwuyaomiao":"鹂舞要眇",
 					"zioy_liwuyaomiao_info":"占位",
 				}
