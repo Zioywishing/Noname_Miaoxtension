@@ -142,7 +142,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 
 			//更换武将头像
 			lib.element.player.changeAvatarMiao = function (imgFrom, imgTo) {
-				path = this.node.avatar.style.backgroundImage.split(imgFrom)[0];
+				var path = this.node.avatar.style.backgroundImage.split(imgFrom)[0];
 
 				this.node.avatar.style.backgroundImage = path + imgTo + '")';
 			};
@@ -209,7 +209,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					if (!player.storage._damageLimiter_Miao) return false;
 					var min = Infinity;
 					for (var i = 0; i < player.storage._damageLimiter_Miao.length; ++i) {
-						limiter = player.storage._damageLimiter_Miao[i];
+						var limiter = player.storage._damageLimiter_Miao[i];
 						if (player.storage._damageLimiter_Miao[i].num < min) min = player.storage._damageLimiter_Miao[i].num;
 					}
 					return event.num > min;
@@ -225,7 +225,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					mark: function (dialog, storage, player) {
 						var min = Infinity;
 						for (var i = 0; i < player.storage._damageLimiter_Miao.length; ++i) {
-							limiter = player.storage._damageLimiter_Miao[i];
+							var limiter = player.storage._damageLimiter_Miao[i];
 							if (player.storage._damageLimiter_Miao[i].num < min) min = player.storage._damageLimiter_Miao[i].num;
 						}
 						return "你受到的所有伤害不超过" + min + "点";
@@ -234,7 +234,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				content: function () {
 					var min = Infinity;
 					for (var i = 0; i < player.storage._damageLimiter_Miao.length; ++i) {
-						limiter = player.storage._damageLimiter_Miao[i];
+						var limiter = player.storage._damageLimiter_Miao[i];
 						if (player.storage._damageLimiter_Miao[i].num < min) min = player.storage._damageLimiter_Miao[i].num;
 					}
 					if (trigger.num > min) trigger.num = min;
@@ -1352,7 +1352,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				}
 				var flag = true;
 				for (var i = 0; i < buff.length; i++) {
-					b = buff[i];
+					var b = buff[i];
 					flag = true;
 					if (b == null || !lib.buffMiao[b]) {
 						game.log("buff not found_3", b);
@@ -1437,7 +1437,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 
 				var flag = true;
 				for (var i = 0; i < buff.length; i++) {
-					b = buff[i];
+					var b = buff[i];
 					flag = true;
 					if (b == null || !lib.buffMiao[b]) {
 						game.log("buff not found_4");
@@ -1547,9 +1547,10 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 							name: "免疫以下异常状态",
 							mark: function (dialog, storage, player) {
 								var flag = 0,
-									str = "";
+									str = "",
+									buff_name="";
 								for (var i = 0; i < player.storage.immuneBuffArray.length; i++) {
-									a = player.storage.immuneBuffArray[i];
+									var a = player.storage.immuneBuffArray[i];
 									if (player.storage.immuneBuffRemover[a].num != Infinity) {
 										buff_name = lib.buffMiao[a].translation + ":" + player.storage.immuneBuffRemover[a].num;
 									} else {
@@ -1603,7 +1604,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						intro: {
 							name: "睡眠",
 							mark: function (dialog, storage, player) {
-								n = player.storage.shuimian_count + 1;
+								var n = player.storage.shuimian_count + 1;
 								return "始终跳过出牌阶段，无法使用或打出任何牌，下轮游戏开始时有" + 25 * n + "%概率移除此状态,受到伤害后立即移除此状态。";
 							}
 						}
@@ -1640,7 +1641,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 
 			lib.element.player.goMad_old = lib.element.player.goMad
 			lib.element.player.goMad = function(end ,force){
-				console.log(this, this.storage )
+				// console.log(this, this.storage )
 				if (!this.storage.buffArray) {
 					this.storage.buffArray = [];
 				}
@@ -1863,7 +1864,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					game.log(this, "已锁定强化");
 					return;
 				}
-				c = ["attack", "miss", "defend", "hit", "strike"];
+				var c = ["attack", "miss", "defend", "hit", "strike"];
 				for (var l = 0; l < c.length; ++l) {
 					i = c[l];
 					if (nolog != null) this.changeEnhancement(i, -this.storage.enhancementArray[i], source, forced, nolog);
@@ -2279,10 +2280,11 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 
 			/*---------------------------------------------------------------以下部分为武将势力相关---------------------------------------------------------------*/
 
+			// 暂时不可用
 			game.AddGroupNatureMiao = function (name, translation, mapping) {
 				/*设定势力的函数，from活动武将 */
 				if (!mapping || !Array.isArray(mapping) || mapping.length != 3) mapping = [199, 21, 133];
-				gradient = [mapping, mapping];
+				var gradient = [mapping, mapping];
 				var y = "(" + mapping[0] + "," + mapping[1] + "," + mapping[2];
 				var y1 = y + ",1)",
 					y2 = y + ")";
@@ -5576,7 +5578,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								do {
 									if (p1.countMark("zioy_cuiyi") > 0) {
 										p1.recover()
-										c = ["strike", "attack", "defend", "miss", "hit"];
+										var c = ["strike", "attack", "defend", "miss", "hit"];
 										p1.changeEnhancement(c[(2 * game.roundNumber - 1) % 5], c[(2 * game.roundNumber) % 5], 1);
 									}
 									p1 = p1.next;
@@ -5727,7 +5729,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}else{
 								target = trigger.player;
 								num = 0;
-								c = ["strike", "attack", "defend", "miss", "hit"];
+								var c = ["strike", "attack", "defend", "miss", "hit"];
 								for (var i = 0; i < c.length; ++i) {
 									if (Math.abs(trigger.player.storage.enhancementArray[c[i]]) != 0) num++;
 									trigger.player.changeEnhancement(c[i], -2 * trigger.player.storage.enhancementArray[c[i]]);
@@ -6402,7 +6404,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							} else {
 								game.changeGlobalStatusEnd(num);
 							}
-							c = ["attack", "miss", "defend", "hit", "strike"];
+							var c = ["attack", "miss", "defend", "hit", "strike"];
 							for (var i = 0; i < c.length; ++i) {
 								if (player.storage.enhancementArray[c[i]] > 0) continue;
 								player.changeEnhancement(c[i], -2 * player.storage.enhancementArray[c[i]]);
@@ -6467,7 +6469,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							result: {
 								player: function (player) {
 									if (player.countMark("zioy_hexuchongxiang_mark") == player.maxHp) return 999;
-									x = player.storage.enhancementArray["attack"];
+									var x = player.storage.enhancementArray["attack"];
 									if (x > -1) {
 										return -10;
 									}
@@ -6502,7 +6504,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								priority: 45411284,
 								content: function () {
 									target = trigger.player;
-									c = target.getCards("hej");
+									var c = target.getCards("hej");
 									for (let i = 0; i < c.length; ++i) {
 										if (c[i].name == trigger.card.name) {
 											target.discard(c[i]);
@@ -6853,7 +6855,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								init: function (player) {
 									player.markSkill("zioy_v07yuxie");
 									player.removeDamageLimiter(1, "zioy_v07yuxie_yuxie");
-									c = ["strike", "attack", "defend", "miss", "hit"];
+									var c = ["strike", "attack", "defend", "miss", "hit"];
 									for (var i = 0; i < c.length; ++i) {
 										player.changeEnhancement(c[i], -1 * player.storage.enhancementArray[c[i]]);
 									}
@@ -6868,7 +6870,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								onremove: function (player) {
 									player.unmarkSkill("zioy_v07yuxie");
 									player.addDamageLimiter(1, "zioy_v07yuxie_yuxie");
-									c = ["strike", "attack", "defend", "miss", "hit"];
+									var c = ["strike", "attack", "defend", "miss", "hit"];
 									for (var i = 0; i < c.length; ++i) {
 										player.changeEnhancement(c[i], -1 * player.storage.enhancementArray[c[i]]);
 									}
@@ -7504,10 +7506,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							save:true,
 							result: {
 								player: function (player) {
-									x = player.storage.yurangzhijian_count;
-									n = player.countMark("zioy_pinghuqiuyue");
-									m = player.countMark("zioy_yurangzhijian_chengsheng");
-									y = parseInt(0 - x + n / 3 + m);
+									var x = player.storage.yurangzhijian_count;
+									var n = player.countMark("zioy_pinghuqiuyue");
+									var m = player.countMark("zioy_yurangzhijian_chengsheng");
+									var y = parseInt(0 - x + n / 3 + m);
 									if (player.storage.yurangzhijian_nuqi + n >= 10 && !player.hasSkill("zioy_yurangzhijian_chengsheng")) {
 										return 100;
 									}
@@ -8266,7 +8268,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								if (!from.storage._miao_twins || !from.storage._miao_twins.isIn() || from.storage.zioy_riyuexingkong_inRange_flag === false) return distance;
 								from.storage._miao_twins.storage.zioy_riyuexingkong_inRange_flag = false;
 								from.storage.zioy_riyuexingkong_inRange_flag = false;
-								num = Math.min(get.distance(from, to), get.distance(from.storage._miao_twins, to));
+								var num = Math.min(get.distance(from, to), get.distance(from.storage._miao_twins, to));
 								from.storage._miao_twins.storage.zioy_riyuexingkong_inRange_flag = true;
 								from.storage.zioy_riyuexingkong_inRange_flag = true;
 								return num;
@@ -9164,7 +9166,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_liechenyuyou_wood_info":
 						"血脉技，免疫失效。<br>①令你获得“苏之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“泷之神佑”的角色造成的伤害+1。",
 					"zioy_zhifenghuifang":"栉风绘芳",
-					"zioy_zhifenghuifang_info":"若场上无全局状态，则根据轮数奇偶尝试召唤“芬芳”或“森罗万象”，若场上已有天气/环境，则强制转换场上天气/环境为“森罗万象”/“芬芳”",
+					"zioy_zhifenghuifang_info":"<br>①出牌阶段限1次，若为奇数轮则尝试召唤3轮“芬芳”，若场上为“芬芳”且为偶数轮，则强制召唤3轮“森罗万象”。然后若当前场上存在天气，则你可以选择任意名角色，你令其获得“华予”，失去所有护盾，回复等同于失去护盾量+1点体力，摸3张牌。若当前场上存在环境，则你可以选择则你可以选择任意名角色，你令其获得“篁蔓”，失去体力至1点并获得等量的护盾，弃置手牌至1张牌。一名角色获得“华予”/“篁蔓”时会自动失去“篁蔓”/“华予”。<br>②一名角色的回合开始时，若你未拥有“华予”，你获得“华予”。<br>③防止你的“华予”失效。<br>“华予”:①你永久获得全异常免疫。②你的回合开始阶段，你回复1点体力。③当你即将受到伤害时",
 					"zioy_liwuyaomiao":"鹂舞要眇",
 					"zioy_liwuyaomiao_info":"占位",
 				}
