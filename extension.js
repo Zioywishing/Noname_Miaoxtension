@@ -969,7 +969,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					translation: "森罗万象",
 					skill: "zioy_status_senluowanxiang",
 					type: "environment",
-					intro: "束缚相关？。"
+					intro: "回合结束阶段，你随机摸0~6张牌，然后你有10*N%几率进入睡眠/混乱状态（N为你以此法获得的牌的数量）。"
 				},
 
 				/*以下为其他状态 */
@@ -1144,7 +1144,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					},
 					senluowanxiang: {
 						trigger: {
-							global: "phaseEnd"
+							player: "phaseEnd"
 						},
 						sub: true,
 						forced: true,
@@ -1156,7 +1156,14 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						},
 						init: function (player) {},
 						onremove: function (player) {},
-						content: function () {},
+						content: function () {
+							let num = parseInt(Math.random()*7)
+							player.draw(num)
+							if(Math.random() < 0.1*num){
+								// console.log(12)
+								player.addBuff('shuimian')
+							}
+						},
 						mod: {},
 					},
 					test: {
@@ -1291,7 +1298,12 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						this.removeBuff(this.storage.buffArray[i]);
 					}
 				}
-				this.addSkill(skill);
+				// console.log(this)
+				if(skill == 'mad'){
+					this.addTempSkill(skill,'phaseEnd')
+				}else{
+					this.addSkill(skill);
+				}
 				this.storage.buffArray.push(buff);
 				var strf = "";
 				if (force) strf = "强制";
@@ -1635,19 +1647,19 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					type: "control",
 					intro: "始终跳过出牌阶段，无法使用或打出任何牌，每轮游戏开始时有25*n%概率移除此状态,受到伤害时立即移除此状态。（n为异常状态已持续轮数）"
 				},
-				"bingdong": {
-					translation: "冰冻",
-					skill: "zioy_buff_bingdong",
-					type: "control",
-					intro:
-						"跳过判定阶段，摸牌阶段，出牌阶段与弃牌阶段，受到的所有伤害-1，回合开始阶段有15*n%概率移除此状态。受到火属性伤害时立即移除此状态。（n为异常状态已持续轮数）"
-				},
-				"ranshao": {
-					translation: "燃烧",
-					skill: "zioy_status_ranshao",
-					type: "damage",
-					intro: "balabala"
-				},
+				// "bingdong": {
+				// 	translation: "冰冻",
+				// 	skill: "zioy_buff_bingdong",
+				// 	type: "control",
+				// 	intro:
+				// 		"跳过判定阶段，摸牌阶段，出牌阶段与弃牌阶段，受到的所有伤害-1，回合开始阶段有15*n%概率移除此状态。受到火属性伤害时立即移除此状态。（n为异常状态已持续轮数）"
+				// },
+				// "ranshao": {
+				// 	translation: "燃烧",
+				// 	skill: "zioy_status_ranshao",
+				// 	type: "damage",
+				// 	intro: "balabala"
+				// },
 				"mad":{
 					translation: "混乱",
 					skill: "mad",
@@ -2511,6 +2523,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				lib.groupnature[name] = "miao_" + name;
 			};
 			game.AddGroupNatureMiao("daqin", "秦", [255, 165, 0]);
+			game.AddGroupNatureMiao(null, "?", [0, 0, 0]);
+			// game.AddGroupNatureMiao('test', "测试", [0, 0, 0]);
 		},
 		precontent: function () {},
 		help: {},
@@ -5984,7 +5998,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							var c = result.control
 							if(c == 1){
 								// player.addBuffImmune("all",2)
-								player.discardPlayerCard(player.next,'hej',[0,999])
+								// player.discardPlayerCard(player.next,'hej',[0,999])
+								player.next.damage(1)
 							}else if(c == 2){
 								player.removeBuffImmune("all",'id=testtest')
 							}else if(c == 3){
@@ -7670,7 +7685,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								} else {
 									m = 3;
 								}
-								player.removeMark("zioy_yurangzhijian_chengsheng", m);
+								if(m > 0)player.removeMark("zioy_yurangzhijian_chengsheng", m);
 							}
 							game.changeGlobalStatus("xiyu", 5, "round");
 							player.addBuffImmune("all", 5, "round");
@@ -9238,12 +9253,12 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					},
 					"zioy_liwuyaomiao":{
 						trigger: {
-							global: "phaseBegin"
+							global: "roundStart"
 						},
 						filter: function (event, player) {
-							return true
+							return game.roundNumber % player.hp == 0
 						},
-						direct:true,
+						forced:true,
 						content: function () {
 							player.recover(1)
 						},
@@ -9564,7 +9579,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_zhifenghuifang":"栉风绘芳",
 					"zioy_zhifenghuifang_info":"<br>①出牌阶段限1次，若为奇数轮且场上不为“芬芳”则尝试召唤3轮“芬芳”，若为偶数轮且场上为天气，则强制召唤3轮“森罗万象”。然后若当前场上存在天气，则你可以选择1名角色，若其没有“华予”，你令其失去所有护盾，回复等同于失去护盾量+1点体力，摸3张牌。然后你令其获得/重置“华予”。若当前场上存在环境，则你可以选择则你可以选择1名角色，若其没有“篁蔓”，你令其失去体力至1点并获得等量的护盾，弃置手牌至1张牌。然后你令其获得“篁蔓”。一名角色获得“华予”/“篁蔓”时会自动失去“篁蔓”/“华予”。<br>②一名角色的回合开始时，若你未拥有“华予”，你获得“华予”。<br>·“华予”状态下使拥有者获得以下效果:<br>>>①你获得全异常免疫。<br>>>②受到伤害后，你有100*0.75^(N+1)%几率回复1点体力(N为此效果触发次数，每次获得“华予”时重置为0)<br>>>③当你即将受到伤害时，若此伤害值不小于你当前体力值，限制你受到的伤害不超过1直到任意伤害结算完成。<br>>>④防止你于回合外失去手牌。<br>>>⑤当你受到伤害后，伤害来源获得“篁蔓”。<br>·“篁蔓”状态下使拥有者获得以下效果:<br>>>①你计算与其他角色的距离+2。<br>>>②当你造成伤害后，你弃置等同于你本回合造成过伤害值总和数量的牌。<br>>>③当你造成伤害后，受伤角色获得“华予”。",
 					"zioy_liwuyaomiao":"鹂舞要眇",
-					"zioy_liwuyaomiao_info":"<br>①一名角色的回合开始阶段，你回复1点体力。",
+					"zioy_liwuyaomiao_info":"<br>①一轮游戏开始时，若当前轮数是你当前体力的整数倍，你回复1点体力。",
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
