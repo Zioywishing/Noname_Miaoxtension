@@ -2606,6 +2606,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_dacongming": ["male", "qun", "6/6/6", ["zioy_shoufa"], ["des:聪明手法的角色"]],
 					"zioy_exchel": ["female", "wei", "2/4", ["zioy_liwuyaomiao","zioy_zhifenghuifang","zioy_liechenyuyou_wood"], []],
 					"zioy_sushuang": ["male", "wei", "4/5/1", ['zioy_jietian','zioy_yunshuang'], []],
+					"zioy_kaixier": ["female", "qun", "2/4/3", ["zioy_helu"], []],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2652,7 +2653,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_bidu": "别西卜",
 					"zioy_dacongming": "大聪明",
 					"zioy_exchel":"伊珂玺尔",
-					"zioy_sushuang":'鹔鹴'
+					"zioy_sushuang":'鹔鹴',
+					"zioy_kaixier":'凯希儿'
 				}
 			},
 			card: {
@@ -9372,6 +9374,50 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 				
 						},
 						"_priority": 124527551144
+					},
+					'zioy_helu':{
+						trigger:{
+							player:"useCardToPlayered",
+						},
+						check:function(event,player){
+							return true;
+						},
+						filter:function(event,player){
+							return event.target != player && player.countCards('h') > 0;
+						},
+						init:function(player){
+							// player.storage.zioy_helu_map = {}
+						},
+						content:function(){
+							"step 0"
+							player.chooseCard('h',1)
+							"step 1"
+							if(result.bool){
+								var c = result.cards[0]
+								trigger.getParent().directHit.add(trigger.target);
+								trigger.target.gain(c)
+								if(!trigger.target.storage.zioy_helu_num){
+									trigger.target.storage.zioy_helu_num = 0
+								}
+								trigger.target.storage.zioy_helu_num++
+							}
+						},
+						group:['zioy_helu_draw'],
+						subSkill:{
+							draw:{
+								trigger:{
+									global:"phaseEnd",
+								},
+								forced:true,
+								filter:function(event,player){
+									return event.player.storage.zioy_helu_num
+								},
+								content:function(){
+									player.draw(2*trigger.player.storage.zioy_helu_num)
+									trigger.player.storage.zioy_helu_num = 0
+								}
+							}
+						}
 					}
 				},
 				translate: {
@@ -9693,6 +9739,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_jietian_info":'锁定技，你的回合开始时，你对自己造成1点伤害，然后获得1点护甲',
 					"zioy_yunshuang":'陨霜',
 					"zioy_yunshuang_info":'每轮游戏限2次，一名角色即将造成伤害时，若受伤角色区域内的牌数量不小于2，你可以防止此伤害，改为造成伤害的角色弃置受伤角色至多2张牌。',
+					"zioy_helu":'吓赂',
+					"zioy_helu_info":'当你使用牌指定一名其他角色为目标时，你可以选择一张手牌，其获得此牌并无法响应你本次对其使用的牌。其回合结束阶段，你摸2X张牌并令X=0（X为其通过〖吓赂〗从你的区域内获得的牌的数量）。',
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
