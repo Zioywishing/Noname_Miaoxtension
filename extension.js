@@ -218,6 +218,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				priority: -705831,
 				forced: true,
+				silent:true,
 				charlotte: true,
 				unique: true,
 				mark: true,
@@ -309,6 +310,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				priority: -Infinity, //保证优先级最低
 				forced: true,
+				silent:true,
 				charlotte: true,
 				unique: true,
 				mark: true,
@@ -402,6 +404,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				direct: true,
 				unique: true,
+				silent:true,
 				// forceunique:true,
 				filter: function (event, player) {
 					if (!player.hp_float) {
@@ -432,6 +435,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				direct: true,
 				unique: true,
+				silent:true,
 				forceunique: true,
 				filter: function (event, player) {
 					if (!player.hp_float) {
@@ -455,6 +459,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				direct: true,
 				unique: true,
+				silent:true,
 				forceunique: true,
 				filter: function (event, player) {
 					return true;
@@ -1000,6 +1005,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						forced: true,
 						direct: true,
 						unique: true,
+						silent:true,
 						charlotte: true,
 						filter: function (event, player) {
 							return true;
@@ -1015,6 +1021,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						forced: true,
 						direct: true,
 						unique: true,
+						silent:true,
 						charlotte: true,
 						trigger: {
 							source: "damageBegin1"
@@ -1032,6 +1039,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						forced: true,
 						direct: true,
 						unique: true,
+						silent:true,
 						charlotte: true,
 						trigger: {
 							source: "damageBegin1"
@@ -1048,6 +1056,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						sub: true,
 						forced: true,
 						direct: true,
+						silent:true,
 						unique: true,
 						charlotte: true,
 						mod: {
@@ -1061,6 +1070,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						forced: true,
 						direct: true,
 						unique: true,
+						silent:true,
 						charlotte: true,
 						trigger: {
 							player: "phaseEnd"
@@ -1078,6 +1088,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						forced: true,
 						direct: true,
 						unique: true,
+						silent:true,
 						charlotte: true,
 						filter: function (event, player) {
 							return !player.storage.shenlou_noLoseHp;
@@ -1110,6 +1121,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						sub: true,
 						forced: true,
 						direct: true,
+						silent:true,
 						unique: true,
 						charlotte: true,
 						filter: function (event, player) {
@@ -1131,6 +1143,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						forced: true,
 						direct: true,
 						unique: true,
+						silent:true,
 						charlotte: true,
 						filter: function (event, player) {
 							return true;
@@ -1149,6 +1162,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						sub: true,
 						forced: true,
 						direct: true,
+						silent:true,
 						unique: true,
 						charlotte: true,
 						filter: function (event, player) {
@@ -1171,6 +1185,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						forced: true,
 						direct: true,
 						unique: true,
+						silent:true,
 						charlotte: true,
 						mod: {}
 					}
@@ -1189,6 +1204,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				direct: true,
 				charlotte: true,
+				silent:true,
 				unique: true,
 				content: function () {
 					if (game.globalStatus.timing_type == "round" && game.globalStatus.end <= game.roundNumber) {
@@ -1205,6 +1221,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				direct: true,
 				charlotte: true,
+				silent:true,
 				unique: true,
 				filter: function (event, player) {
 					if (game.globalStatus.storage.remove_timing_locked == true) return false;
@@ -1237,6 +1254,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				direct: true,
 				charlotte: true,
+				silent:true,
 				unique: true,
 				filter: function (event, player) {
 					return true;
@@ -1565,6 +1583,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				direct: true,
 				charlotte: true,
+				silent:true,
 				unique: true,
 				content: function () {
 					// 检查是否所有计时器都结束
@@ -1604,6 +1623,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				direct: true,
 				charlotte: true,
+				silent:true,
 				unique: true,
 				filter: function (event, player) {
 					return player.storage.immuneBuffRemover;
@@ -1756,6 +1776,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						},
 						priority: 3014745327,
 						direct: true,
+						silent:true,
 						filter: function () {
 							return true;
 						},
@@ -1788,6 +1809,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						},
 						priority: -301745327,
 						direct: true,
+						silent:true,
 						filter: function () {
 							return true;
 						},
@@ -1801,6 +1823,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						},
 						priority: -3456301727,
 						direct: true,
+						silent:true,
 						filter: function () {
 							return true;
 						},
@@ -2069,6 +2092,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				priority: 70582140,
 				forced: true,
+				silent:true,
 				locked: true,
 				direct: true,
 				filter: function (event, player) {
@@ -2099,6 +2123,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					return true;
 				},
 				direct: true,
+				silent:true,
 				charlotte: true,
 				unique: true,
 				content: function () {
@@ -2159,6 +2184,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				priority: 70582140,
 				forced: true,
 				direct: true,
+				silent:true,
 				charlotte: true,
 				unique: true,
 				content: function () {
@@ -2216,6 +2242,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				direct: true,
 				charlotte: true,
+				silent:true,
 				unique: true,
 				content: function () {
 					if (!player.storage.enhancementArray) {
@@ -2262,6 +2289,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					return true;
 				},
 				direct: true,
+				silent:true,
 				charlotte: true,
 				unique: true,
 				content: function () {
@@ -2281,6 +2309,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					global: "phaseBegin"
 				},
 				direct: true,
+				silent:true,
 				charlotte: true,
 				unique: true,
 				filter: function (event, player) {
@@ -2575,7 +2604,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_purangsigai": ["none", "wu", 4, ["zioy_jisuishengjin"], ["des:plus黄盖"]],
 					"zioy_bidu": ["female", "jin", "3/14/2", ["zioy_biubiubiu"], []],
 					"zioy_dacongming": ["male", "qun", "6/6/6", ["zioy_shoufa"], ["des:聪明手法的角色"]],
-					"zioy_exchel": ["female", "wei", "2/4", ["zioy_liwuyaomiao","zioy_zhifenghuifang","zioy_liechenyuyou_wood"], []]
+					"zioy_exchel": ["female", "wei", "2/4", ["zioy_liwuyaomiao","zioy_zhifenghuifang","zioy_liechenyuyou_wood"], []],
+					"zioy_sushuang": ["male", "wei", "4/5/1", ['zioy_suitian','zioy_yunshuang'], []],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2621,7 +2651,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_purangsigai": "普琅斯盖",
 					"zioy_bidu": "别西卜",
 					"zioy_dacongming": "大聪明",
-					"zioy_exchel":"伊珂玺尔"
+					"zioy_exchel":"伊珂玺尔",
+					"zioy_sushuang":'鹔鹴'
 				}
 			},
 			card: {
@@ -3851,7 +3882,7 @@ return false;*/
 								if (player.storage.zsyhj2) {
 									return "防止受到无属性伤害";
 								}
-								return "未拥有护盾";
+								return "未拥有护甲";
 							},
 							markcount: "expansion"
 						},
@@ -9264,6 +9295,83 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						"_priority": 52345007865
 					},
+					"zioy_suitian":{
+						trigger: {
+							player: "phaseBegin"
+						},
+						filter: function (event, player) {
+							return true
+						},
+						forced:true,
+						locked:true,
+						content: function () {
+							'step 0'
+							player.damage(1)
+							'step 1'
+							player.changeHujia(1)
+						},
+						"_priority": 1245275511
+					},
+					"zioy_yunshuang":{
+						trigger: {
+							global: "damageBegin2"
+						},
+						filter: function (event, player) {
+							if(player.storage.zioy_yunshuang_roundNumber < game.roundNumber){
+								player.storage.zioy_yunshuang_roundNumber = game.roundNumber
+								player.storage.zioy_yunshuang_count = 0
+							}
+							return event.source&&event.source.isIn()&&player.storage.zioy_yunshuang_count < 2
+							&&event.player.getCards('hej').length>1;
+						},
+						direct:true,
+						init:function(player){
+							player.storage.zioy_yunshuang_count = 0
+							player.storage.zioy_yunshuang_roundNumber = 0
+						},
+						content: function () {
+							"step 0"
+							var choices = ["是", "否"];
+							player
+								.chooseControl(choices)
+								// .set("prompt", "陨霜：请选择一项")
+								.set("prompt", '是否防止'+get.translation(trigger.source)+'对'+get.translation(trigger.player)+'造成伤害并令'+get.translation(trigger.source)+'弃置'+get.translation(trigger.player)+'2张牌')
+								.set("ai", () => {
+									var target=trigger.player;
+									var eff=get.damageEffect(target,player,player,trigger.nature);
+									// game.log(target,eff)
+									if(get.attitude(player,target)>0){
+										if(target.countCards('j')>0){
+											return '是'
+										}
+										if(eff>=0) return '否';
+										return '是';
+									}
+									if(eff<=0) return '是';
+									if(target.hp==1) return '否';
+									if(trigger.num>1||player.hasSkill('tianxianjiu')||
+										player.hasSkill('luoyi2')||player.hasSkill('reluoyi2')) return '否';
+									if(target.countCards('hej')<2) return '否';
+									var num=0;
+									var cards=target.getCards('hej');
+									for(var i=0;i<cards.length;i++){
+										if(get.value(cards[i])>6) num++;
+									}
+									if(num>=2) return '是';
+									return '否';
+								});
+							"step 1"
+							if (result.control == "否") event.finish();
+							"step 2"
+							game.log(player,'发动了','<span style="color:yellow">'+get.translation(event.name)+'</span>')
+							player.storage.zioy_yunshuang_count++
+							trigger.cancel()
+							trigger.source.line(trigger.player);
+							trigger.source.discardPlayerCard('hej',trigger.player,[0,2],true);
+				
+						},
+						"_priority": 124527551144
+					}
 				},
 				translate: {
 					"zioy_xixue": "汲血",
@@ -9493,12 +9601,12 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"锁定技<br>①防止你在已损失体力时死亡，你在未损失体力时进入濒死状态。<br>②你不以此法失去体力与受到伤害均改为回复体力，不以此法回复体力均改为失去体力。<br>③除开始阶段与结束阶段，你的回合阶段执行顺序与正常顺序相反。<br>④你的手牌上限等于你已损失体力。",
 					"zioy_hexuchongxiang": "鹤墟重香",
 					"zioy_hexuchongxiang_info":
-						"清香更何用，犹发去年枝。<br>①将你即将受到伤害/流失体力时伤害/流失值超过X-N点的部分转化为“蜃气”，触发此效果超过X+1次后令X加1并重置计数（获得此技能时令X=0，N为本回合满足〖鹤墟重香①〗的时机次数-1且不超过X）<br>②当你死亡时，若你体力值大于0则改为失去所有体力，否则：若你体力上限不为场上唯一最多或发动〖鹤墟重香②〗的次数小于2，你复活，获得N+1点体力上限，回复所有体力，移去所有“蜃气”并获得等量护盾，摸等量的牌，令X等于N-1，重置①效果计数，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加80%（向下取整）（N为〖鹤墟重香②〗发动的次数）<br>③你的“蜃气”数量不会超过你体力上限，获得“蜃气”时根据你是否受伤将多余的“蜃气”转换为体力值或“海市蜃楼”天气回合数。",
+						"清香更何用，犹发去年枝。<br>①将你即将受到伤害/流失体力时伤害/流失值超过X-N点的部分转化为“蜃气”，触发此效果超过X+1次后令X加1并重置计数（获得此技能时令X=0，N为本回合满足〖鹤墟重香①〗的时机次数-1且不超过X）<br>②当你死亡时，若你体力值大于0则改为失去所有体力，否则：若你体力上限不为场上唯一最多或发动〖鹤墟重香②〗的次数小于2，你复活，获得N+1点体力上限，回复所有体力，移去所有“蜃气”并获得等量护甲，摸等量的牌，令X等于N-1，重置①效果计数，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加80%（向下取整）（N为〖鹤墟重香②〗发动的次数）<br>③你的“蜃气”数量不会超过你体力上限，获得“蜃气”时根据你是否受伤将多余的“蜃气”转换为体力值或“海市蜃楼”天气回合数。",
 					"zioy_hexuchongxiang_mark": "鹤墟重香③",
 					"zioy_hexuchongxiang_revive": "鹤墟重香②",
 					"zioy_yuezhuiyunwei": "月坠云微",
 					"zioy_yuezhuiyunwei_info":
-						"梦回芳草思依依，天远雁声稀。<br>①根据当前“蜃气”的数量执行下列效果：<br>不大于50%体力上限：一名角色的回合开始阶段你失去1级防御，攻击强化，你的判定区视为被废除，你免疫任何异常状态，你的武将牌始终正面向上。<br>大于25%体力上限：当你成为其他角色使用牌的目标时，其弃置一张与此牌同名的手牌（没有则不弃）<br>大于6：当你造成超过1点伤害后，你失去1点体力上限并令其获得1点体力上限，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加20%（与〖鹤墟重香〗同乘区）。<br>等于体力上限：每局游戏限一次，发动〖鹤墟重香②〗或〖月坠云微②〗时重置计数。当你使用牌对指定一名角色为唯一目标时，你与其交换体力与体力上限。以此法交换的体力和体力上限不超过X点（X为你发动〖鹤墟重香③〗的次数）<br>②每回合限1次，出牌阶段，若你有“蜃气”，你可以主动发动此技能：你失去所有“蜃气”，倒置负面强化并清除所有异常状态，召唤等量回合的“海市蜃楼”天气，令一名角色获得等量护盾，令一名角色回复等量体力，令一名角色摸等量牌（X=你的体力上限/2且向下取整）<br>③你永久免疫“睡眠”异常，永久免疫“海市蜃楼”的任何效果。",
+						"梦回芳草思依依，天远雁声稀。<br>①根据当前“蜃气”的数量执行下列效果：<br>不大于50%体力上限：一名角色的回合开始阶段你失去1级防御，攻击强化，你的判定区视为被废除，你免疫任何异常状态，你的武将牌始终正面向上。<br>大于25%体力上限：当你成为其他角色使用牌的目标时，其弃置一张与此牌同名的手牌（没有则不弃）<br>大于6：当你造成超过1点伤害后，你失去1点体力上限并令其获得1点体力上限，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加20%（与〖鹤墟重香〗同乘区）。<br>等于体力上限：每局游戏限一次，发动〖鹤墟重香②〗或〖月坠云微②〗时重置计数。当你使用牌对指定一名角色为唯一目标时，你与其交换体力与体力上限。以此法交换的体力和体力上限不超过X点（X为你发动〖鹤墟重香③〗的次数）<br>②每回合限1次，出牌阶段，若你有“蜃气”，你可以主动发动此技能：你失去所有“蜃气”，倒置负面强化并清除所有异常状态，召唤等量回合的“海市蜃楼”天气，令一名角色获得等量护甲，令一名角色回复等量体力，令一名角色摸等量牌（X=你的体力上限/2且向下取整）<br>③你永久免疫“睡眠”异常，永久免疫“海市蜃楼”的任何效果。",
 					"zioy_zhumingxiangan": "烛明香暗",
 					"zioy_zhumingxiangan_info": "凭阑半日独无言，依旧竹声新月似当年。<br>转换技：<br>阳：<br>>>①若你。<br>阴：<br>>>①若你。",
 					"zioy_hanbosuliu": "寒波泝流",
@@ -9577,9 +9685,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_liechenyuyou_wood_info":
 						"血脉技，免疫失效。<br>①令你获得“苏之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“泷之神佑”的角色造成的伤害+1。",
 					"zioy_zhifenghuifang":"栉风绘芳",
-					"zioy_zhifenghuifang_info":"<br>①出牌阶段限1次，若为奇数轮且场上不为“芬芳”则尝试召唤3轮“芬芳”，若为偶数轮且场上为天气，则强制召唤3轮“森罗万象”。然后若当前场上存在天气，则你可以选择1名角色，若其没有“华予”，你令其失去所有护盾，回复等同于失去护盾量+1点体力，摸3张牌。然后你令其获得/重置“华予”。若当前场上存在环境，则你可以选择则你可以选择1名角色，若其没有“篁蔓”，你令其失去体力至1点并获得等量的护盾，弃置手牌至1张牌。然后你令其获得“篁蔓”。一名角色获得“华予”/“篁蔓”时会自动失去“篁蔓”/“华予”。<br>②一名角色的回合开始时，若你未拥有“华予”，你获得“华予”。<br>·“华予”状态下使拥有者获得以下效果:<br>>>①你获得全异常免疫。<br>>>②受到伤害后，你有100*0.75^(N+1)%几率回复1点体力(N为此效果触发次数，每次获得“华予”时重置为0)<br>>>③当你即将受到伤害时，若此伤害值不小于你当前体力值，限制你受到的伤害不超过1直到任意伤害结算完成。<br>>>④防止你于回合外失去手牌。<br>>>⑤当你受到伤害后，伤害来源获得“篁蔓”。<br>·“篁蔓”状态下使拥有者获得以下效果:<br>>>①你计算与其他角色的距离+2。<br>>>②当你造成伤害后，你弃置等同于你本回合造成过伤害值总和数量的牌。<br>>>③当你造成伤害后，受伤角色获得“华予”。",
+					"zioy_zhifenghuifang_info":"<br>①出牌阶段限1次，若为奇数轮且场上不为“芬芳”则尝试召唤3轮“芬芳”，若为偶数轮且场上为天气，则强制召唤3轮“森罗万象”。然后若当前场上存在天气，则你可以选择1名角色，若其没有“华予”，你令其失去所有护甲，回复等同于失去护甲量+1点体力，摸3张牌。然后你令其获得/重置“华予”。若当前场上存在环境，则你可以选择则你可以选择1名角色，若其没有“篁蔓”，你令其失去体力至1点并获得等量的护甲，弃置手牌至1张牌。然后你令其获得“篁蔓”。一名角色获得“华予”/“篁蔓”时会自动失去“篁蔓”/“华予”。<br>②一名角色的回合开始时，若你未拥有“华予”，你获得“华予”。<br>·“华予”状态下使拥有者获得以下效果:<br>>>①你获得全异常免疫。<br>>>②受到伤害后，你有100*0.75^(N+1)%几率回复1点体力(N为此效果触发次数，每次获得“华予”时重置为0)<br>>>③当你即将受到伤害时，若此伤害值不小于你当前体力值，限制你受到的伤害不超过1直到任意伤害结算完成。<br>>>④防止你于回合外失去手牌。<br>>>⑤当你受到伤害后，伤害来源获得“篁蔓”。<br>·“篁蔓”状态下使拥有者获得以下效果:<br>>>①你计算与其他角色的距离+2。<br>>>②当你造成伤害后，你弃置等同于你本回合造成过伤害值总和数量的牌。<br>>>③当你造成伤害后，受伤角色获得“华予”。",
 					"zioy_liwuyaomiao":"鹂舞要眇",
 					"zioy_liwuyaomiao_info":"<br>①一轮游戏开始时，若当前轮数是你当前体力的整数倍，你回复1点体力。",
+					"zioy_suitian":'遂天',
+					"zioy_suitian_info":'锁定技，你的回合开始时，你对自己造成1点伤害，然后获得1点护甲',
+					"zioy_yunshuang":'陨霜',
+					"zioy_yunshuang_info":'每轮游戏限2次，一名角色即将造成伤害时，若受伤角色区域内的牌数量不小于2，你可以防止此伤害，改为造成伤害的角色弃置受伤角色至多2张牌。',
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
