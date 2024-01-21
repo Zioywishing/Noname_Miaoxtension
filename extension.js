@@ -2605,7 +2605,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_bidu": ["female", "jin", "3/14/2", ["zioy_biubiubiu"], []],
 					"zioy_dacongming": ["male", "qun", "6/6/6", ["zioy_shoufa"], ["des:聪明手法的角色"]],
 					"zioy_exchel": ["female", "wei", "2/4", ["zioy_liwuyaomiao","zioy_zhifenghuifang","zioy_liechenyuyou_wood"], []],
-					"zioy_sushuang": ["male", "wei", "4/5/1", ['zioy_suitian','zioy_yunshuang'], []],
+					"zioy_sushuang": ["male", "wei", "4/5/1", ['zioy_jietian','zioy_yunshuang'], []],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -9295,7 +9295,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						"_priority": 52345007865
 					},
-					"zioy_suitian":{
+					"zioy_jietian":{
 						trigger: {
 							player: "phaseBegin"
 						},
@@ -9338,6 +9338,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								.set("prompt", '是否防止'+get.translation(trigger.source)+'对'+get.translation(trigger.player)+'造成伤害并令'+get.translation(trigger.source)+'弃置'+get.translation(trigger.player)+'2张牌')
 								.set("ai", () => {
 									var target=trigger.player;
+									var player = trigger.source;
 									var eff=get.damageEffect(target,player,player,trigger.nature);
 									// game.log(target,eff)
 									if(get.attitude(player,target)>0){
@@ -9688,8 +9689,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_zhifenghuifang_info":"<br>①出牌阶段限1次，若为奇数轮且场上不为“芬芳”则尝试召唤3轮“芬芳”，若为偶数轮且场上为天气，则强制召唤3轮“森罗万象”。然后若当前场上存在天气，则你可以选择1名角色，若其没有“华予”，你令其失去所有护甲，回复等同于失去护甲量+1点体力，摸3张牌。然后你令其获得/重置“华予”。若当前场上存在环境，则你可以选择则你可以选择1名角色，若其没有“篁蔓”，你令其失去体力至1点并获得等量的护甲，弃置手牌至1张牌。然后你令其获得“篁蔓”。一名角色获得“华予”/“篁蔓”时会自动失去“篁蔓”/“华予”。<br>②一名角色的回合开始时，若你未拥有“华予”，你获得“华予”。<br>·“华予”状态下使拥有者获得以下效果:<br>>>①你获得全异常免疫。<br>>>②受到伤害后，你有100*0.75^(N+1)%几率回复1点体力(N为此效果触发次数，每次获得“华予”时重置为0)<br>>>③当你即将受到伤害时，若此伤害值不小于你当前体力值，限制你受到的伤害不超过1直到任意伤害结算完成。<br>>>④防止你于回合外失去手牌。<br>>>⑤当你受到伤害后，伤害来源获得“篁蔓”。<br>·“篁蔓”状态下使拥有者获得以下效果:<br>>>①你计算与其他角色的距离+2。<br>>>②当你造成伤害后，你弃置等同于你本回合造成过伤害值总和数量的牌。<br>>>③当你造成伤害后，受伤角色获得“华予”。",
 					"zioy_liwuyaomiao":"鹂舞要眇",
 					"zioy_liwuyaomiao_info":"<br>①一轮游戏开始时，若当前轮数是你当前体力的整数倍，你回复1点体力。",
-					"zioy_suitian":'遂天',
-					"zioy_suitian_info":'锁定技，你的回合开始时，你对自己造成1点伤害，然后获得1点护甲',
+					"zioy_jietian":'嗟天',
+					"zioy_jietian_info":'锁定技，你的回合开始时，你对自己造成1点伤害，然后获得1点护甲',
 					"zioy_yunshuang":'陨霜',
 					"zioy_yunshuang_info":'每轮游戏限2次，一名角色即将造成伤害时，若受伤角色区域内的牌数量不小于2，你可以防止此伤害，改为造成伤害的角色弃置受伤角色至多2张牌。',
 				}
