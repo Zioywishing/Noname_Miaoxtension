@@ -2607,6 +2607,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_exchel": ["female", "wei", "2/4", ["zioy_liwuyaomiao","zioy_zhifenghuifang","zioy_liechenyuyou_wood"], []],
 					"zioy_sushuang": ["male", "wei", "4/5/1", ['zioy_jietian','zioy_yunshuang'], []],
 					"zioy_kaixier": ["female", "qun", "2/4/3", ["zioy_helu"], []],
+					"zioy_ji1": ["male", "jin", "3", ["zioy_shidai"], ["hiddenSkill"]],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2654,7 +2655,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_dacongming": "大聪明",
 					"zioy_exchel":"伊珂玺尔",
 					"zioy_sushuang":'鹔鹴',
-					"zioy_kaixier":'凯希儿'
+					"zioy_kaixier":'凯希儿',
+					"zioy_ji1": '畸',
 				}
 			},
 			card: {
@@ -9323,7 +9325,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								player.storage.zioy_yunshuang_roundNumber = game.roundNumber
 								player.storage.zioy_yunshuang_count = 0
 							}
-							return event.source&&event.source.isIn()&&player.storage.zioy_yunshuang_count < 2
+							return event.source&&event.source.isIn()&&player.storage.zioy_yunshuang_count < 4
 							&&event.player.getCards('hej').length>1;
 						},
 						direct:true,
@@ -9416,6 +9418,106 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.draw(2*trigger.player.storage.zioy_helu_num)
 									trigger.player.storage.zioy_helu_num = 0
 								}
+							}
+						}
+					},
+					'zioy_shidai':{
+						init:function(player){
+							player.storage.shidai_layer = -1
+						},
+						trigger:{
+							global:['die','roundStart'],
+						},
+						filter:()=>{return true},
+						content:function(){
+							game.log(123)
+							player.storage.shidai_layer++
+						},
+						direct:true,
+						group:['zioy_shidai_1','zioy_shidai_3','zioy_shidai_4','zioy_shidai_5'],
+						"_priority":456486748,
+						mod:{
+							selectTarget:function (card, player, range) {
+								if (player.storage.shidai_layer < 2 && get.type(card) != 'equip' && !['nanman','wanjian','jiu','tao','lebu','bingliang'].includes(card.name) &&  game.filterPlayer(current=>{
+									return lib.filter.targetEnabled2(card,player,current);
+								}).length > 1) return range[1] += 2
+							},
+						},
+						subSkill:{
+							1:{
+								trigger:{
+									player:"useCard",
+								},
+								direct:true,
+								silent:true,
+								filter:function (event, player) {
+									return player.storage.shidai_layer < 1;
+								},
+								content:function () {
+									trigger.directHit.addArray(
+										game.filterPlayer(current => {
+											return true;
+										})
+									);
+								},
+								sub:true,
+								"_priority":45648678,
+							},
+							3:{
+								trigger:{
+									source:"damageBegin1",
+								},
+								direct:true,
+								silent:true,
+								filter:function (event, player) {
+									return player.storage.shidai_layer < 3;
+								},
+								content:function () {
+									if(3-game.roundNumber > 0)trigger.num += 3-game.roundNumber
+								},
+								sub:true,
+								"_priority":45648678,
+							},
+							4:{
+								trigger:{
+									source:"damageEnd",
+								},
+								direct:true,
+								silent:true,
+								filter:function (event, player) {
+									return player.storage.shidai_layer < 4;
+								},
+								content:function () {
+									player.recover()
+								},
+								sub:true,
+								"_priority":45648678,
+							},
+							5:{
+								trigger:{
+									player:"useCard",
+								},
+								direct:true,
+								silent:true,
+								init:function(player){
+									player.storage.shidai_card = null
+								},
+								filter:function (event, player) {
+									if(event.getParent(2).name == 'zioy_shidai_5')return false
+									return player.storage.shidai_layer < 5;
+								},
+								content:function () {
+									'step 0'
+									if(player.storage.shidai_card != null && game.filterPlayer(current=>{
+										return lib.filter.targetEnabled2(player.storage.shidai_card,event.player,current);
+									}).length != 0 && get.type(player.storage.shidai_card) != 'equip'){
+										player.chooseUseTarget(player.storage.shidai_card.name,'视为使用一张【'+get.translation(player.storage.shidai_card)+'】');
+									};
+									'step 1'
+									if(get.type(trigger.card) != 'equip')player.storage.shidai_card = trigger.card
+								},
+								sub:true,
+								"_priority":456448678,
 							}
 						}
 					}
@@ -9738,9 +9840,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_jietian":'嗟天',
 					"zioy_jietian_info":'锁定技，你的回合开始时，你对自己造成1点伤害，然后获得1点护甲',
 					"zioy_yunshuang":'陨霜',
-					"zioy_yunshuang_info":'每轮游戏限2次，一名角色即将造成伤害时，若受伤角色区域内的牌数量不小于2，你可以防止此伤害，改为造成伤害的角色弃置受伤角色至多2张牌。',
+					"zioy_yunshuang_info":'每轮游戏限4次，一名角色即将造成伤害时，若受伤角色区域内的牌数量不小于2，你可以防止此伤害，改为造成伤害的角色弃置受伤角色至多2张牌。',
 					"zioy_helu":'吓赂',
 					"zioy_helu_info":'当你使用牌指定一名其他角色为目标时，你可以选择一张手牌，其获得此牌并无法响应你本次对其使用的牌。其回合结束阶段，你摸2X张牌并令X=0（X为其通过〖吓赂〗从你的区域内获得的牌的数量）。',
+					"zioy_shidai":'时贷',
+					"zioy_shidai_info":'你拥有以下效果，当一名角色死亡或一轮游戏开始时，你按顺序移去你拥有的序号最小的效果。<br>①你使用的牌无法被响应。<br>②你使用的牌可以额外指定2名角色为目标。<br>③你造成的伤害+X。（X=3-游戏轮数）<br>④当你造成伤害后，你回复1点体力。<br>⑤当你使用牌时，你可以视为使用一张与你上一次使用的非装备牌牌名相同的虚拟牌。',
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
