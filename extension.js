@@ -2607,7 +2607,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_exchel": ["female", "wei", "2/4", ["zioy_liwuyaomiao","zioy_zhifenghuifang","zioy_liechenyuyou_wood"], []],
 					"zioy_sushuang": ["male", "wei", "4/5/1", ['zioy_jietian','zioy_yunshuang'], []],
 					"zioy_kaixier": ["female", "qun", "2/4/3", ["zioy_helu"], []],
-					"zioy_ji1": ["male", "jin", "3", ["zioy_shidai"], ["hiddenSkill"]],
+					"zioy_ji1": ["male", "jin", "3", ["zioy_shidai",'zioy_heimeng'], ["hiddenSkill"]],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -9423,24 +9423,29 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					},
 					'zioy_shidai':{
 						init:function(player){
-							player.storage.shidai_layer = -1
+							player.storage.shidai_layer = 0
 						},
 						trigger:{
 							global:['die','roundStart'],
 						},
 						filter:()=>{return true},
 						content:function(){
-							game.log(123)
 							player.storage.shidai_layer++
+							game.log(player.storage.shidai_layer)
 						},
 						direct:true,
-						group:['zioy_shidai_1','zioy_shidai_3','zioy_shidai_4','zioy_shidai_5'],
+						group:['zioy_shidai_1','zioy_shidai_2','zioy_shidai_7','zioy_shidai_5'],
 						"_priority":456486748,
 						mod:{
 							selectTarget:function (card, player, range) {
-								if (player.storage.shidai_layer < 2 && get.type(card) != 'equip' && !['nanman','wanjian','jiu','tao','lebu','bingliang'].includes(card.name) &&  game.filterPlayer(current=>{
+								if (3-game.roundNumber > 0 && player.storage.shidai_layer < 4 && get.type(card) != 'equip' && !['nanman','wanjian','jiu','tao','lebu','bingliang','wuzhong'].includes(card.name) &&  game.filterPlayer(current=>{
 									return lib.filter.targetEnabled2(card,player,current);
-								}).length > 1) return range[1] += 2
+								}).length > 1) return range[1] += 3-game.roundNumber
+							},
+							globalFrom:function(from,to,distance){
+								if(3-game.roundNumber > 0 && from.storage.shidai_layer < 3){
+									return distance-(3-game.roundNumber);
+								}
 							},
 						},
 						subSkill:{
@@ -9463,14 +9468,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								sub:true,
 								"_priority":45648678,
 							},
-							3:{
+							2:{
 								trigger:{
 									source:"damageBegin1",
 								},
 								direct:true,
 								silent:true,
 								filter:function (event, player) {
-									return player.storage.shidai_layer < 3;
+									return player.storage.shidai_layer < 2;
 								},
 								content:function () {
 									if(3-game.roundNumber > 0)trigger.num += 3-game.roundNumber
@@ -9478,14 +9483,29 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								sub:true,
 								"_priority":45648678,
 							},
-							4:{
+							5:{
+								trigger:{
+									source:"dieBefore",
+								},
+								direct:true,
+								silent:true,
+								filter:function (event, player) {
+									return player.storage.shidai_layer < 5;
+								},
+								content:function () {
+									player.gain(trigger.player.getCards('hej'))
+								},
+								sub:true,
+								"_priority":45648678,
+							},
+							6:{
 								trigger:{
 									source:"damageEnd",
 								},
 								direct:true,
 								silent:true,
 								filter:function (event, player) {
-									return player.storage.shidai_layer < 4;
+									return player.storage.shidai_layer < 6;
 								},
 								content:function () {
 									player.recover()
@@ -9493,7 +9513,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								sub:true,
 								"_priority":45648678,
 							},
-							5:{
+							7:{
 								trigger:{
 									player:"useCard",
 								},
@@ -9503,14 +9523,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.storage.shidai_card = null
 								},
 								filter:function (event, player) {
-									if(event.getParent(2).name == 'zioy_shidai_5')return false
-									return player.storage.shidai_layer < 5;
+									if(event.getParent(2).name == 'zioy_shidai_7')return false
+									return player.storage.shidai_layer < 7;
 								},
 								content:function () {
 									'step 0'
-									if(player.storage.shidai_card != null && game.filterPlayer(current=>{
+									if(player.storage.shidai_card != null && (game.filterPlayer(current=>{
 										return lib.filter.targetEnabled2(player.storage.shidai_card,event.player,current);
-									}).length != 0 && get.type(player.storage.shidai_card) != 'equip'){
+									}).length != 0 || player.storage.shidai_card.name == 'jiu') && get.type(player.storage.shidai_card) != 'equip'){
 										player.chooseUseTarget(player.storage.shidai_card.name,'视为使用一张【'+get.translation(player.storage.shidai_card)+'】');
 									};
 									'step 1'
@@ -9520,6 +9540,24 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								"_priority":456448678,
 							}
 						}
+					},
+					'zioy_heimeng':{
+						trigger:{
+							player:"showCharacterAfter",
+						},
+						forced:true,
+						hiddenSkill:true,
+						// silent:true,
+						filter:function(event,player){
+							return event.toShow&&event.toShow.includes(player.name);
+						},
+						content:function(){
+							player.gain(player.getCards('j'))
+						},
+						// ai:{
+						// 	expose:0.2,
+						// },
+						"_priority":0,
 					}
 				},
 				translate: {
@@ -9796,7 +9834,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_zhufashengmie_info": "一局游戏限一次，你死亡时，取消之，然后你令你的体力值等于体力上限并锁定体力直到你的出牌阶段结束。",
 					"zioy_yongyeqingxiao": "永夜清宵",
 					"zioy_yongyeqingxiao_info":
-						"①获得此技能时你获得5个“无瞋”标记。若你有“无瞋”，你使用牌结算后需弃置1张牌（没有则不弃）并失去1个“无瞋”。<br>②出牌阶段，若你有“无瞋”标记且不为5个，你可以将“无瞋”补至5个，记补充数量为X，你摸X*1.25（向下取整）张牌，回复X/2（向下取整）点体力（回复体力效果每回合限1次），获得X轮异常免疫，若当前为奇数轮则召唤X轮“热浪”天气，否则召唤X轮“风林火山”环境。<br>③若你没有“无瞋”，你废弃你的判定区，永久获得全异常免疫，攻击距离+4，出牌阶段可以额外使用1张【杀】。",
+						"①获得此技能时你获得5个“无瞋”标记。若你有“无瞋”，你使用牌结算后需弃置1张牌（没有则不弃）并失去1个“无瞋”。<br>②出牌阶段，若你有“无瞋”标记且不为5个，你可以将“无瞋”补至5个，记补充数量为X，你摸X*1.25（向下取整）张牌，回复X/2（向下取整）点体力（回复体力效果每回合限1次），获得X轮异常免疫，若当前为奇数轮则召唤X轮“热浪”天气，否则召唤X轮“风林火山”环境。<br>③若你没有“无瞋”，你废弃你的判定区，永久获得全异常免疫，进攻距离+4，出牌阶段可以额外使用1张【杀】。",
 					"zioy_nongying": "弄影",
 					"zioy_nongying_info":
 						"起舞弄清影，何似在人间。<br>①你手牌中的【闪】均视为【杀】，当你需要使用或打出【闪】时，你可以视为打出一张【闪】。<br>②每当你发动〖弄影①〗或将【闪】视为【杀】使用或打出时，若你已受伤，你失去1点体力上限并恢复1点体力，否则你获得1点体力上限并失去1点体力。",
@@ -9814,10 +9852,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						'①记你的体力上限+你拥有的“雷殊”数量为你的"尾数"，若你的"尾数"小于9，每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/3(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到200枚时你移去200枚“鸣雷”标记并回复1点体力值，若尾数达到9则使你下一次造成伤害后对受伤角色造成1点不会触发此技能③效果的雷属性伤害。<br>③当你尾数达到9时，你为伤害来源的任何伤害数值+2，你造成任何伤害后获得伤害值*尾数*3点“鸣雷”标记。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。<br>⑤你的摸牌阶段摸牌数基数为你的尾数/1.5(向下取整)。',
 					"zioy_zhoumingchuanxuan": "骤明穿玄",
 					"zioy_zhoumingchuanxuan_info":
-						"①你的攻击距离+X，使用牌（延时锦囊除外）可多指定X名角色为目标（X为你的尾数/3且向下取整）<br>②若你使用牌指定唯一其他角色为目标且你的体力上限大于1，你失去1点体力上限并获得1枚“雷殊”标记，然后清除场上非天气的全局状态<br>③若你有至少2枚“雷殊”，你可以主动发动此技能，移去所有“雷殊”并选择X名其他角色，你对其造成X点雷属性伤害（X为你移去“雷殊”的数量/1.5且向下取整）",
+						"①你的进攻距离+X，使用牌（延时锦囊除外）可多指定X名角色为目标（X为你的尾数/3且向下取整）<br>②若你使用牌指定唯一其他角色为目标且你的体力上限大于1，你失去1点体力上限并获得1枚“雷殊”标记，然后清除场上非天气的全局状态<br>③若你有至少2枚“雷殊”，你可以主动发动此技能，移去所有“雷殊”并选择X名其他角色，你对其造成X点雷属性伤害（X为你移去“雷殊”的数量/1.5且向下取整）",
 					"zioy_riyuexingkong": "日月行空",
 					"zioy_riyuexingkong_info":
-						"你加入游戏时不加入本角色，改为加入“耀阳”与“辉月”。“耀阳”与“辉月”共享攻击距离与范围计算，若其中一名角色即将死亡且另一名角色未处于休整状态，你令其休整至其下一回合开始时，否则令“耀阳”与“辉月”死亡。",
+						"你加入游戏时不加入本角色，改为加入“耀阳”与“辉月”。“耀阳”与“辉月”共享进攻距离与范围计算，若其中一名角色即将死亡且另一名角色未处于休整状态，你令其休整至其下一回合开始时，否则令“耀阳”与“辉月”死亡。",
 					"zioy_jisuishengjin": "击髓生津",
 					"zioy_jisuishengjin_info":
 						"<br>①出牌阶段，你可以对自己造成1点伤害。<br>②当你受到1点伤害时，你可以观看牌堆顶上的8张牌并获得其中至多四张牌，将剩余的牌按原顺序放回牌堆顶。",
@@ -9844,7 +9882,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_helu":'吓赂',
 					"zioy_helu_info":'当你使用牌指定一名其他角色为目标时，你可以选择一张手牌，其获得此牌并无法响应你本次对其使用的牌。其回合结束阶段，你摸2X张牌并令X=0（X为其通过〖吓赂〗从你的区域内获得的牌的数量）。',
 					"zioy_shidai":'时贷',
-					"zioy_shidai_info":'你拥有以下效果，当一名角色死亡或一轮游戏开始时，你按顺序移去你拥有的序号最小的效果。<br>①你使用的牌无法被响应。<br>②你使用的牌可以额外指定2名角色为目标。<br>③你造成的伤害+X。（X=3-游戏轮数）<br>④当你造成伤害后，你回复1点体力。<br>⑤当你使用牌时，你可以视为使用一张与你上一次使用的非装备牌牌名相同的虚拟牌。',
+					"zioy_shidai_info":'你拥有以下效果，当一名角色死亡或一轮游戏开始时，你按顺序移去你拥有的序号最小的效果。<br>①你使用的牌无法被响应。<br>②你造成的伤害+X。（X=3-游戏轮数）<br>③你的进攻距离+X。（X=3-游戏轮数）<br>④你使用的牌可以额外指定X名角色为目标。（X=3-游戏轮数）<br>⑤你获得你杀死的角色区域内的所有牌。<br>⑥当你造成伤害后，你回复1点体力。<br>⑦当你使用牌时，若时机合法，你可以视为使用一张与你上一次使用的非虚拟非装备牌牌名相同的无属性虚拟牌。',
+					"zioy_heimeng":'黑梦',
+					"zioy_heimeng_info":'隐匿技，锁定技。当你登场后，你获得你判定区内的牌。',
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
