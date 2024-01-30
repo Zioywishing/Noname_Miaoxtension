@@ -2607,7 +2607,9 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_exchel": ["female", "wei", "2/4", ["zioy_liwuyaomiao","zioy_zhifenghuifang","zioy_liechenyuyou_wood"], []],
 					"zioy_sushuang": ["male", "wei", "4/5/1", ['zioy_jietian','zioy_yunshuang'], []],
 					"zioy_kaixier": ["female", "qun", "2/4/3", ["zioy_helu"], []],
-					"zioy_ji1": ["male", "jin", "3", ["zioy_shidai",'zioy_heimeng'], ["hiddenSkill"]],
+					"zioy_ji1": ["male", "jin", "3", ["zioy_shimeng",'zioy_heimeng'], ["hiddenSkill"]],
+					"zioy_pangxian": ["female", "shu", "3/4/5", ["zioy_bian1","zioy_bian2","zioy_bian3","zioy_bian4","zioy_biandaogui"], ["hiddenSkill"]],
+					"zioy_tianqi": ["female", "daqin", "2", ["zioy_junling","zioy_junming","zioy_junci","zioy_junnu","zioy_junyun"], ["hiddenSkill"]],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2657,6 +2659,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_sushuang":'鹔鹴',
 					"zioy_kaixier":'凯希儿',
 					"zioy_ji1": '畸',
+					"zioy_pangxian": '逄暹',
+					"zioy_tianqi":'天启',
 				}
 			},
 			card: {
@@ -9421,7 +9425,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}
 						}
 					},
-					'zioy_shidai':{
+					'zioy_shimeng':{
 						init:function(player){
 							player.storage.shidai_layer = 0
 						},
@@ -9431,10 +9435,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						filter:()=>{return true},
 						content:function(){
 							player.storage.shidai_layer++
-							game.log(player.storage.shidai_layer)
+							// game.log(player.storage.shidai_layer)
 						},
 						direct:true,
-						group:['zioy_shidai_1','zioy_shidai_2','zioy_shidai_7','zioy_shidai_5'],
+						group:['zioy_shimeng_1','zioy_shimeng_2','zioy_shimeng_7','zioy_shimeng_5'],
 						"_priority":456486748,
 						mod:{
 							selectTarget:function (card, player, range) {
@@ -9534,7 +9538,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.storage.shidai_card = null
 								},
 								filter:function (event, player) {
-									if(event.getParent(2).name == 'zioy_shidai_7')return false
+									if(event.getParent(2).name == 'zioy_shimeng_7')return false
 									return player.storage.shidai_layer < 7;
 								},
 								content:function () {
@@ -9569,7 +9573,284 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						// 	expose:0.2,
 						// },
 						"_priority":0,
-					}
+					},
+					'zioy_bian1':{},
+					'zioy_bian2':{},
+					'zioy_bian3':{},
+					'zioy_bian4':{},
+					'zioy_biandaogui':{},
+					"zioy_junling":{
+						trigger:{
+							player:"showCharacterAfter",
+						},
+						forced:true,
+						hiddenSkill:true,
+						// silent:true,
+						filter:function(event,player){
+							return event.toShow&&event.toShow.includes(player.name);
+						},
+						content:function(){
+							"step 0"
+							for(var p of game.players){
+								if(p === player){
+									p.gainMaxHp(7)
+									p.draw(9)
+								}else{
+									p.gainMaxHp(2)
+									p.draw(4)
+									if(!p.isTurnedOver()){
+										p.turnOver();
+									}
+								}
+							}
+							"step 1"
+							if(player!=_status.currentPhase){
+								var cards=Array.from(ui.ordering.childNodes);
+								while(cards.length){
+									cards.shift().discard();
+								}
+							}
+							"step 2"
+							if(player!=_status.currentPhase){
+								var evt=_status.event.getParent('phase');
+								if(evt){
+									game.resetSkills();
+									_status.event=evt;
+									_status.event.finish();
+									_status.event.untrigger(true);
+								}
+							}
+							// 'step 3'
+							// trigger.getParent(2).phaseList.splice(trigger.num,0,'phaseUse|zioy_junling');
+							// trigger.getParent(2).phaseList.splice(trigger.num,0,'phaseDiscard|zioy_junling');
+						},
+						"_priority":0,
+					},
+					"zioy_junming":{
+						trigger:{
+							global:"roundStart",
+						},
+						filter:()=>{return game.players.filter(p=>p.hp < p.maxHp).length > 0},
+						direct:true,
+						content:function(){
+							'step 0'
+							var max = -1
+							for(var p of game.players){
+								max = Math.max(max,p.maxHp - p.hp)
+							}
+							event.pArray = []
+							for(var p of game.players){
+								if(p.maxHp - p.hp == max)event.pArray.push(p)
+							}
+							var str = ''
+							for(var p of event.pArray){
+								if(str != ''){
+									str = str + ','
+								}
+								str = str + get.translation(p)
+							}
+							str = '是否对' + str + "发动【" + get.translation(event.name) + '】'
+							player.chooseBool(str).set('ai',()=>{
+								return player.hp + player.hujia < 3 || event.pArray.filter((p)=>{p === player}).length == 0
+							})
+							'step 1'
+							if(result.bool){
+								game.log(player,'发动了','<span class="greentext">【'+get.translation(event.name)+'】</span>')
+								var max = -1
+								for(var p of event.pArray){
+									if(p.maxHp > 1)p.loseMaxHp(1)
+									max = Math.max(p.maxHp - p.hp - 1,max)
+									p.recover(p.maxHp - p.hp)
+								}
+								if(max - player.hujia != 0)player.changeHujia(max - player.hujia)
+								player.draw(max)
+							}
+						}
+					},
+					"zioy_junci":{
+						trigger:{
+							global:"damageEnd",
+						},
+						filter:function(event,player){
+							if(player.hasSkill('zioy_junci_phase'))return false
+							if(!event.source) return false
+							var f = false
+							for(var p of [event.source,event.player,player]){
+								if(p.countCards('hej') > 0){
+									f = true
+									break
+								}
+							}
+							return event.source && event.player != player && f && event.player != event.source
+						},
+						direct:true,
+						content:function(){
+							'step 0'
+							player.chooseTarget('请选择移出牌的目标',1,false, (card, player, target)=> {
+								return [player,trigger.player,trigger.source].includes(target) && target.countCards('hej') > 0;
+							}).set('ai', target => {
+								var att = get.attitude(player, target);
+								return -att;
+							});
+							'step 1'
+							if(result.bool){
+								event.plose = result.targets[0]
+								if(event.plose == player && player != trigger.player && player != trigger.source){
+									player.chooseTarget('请选择移入牌的目标',1,false, (card, player, target)=> {
+										return [trigger.player,trigger.source].includes(target);
+									}).set('ai', target => {
+										var att = get.attitude(player, target);
+										return -att;
+									});
+								}else{
+									event.pgain = event.plose == trigger.player ? trigger.source : trigger.player
+									event.goto(3)
+								}
+							}else{
+								event.finish()
+							}
+							'step 2'
+							event.pgain = result.targets[0]
+							'step 3'
+							// game.log(event.plose,event.pgain)
+							player.choosePlayerCard(event.plose,'hej',true).set('ai',get.buttonValue);
+							'step 4'
+							player.addTempSkill('zioy_junci_phase')
+							var card = result.cards[0]
+							if(get.position(card)=='e'){ 
+								event.pgain.equip(card);
+								event.finish()
+							}
+            				else if(get.position(card)=='j'){ 
+								event.pgain.addJudge(card);
+								event.finish()
+							}
+							else {
+								event.pgain.gain(card)
+								event.card = card
+							}
+							'step 5'
+							if(game.filterPlayer(current=>{
+								return lib.filter.targetEnabled2(player.storage.shidai_card,event.player,current);
+							}).length != 0){
+								event.bool = true
+								event.pgain.chooseBool('是否使用【' + get.translation(event.card) + '】').set('ai',()=>{return true})
+							}else{
+								event.bool = false
+							}
+							'step 6'
+							if(event.bool && result.bool){
+								event.pgain.chooseUseTarget(event.card)
+								event.finish()
+							}else if(event.pgain == player){
+								event.finish()
+							}
+							'step 7'
+							player.chooseBool('是否对' + get.translation(event.pgain) + '造成1点伤害')
+							.set('ai',()=>{return get.attitude(event.pgain,player) <= 0})
+							'step 8'
+							if(result.bool){
+								event.pgain.damage(1)
+								event.finish()
+							}
+						},
+						subSkill:{
+							'phase':{}
+						}
+					},
+					"zioy_junnu":{
+						trigger:{
+							source:"damageBegin1",
+							player:'damageBegin1'
+						},
+						filter:()=>{return true},
+						content:function(){
+							'step 0'
+							player.showHandcards();
+							var nr = player.getCards('h').filter(c=>get.color(c) == 'red').length
+							var nb = player.getCards('h').filter(c=>get.color(c) == 'black').length
+							var nc = player.getCards('h').length
+							// game.log(nr,nb)
+							if(nr >= nb){
+								trigger.num += 1
+								if(nc > 0 && trigger.source)trigger.source.chooseToDiscard(Math.min(trigger.source.countCards('he'),nc),'he',true)
+							}
+							if(nb >= nr){
+								trigger.num += 1
+								if(nc > 0)trigger.player.chooseToDiscard(Math.min(trigger.player.countCards('he'),nc),'he',true)
+							}
+						},
+						check:function(event,player){
+							var nr = player.getCards('h').filter(c=>get.color(c) == 'red').length
+							var nb = player.getCards('h').filter(c=>get.color(c) == 'black').length
+							if(event.player==player){
+								if(player.hp + player.hujia <= 5){
+									return false
+								}
+								if(nb >= nr)return false
+								if(nr >= nb){
+									if(!event.source)return false
+								}
+							}else{
+								if(get.attitude(event.player,player) > 0)return false
+							}
+							return true
+						},
+						ai: {
+							threaten:15,
+							damageBonus:true,
+						},
+					},
+					"zioy_junyun":{
+						trigger:{
+							player:"dieBefore",
+						},
+						filter:function(event,player){
+							return true
+						},
+						forced:true,
+						limited:true,
+						direct:true,
+						forceDie:true,
+						skillAnimation:true,
+						animationColor:"soil",
+						content:function(){
+							'step 0'
+							player.awakenSkill(event.name)
+							event.max = player.maxHp
+							player.chooseTarget('请选择〖君陨〗的目标',[1,event.max],false,function (card, player, target) {
+								return player != target;
+							}).set('ai', target => {
+								var att = get.attitude(player, target);
+								return -att;
+							});
+							'step 1'
+							if(!result.bool){
+								event.finish()
+							}else{
+								event.targets = result.targets
+							}
+							'step 2'
+							event.t = event.targets.pop()
+							buttoms = []
+							for(var i = 1;i < event.max - event.targets.length + 1;i++){
+								buttoms.push(i)
+							}
+							if(buttoms.length === 1){
+								event.t.damage(1)
+								event.goto(4)
+							}else{
+								player.chooseControl(buttoms).set("prompt",'请选择对'+get.translation(event.t)+'造成的伤害值')
+							}
+							'step 3'
+							event.t.damage(result.control)
+							event.max -= result.control
+							'step 4'
+							if(event.targets.length > 0){
+								event.goto(2)
+							}
+						},
+					},
 				},
 				translate: {
 					"zioy_xixue": "汲血",
@@ -9892,10 +10173,30 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yunshuang_info":'每轮游戏限4次，一名角色即将造成伤害时，若受伤角色区域内的牌数量不小于2，你可以防止此伤害，改为造成伤害的角色弃置受伤角色至多2张牌。',
 					"zioy_helu":'吓赂',
 					"zioy_helu_info":'当你使用牌指定一名其他角色为目标时，你可以选择一张手牌，其获得此牌并无法响应你本次对其使用的牌。其回合结束阶段，你摸2X张牌并令X=0（X为其通过〖吓赂〗从你的区域内获得的牌的数量）。',
-					"zioy_shidai":'时贷',
-					"zioy_shidai_info":'你拥有以下效果，当一名角色死亡或一轮游戏开始时，你按顺序移去你拥有的序号最小的效果。<br>①你使用的牌无法被响应。<br>②你每轮第一次造成的伤害+X。（X=3-游戏轮数）<br>③你的进攻距离+X。（X=3-游戏轮数）<br>④你使用的牌可以额外指定X名角色为目标。（X=3-游戏轮数）<br>⑤你获得你杀死的角色区域内的所有牌。<br>⑥当你造成伤害后，你回复1点体力。<br>⑦当你使用牌时，若时机合法，你可以视为使用一张与你上一次使用的非虚拟非装备牌牌名相同的无属性虚拟牌。',
+					"zioy_shimeng":'逝梦',
+					"zioy_shimeng_info":'你拥有以下效果，当一名角色死亡或一轮游戏开始时，你按顺序移去你拥有的序号最小的效果。<br>①你使用的牌无法被响应。<br>②你每轮第一次造成的伤害+X。（X=3-游戏轮数）<br>③你的进攻距离+X。（X=3-游戏轮数）<br>④你使用的牌可以额外指定X名角色为目标。（X=3-游戏轮数）<br>⑤你获得你杀死的角色区域内的所有牌。<br>⑥当你造成伤害后，你回复1点体力。<br>⑦当你使用牌时，若时机合法，你可以视为使用一张与你上一次使用的非虚拟非装备牌牌名相同的无属性虚拟牌。',
 					"zioy_heimeng":'黑梦',
 					"zioy_heimeng_info":'隐匿技，锁定技。当你登场后，你获得你判定区内的牌。',
+					"zioy_bian1":'彼岸式Ⅰ',
+					"zioy_bian1_info":'限定技，',
+					"zioy_bian2":'彼岸式Ⅱ',
+					"zioy_bian2_info":'限定技，',
+					"zioy_bian3":'彼岸式Ⅲ',
+					"zioy_bian3_info":'限定技，',
+					"zioy_bian4":'彼岸式Ⅳ',
+					"zioy_bian4_info":'限定技，',
+					"zioy_biandaogui":'彼岸道归',
+					"zioy_biandaogui_info":'锁定技，',
+					"zioy_junling":'君临',
+					"zioy_junling_info":'隐匿技，锁定技。当你登场时，若当前回合角色不为你则终止一切结算，当前回合结束。然后你增加7点体力上限，摸9张牌；其他角色增加2点体力上限，摸4张牌，并将武将牌翻至背面朝上。',
+					"zioy_junming":'君命',
+					"zioy_junming_info":'一轮游戏开始时，若场上有受伤角色，你可以令场上已损失体力值最多的所有角色失去1点体力上限（最多失去至1点）并将体力值回复至体力上限，然后你将你的护甲值调整为N并摸N张牌。（N为技能结算前场上角色已损失体力值的最大值）',
+					"zioy_junci":'君赐',
+					"zioy_junci_info":'每回合限1次，当一名角色对一名其他角色造成伤害时，你可以将你或受伤角色/伤害来源区域内的一张牌移动至伤害来源/受伤角色区域内的相应位置，若此牌进入移入角色的手牌区，其须选择是否立即使用此牌，若时机不合法或该角色选择不立即使用且该角色不为你，你对其造成1点伤害。',
+					"zioy_junnu":'君怒',
+					"zioy_junnu_info":'当你即将受到/造成伤害时，你可以展示你的所有手牌，若其中红色牌数量不小于黑色牌，你令此伤害+1且造成伤害的角色弃置等同于你手牌数的牌（不足则全弃）；若其中黑色牌数量不小于红色牌，你令此伤害+1且受到伤害的角色弃置等同于你手牌数的牌（不足则全弃）。',
+					"zioy_junyun":'君陨',
+					"zioy_junyun_info":'限定技。当你即将死亡时，你可以对任意名角色造成至多共X点无属性伤害。（X为你的体力上限）',
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
