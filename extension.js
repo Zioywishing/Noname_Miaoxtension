@@ -9597,6 +9597,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									p.draw(9)
 								}else{
 									p.gainMaxHp(2)
+									p.recover(2)
 									p.draw(4)
 									if(!p.isTurnedOver()){
 										p.turnOver();
@@ -9651,6 +9652,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}
 							str = '是否对' + str + "发动【" + get.translation(event.name) + '】'
 							player.chooseBool(str).set('ai',()=>{
+								game.log(event.pArray.filter((p)=>{p === player}).length , max , player.hp)
+								if(event.pArray.filter((p)=>{p === player}).length != 0 && max < player.hp)return false
+								// if(event.pArray.filter((p)=>{p !== player}).length == 0 && max < player.hp)return false
 								return player.hp + player.hujia < 3 || event.pArray.filter((p)=>{p === player}).length == 0
 							})
 							'step 1'
@@ -9659,13 +9663,16 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								var max = -1
 								for(var p of event.pArray){
 									if(p.maxHp > 1)p.loseMaxHp(1)
-									max = Math.max(p.maxHp - p.hp - 1,max)
+									max = Math.max(p.maxHp - p.hp,max)
 									p.recover(p.maxHp - p.hp)
 								}
 								if(max - player.hujia != 0)player.changeHujia(max - player.hujia)
 								player.draw(max)
 							}
-						}
+						},
+						ai: {
+							threaten:95,
+						},
 					},
 					"zioy_junci":{
 						trigger:{
@@ -9756,7 +9763,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						subSkill:{
 							'phase':{}
-						}
+						},
+						ai: {
+							threaten:95,
+						},
 					},
 					"zioy_junnu":{
 						trigger:{
@@ -9794,6 +9804,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}else{
 								if(get.attitude(event.player,player) > 0)return false
 							}
+							if((event.player==player) == (nb >= nr) && player.hp > 0)return false
 							return true
 						},
 						ai: {
@@ -9817,7 +9828,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						content:function(){
 							'step 0'
 							player.awakenSkill(event.name)
-							event.max = player.maxHp
+							event.max = parseInt(player.maxHp/2+0.01 - player.hp)
 							player.chooseTarget('请选择〖君陨〗的目标',[1,event.max],false,function (card, player, target) {
 								return player != target;
 							}).set('ai', target => {
@@ -9840,7 +9851,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								event.t.damage(1)
 								event.goto(4)
 							}else{
-								player.chooseControl(buttoms).set("prompt",'请选择对'+get.translation(event.t)+'造成的伤害值')
+								player.chooseControl(buttoms).set("prompt",'请选择对'+get.translation(event.t)+'造成的伤害值').set('ai',()=>{return buttoms.length})
 							}
 							'step 3'
 							event.t.damage(result.control)
@@ -9849,6 +9860,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							if(event.targets.length > 0){
 								event.goto(2)
 							}
+						},
+						ai: {
+							threaten:95,
 						},
 					},
 				},
@@ -10188,15 +10202,15 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_biandaogui":'彼岸道归',
 					"zioy_biandaogui_info":'锁定技，',
 					"zioy_junling":'君临',
-					"zioy_junling_info":'隐匿技，锁定技。当你登场时，若当前回合角色不为你则终止一切结算，当前回合结束。然后你增加7点体力上限，摸9张牌；其他角色增加2点体力上限，摸4张牌，并将武将牌翻至背面朝上。',
+					"zioy_junling_info":'隐匿技，锁定技。当你登场时，若当前回合角色不为你则终止一切结算，当前回合结束。然后你增加7点体力上限，摸9张牌；其他角色增加2点体力上限，回复2点体力，摸4张牌，并将武将牌翻至背面朝上。',
 					"zioy_junming":'君命',
 					"zioy_junming_info":'一轮游戏开始时，若场上有受伤角色，你可以令场上已损失体力值最多的所有角色失去1点体力上限（最多失去至1点）并将体力值回复至体力上限，然后你将你的护甲值调整为N并摸N张牌。（N为技能结算前场上角色已损失体力值的最大值）',
 					"zioy_junci":'君赐',
-					"zioy_junci_info":'每回合限1次，当一名角色对一名其他角色造成伤害时，你可以将你或受伤角色/伤害来源区域内的一张牌移动至伤害来源/受伤角色区域内的相应位置，若此牌进入移入角色的手牌区，其须选择是否立即使用此牌，若时机不合法或该角色选择不立即使用且该角色不为你，你对其造成1点伤害。',
+					"zioy_junci_info":'每回合限1次，当一名角色对一名其他角色造成伤害时，你可以将你或受伤角色/伤害来源区域内的一张牌移动至伤害来源/受伤角色区域内的相应位置，若此牌被移入手牌区且时机合法，其须选择是否立即使用此牌，若时机不合法或该角色选择不立即使用且该角色不为你，你可以对其造成1点伤害。',
 					"zioy_junnu":'君怒',
 					"zioy_junnu_info":'当你即将受到/造成伤害时，你可以展示你的所有手牌，若其中红色牌数量不小于黑色牌，你令此伤害+1且造成伤害的角色弃置等同于你手牌数的牌（不足则全弃）；若其中黑色牌数量不小于红色牌，你令此伤害+1且受到伤害的角色弃置等同于你手牌数的牌（不足则全弃）。',
 					"zioy_junyun":'君陨',
-					"zioy_junyun_info":'限定技。当你即将死亡时，你可以对任意名角色造成至多共X点无属性伤害。（X为你的体力上限）',
+					"zioy_junyun_info":'限定技。当你即将死亡时，你可以对任意名角色造成至多共X点无属性伤害。（X为你已损失体力/2且向下取整）',
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
