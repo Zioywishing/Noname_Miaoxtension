@@ -9593,8 +9593,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							"step 0"
 							for(var p of game.players){
 								if(p === player){
-									p.gainMaxHp(7)
-									p.draw(9)
+									p.gainMaxHp(3)
+									p.draw(3)
 								}else{
 									p.gainMaxHp(2)
 									p.recover(2)
@@ -9652,8 +9652,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}
 							str = '是否对' + str + "发动【" + get.translation(event.name) + '】'
 							player.chooseBool(str).set('ai',()=>{
-								game.log(event.pArray.filter((p)=>{p === player}).length , max , player.hp)
-								if(event.pArray.filter((p)=>{p === player}).length != 0 && max < player.hp)return false
+								// game.log(event.pArray.filter((p)=>{p === player}).length , max , player.hp)
+								if(player.maxHp - player.hp == max && max < player.hp)return false
 								// if(event.pArray.filter((p)=>{p !== player}).length == 0 && max < player.hp)return false
 								return player.hp + player.hujia < 3 || event.pArray.filter((p)=>{p === player}).length == 0
 							})
@@ -9694,16 +9694,19 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						content:function(){
 							'step 0'
 							player.chooseTarget('请选择移出牌的目标',1,false, (card, player, target)=> {
+								if(!trigger.player.isAlive()) return target == player
 								return [player,trigger.player,trigger.source].includes(target) && target.countCards('hej') > 0;
 							}).set('ai', target => {
 								var att = get.attitude(player, target);
-								return -att;
+								// game.log(1+att)
+								return 1+att > 0;
 							});
 							'step 1'
 							if(result.bool){
+								// player.say('1213')
 								event.plose = result.targets[0]
 								if(event.plose == player && player != trigger.player && player != trigger.source){
-									player.chooseTarget('请选择移入牌的目标',1,false, (card, player, target)=> {
+									player.chooseTarget('请选择移入牌的目标',1,true, (card, player, target)=> {
 										return [trigger.player,trigger.source].includes(target);
 									}).set('ai', target => {
 										var att = get.attitude(player, target);
@@ -9717,6 +9720,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								event.finish()
 							}
 							'step 2'
+							// game.log(result.targets)
 							event.pgain = result.targets[0]
 							'step 3'
 							// game.log(event.plose,event.pgain)
@@ -10202,7 +10206,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_biandaogui":'彼岸道归',
 					"zioy_biandaogui_info":'锁定技，',
 					"zioy_junling":'君临',
-					"zioy_junling_info":'隐匿技，锁定技。当你登场时，若当前回合角色不为你则终止一切结算，当前回合结束。然后你增加7点体力上限，摸9张牌；其他角色增加2点体力上限，回复2点体力，摸4张牌，并将武将牌翻至背面朝上。',
+					"zioy_junling_info":'隐匿技，锁定技。当你登场时，若当前回合角色不为你则终止一切结算，当前回合结束。然后你增加3点体力上限，摸3张牌；其他角色增加2点体力上限，回复2点体力，摸4张牌，并将武将牌翻至背面朝上。',
 					"zioy_junming":'君命',
 					"zioy_junming_info":'一轮游戏开始时，若场上有受伤角色，你可以令场上已损失体力值最多的所有角色失去1点体力上限（最多失去至1点）并将体力值回复至体力上限，然后你将你的护甲值调整为N并摸N张牌。（N为技能结算前场上角色已损失体力值的最大值）',
 					"zioy_junci":'君赐',
