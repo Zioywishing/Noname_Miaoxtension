@@ -2608,7 +2608,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_sushuang": ["male", "wei", "4/5/1", ['zioy_jietian','zioy_yunshuang'], []],
 					"zioy_kaixier": ["female", "qun", "2/4/3", ["zioy_helu"], []],
 					"zioy_ji1": ["male", "jin", "3", ["zioy_shimeng",'zioy_heimeng'], ["hiddenSkill"]],
-					"zioy_pangxian": ["female", "shu", "3/4/5", ["zioy_bian1","zioy_bian2","zioy_bian3","zioy_bian4","zioy_biandaogui"], ["hiddenSkill"]],
+					"zioy_pangxian": ["female", "shu", "20/24", ["zioy_zhu","zioy_bian1","zioy_bian2","zioy_bian3","zioy_bian4","zioy_gui"], ["des:新春特典.2024<br>春风又绿江南岸"]],
 					"zioy_tianqi": ["female", "daqin", "2", ["zioy_junling","zioy_junming","zioy_junci","zioy_junnu","zioy_junyun"], ["hiddenSkill"]],
 				},
 				translate: {
@@ -9574,11 +9574,316 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						// },
 						"_priority":0,
 					},
-					'zioy_bian1':{},
-					'zioy_bian2':{},
-					'zioy_bian3':{},
-					'zioy_bian4':{},
-					'zioy_biandaogui':{},
+					'zioy_zhu':{
+						group:['zioy_zhu_use','zioy_zhu_damage'],
+						locked:true,
+						charlotte:true,
+						unique:true,
+						subSkill:{
+							use:{
+								trigger:{
+									player:["useCardAfter","respondAfter"],
+								},
+								forced:true,
+								filter:()=>true,
+								content:function(){
+									'step 0'
+									event.hp = player.hp
+									'step 1'
+									let n = player.maxHp - 2 > 4 ? 2 : player.maxHp - 4
+									if(n > 0)
+										player.loseMaxHp(n)
+									'step 2'
+									if(event.hp != player.hp){
+										var card=trigger.card,cards=[],func=['type2'];
+										for(var fn of func){
+											var cardx=get.cardPile2(cardxx=>{
+												if(get[fn](card,player)==get[fn](cardxx,player)&&!cards.includes(cardxx)&& card.name != cardxx.name){
+													return true;
+												}
+											});
+										}
+										if(cardx) cards.push(cardx);
+										if(cards.length) player.gain(cards,'gain2')
+									}
+								},
+								"_priority":20,
+							},
+							damage:{
+								trigger:{
+									player:["damageEnd","loseHpEnd"],
+								},
+								forced:true,
+								filter:()=>true,
+								content:function(){
+									'step 0'
+									event.hp = player.hp
+									'step 1'
+									let n = player.maxHp - 4 > 2 ? 4 : player.maxHp - 2
+									if(n > 0)
+										player.loseMaxHp(n)
+									'step 2'
+									if(event.hp != player.hp){
+										if(player.storage.gui_usedSkill.length > 0){
+											var skill = player.storage.gui_usedSkill.randomGet()
+											player.restoreSkill(skill)
+											player.storage.gui_usedSkill = player.storage.gui_usedSkill.filter(s=>{return s!=skill})
+										}
+									}
+								},
+								"_priority":24,
+							}
+						}
+					},
+					'zioy_bian1':{
+						trigger:{
+							player:["phaseEnd"],
+						},
+						forced:false,
+						limited:true,
+						skillAnimation:true,
+						animationColor:"soil",
+						check:()=>true,
+						filter:()=>true,
+						content:function(){
+							'step 0'
+							player.storage.gui_recordf()
+							player.storage.gui_usedSkill.push(event.name)
+							player.awakenSkill(event.name)
+							'step 1'
+							player.chooseTarget(true,function (card, player, target) {
+								return target != player;
+							},)
+							'step 2'
+							event.target = result.targets[0]
+							event.target.draw(2)
+							'step 3'
+							event.target.showHandcards()
+							let cs = event.target.getCards('h')
+							var suits=new Set();
+							for(let c of cs){
+								var suit=get.suit(c);
+								if(suit) suits.add(suit);
+							}
+							if(suits.size > 3){
+								player.insertPhase();
+							}
+
+						},
+						"_priority":20,
+					},
+					'zioy_bian2':{
+						trigger:{
+							source:["damageEnd"],
+						},
+						forced:false,
+						limited:true,
+						skillAnimation:true,
+						animationColor:"soil",
+						check:(event,player)=>player.countCards('h') < event.player.countCards('h'),
+						filter:()=>true,
+						content:function(){
+							'step 0'
+							player.storage.gui_recordf()
+							player.storage.gui_usedSkill.push(event.name)
+							player.awakenSkill(event.name)
+							'step 1'
+							let cp = player.getCards('h')
+							let ct = trigger.player.getCards('h')
+							for(let c of ct){
+								player.gain(c)
+							}
+							for(let c of cp){
+								trigger.player.gain(c)
+							}
+							'step 2'
+							if(Math.min(2,player.countCards('h')) > 0)
+								player.chooseCard('hej',`${get.translation(event.name)}：选择两张牌`,Math.min(2,player.countCards('h')),true)
+							'step 3'
+							event.cards = []
+							if(result&&result.cards)
+								event.cards = [...result.cards]
+							if(Math.min(2,trigger.player.countCards('h')) > 0)
+								trigger.player.chooseCard('hej',`${get.translation(event.name)}：选择两张牌`,Math.min(2,trigger.player.countCards('h')),true)
+							'step 4'
+							if(result&&result.cards){
+								for(let c of result.cards){
+									event.cards.push(c)
+								}
+							}
+							player.chooseTarget(true)
+							'step 5'
+							for(let c of event.cards){
+								game.log(c)
+								result.targets[0].gain(c)
+							}
+						},
+						"_priority":20,
+					},
+					'zioy_bian3':{
+						enable:"phaseUse",
+						forced:false,
+						limited:true,
+						skillAnimation:true,
+						animationColor:"soil",
+						filter:()=>true,
+						content:function(){
+							'step 0'
+							player.storage.gui_recordf()
+							player.storage.gui_usedSkill.push(event.name)
+							player.awakenSkill(event.name)
+							'step 1'
+							var suits = new Set()
+							event.cards = []
+							while(1){
+								let c = get.cards(1)[0]
+								// game.cardsGotoOrdering(c);
+								game.log(player,'展示了',c)
+								event.cards.push(c)
+								let suit=get.suit(c);
+								if(suit) suits.add(suit);
+								if(suits.size > 3)break;
+							}
+							'step 2'
+							player.chooseButton([`${get.translation(event.name)}：请选择要使用的牌`,event.cards],[1,2]).set("filterButton", function (button) {
+								return game.filterPlayer(current=>{
+									return lib.filter.targetEnabled2(button.link,player,current);
+								}).length != 0;
+							})
+							'step 3'
+							if(result.bool){
+								let cs = result.links
+								for(let c of cs){
+									if(game.filterPlayer(current=>{
+										return lib.filter.targetEnabled2(c,player,current);
+									}).length != 0){
+										player.chooseUseTarget(c,true)
+									}else{
+										player.gain(c)
+									}
+								}
+							}
+						},
+						ai: {
+							order: 2024,
+							result:{
+								player:()=>{return 2024}
+							}
+						},
+					},
+					'zioy_bian4':{
+						trigger:{
+							player:["phaseBegin"],
+						},
+						forced:false,
+						limited:true,
+						skillAnimation:true,
+						animationColor:"soil",
+						check:()=>true,
+						filter:()=>true,
+						content:function(){
+							'step 0'
+							player.storage.gui_recordf()
+							player.storage.gui_usedSkill.push(event.name)
+							player.awakenSkill(event.name)
+							'step 1'
+							player.chooseTarget(true,function (card, player, target) {
+								return target != player;
+							})
+							'step 2'
+							event.target = result.targets[0]
+							player.chooseToDebate([event.target,player]).set('callback',function(){
+								var result=event.debateResult;
+								var target=event.getParent(2).target
+								if(result.bool&&result.opinion){
+									var opinion=result.opinion;
+									if(opinion=='red') {
+										player.draw(2)
+										target.draw(2)
+									}
+									else{
+										for(let p of [player,target]){
+											for(let i = 0;i < 4;i++){
+												let c = get.cards(1)[0]
+												game.log(p,'展示了',c)
+												if(game.filterPlayer(current=>{
+													return lib.filter.targetEnabled2(c,p,current);
+												}).length != 0){
+													p.chooseUseTarget(c)
+												}
+											}
+										}
+									};
+								}else{
+									for(let p of [player,target]){
+										p.loseHp()
+									}
+								}
+							}).set('target',event.target);
+							'step 3'
+
+						},
+						"_priority":20,
+					},
+					'zioy_gui':{
+						init:function(player){
+							player.storage.gui_recordArray=[]
+							player.storage.gui_usedSkill=[]
+							player.storage.gui_recordf = function(){
+								let c = player.getCards('h'),
+									hp = player.hp,
+									maxHp = player.maxHp,
+									skillMap = [...player.storage.gui_usedSkill];
+								player.storage.gui_recordArray.push({
+									c: c,hp:hp,maxHp:maxHp,skillMap:skillMap
+								})
+							}
+						},
+						filter:function(event,player){
+							let countSuit = (arr)=>{
+								let suits = new Set()
+								for(let c of arr){
+									let suit=get.suit(c);
+									if(suit) suits.add(suit);
+								}
+								return suits.size
+							}
+							let flag1 = game.players.filter(p=>{
+								return p != player && p.hp >= player.hp
+							}).length != 0
+							
+							let flag2 = game.players.filter(p=>{
+								return p != player && countSuit(p.getCards('h')) >= countSuit(player.getCards('h'))
+							}).length != 0
+							
+							let flag3 = player.storage.gui_recordArray.length > 0
+							console.log(flag1,flag2,flag3,player.storage.gui_recordArray,player.storage.gui_recordArray.length)
+							return flag1 && flag2 && flag3
+						},
+						trigger:{
+							global:'phaseEnd'
+						},
+						forced:true,
+						content:function(){
+							'step 0'
+							player.discard(player.getCards('h'))
+							'step 1'
+							let r = player.storage.gui_recordArray[0]
+							player.storage.gui_recordArray.splice(0,1)
+							for(let c of r.c){
+								player.gain(c)
+							}
+							player.hp = r.hp
+							player.maxHp = r.maxHp
+							for(let i = 1;i < 5;i++){
+								skill = `zioy_bian${i}`
+								if(!r.skillMap.includes(skill)){
+									player.restoreSkill(skill)
+								}
+							}
+							player.storage.skillMap = r.skillMap
+						}
+					},
 					"zioy_junling":{
 						trigger:{
 							player:"showCharacterAfter",
@@ -10195,16 +10500,18 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_shimeng_info":'你拥有以下效果，当一名角色死亡或一轮游戏开始时，你按顺序移去你拥有的序号最小的效果。<br>①你使用的牌无法被响应。<br>②你每轮第一次造成的伤害+X。（X=3-游戏轮数）<br>③你的进攻距离+X。（X=3-游戏轮数）<br>④你使用的牌可以额外指定X名角色为目标。（X=3-游戏轮数）<br>⑤你获得你杀死的角色区域内的所有牌。<br>⑥当你造成伤害后，你回复1点体力。<br>⑦当你使用牌时，若时机合法，你可以视为使用一张与你上一次使用的非虚拟非装备牌牌名相同的无属性虚拟牌。',
 					"zioy_heimeng":'黑梦',
 					"zioy_heimeng_info":'隐匿技，锁定技。当你登场后，你获得你判定区内的牌。',
-					"zioy_bian1":'彼岸式Ⅰ',
-					"zioy_bian1_info":'限定技，',
-					"zioy_bian2":'彼岸式Ⅱ',
-					"zioy_bian2_info":'限定技，',
-					"zioy_bian3":'彼岸式Ⅲ',
-					"zioy_bian3_info":'限定技，',
-					"zioy_bian4":'彼岸式Ⅳ',
-					"zioy_bian4_info":'限定技，',
-					"zioy_biandaogui":'彼岸道归',
-					"zioy_biandaogui_info":'锁定技，',
+					"zioy_zhu":'烛',
+					'zioy_zhu_info':'锁定技。<br>①当你使用或打出牌时，你失去2点体力上限（至多失去至4点），然后若你的体力因此发生变化，你从牌堆中获得1张与你使用/打出的牌类型相同，牌名不同的牌。<br>②当你受到伤害/失去体力时，你失去4点体力上限（至多失去至2点），然后若你的体力因此发生变化，你恢复一个已使用的“彼岸式”。',
+					"zioy_bian1":'彼岸式·Ⅰ',
+					"zioy_bian1_info":'限定技，回合结束时，你可以令一名其他角色摸2张牌并展示其所有手牌，然后若其手牌中包含4种花色，你进行一个额外的回合。',
+					"zioy_bian2":'彼岸式·Ⅱ',
+					"zioy_bian2_info":'限定技，当你造成伤害后，你可以与受伤角色交换手牌，然后你与其各选择两张手牌（不足则全选）并令一名角色获得之。',
+					"zioy_bian3":'彼岸式·Ⅲ',
+					"zioy_bian3_info":'限定技，出牌阶段，你可以重复展示牌堆顶第一张牌直至已展示4种花色，然后你可以使用其中至多2张牌。',
+					"zioy_bian4":'彼岸式·Ⅳ',
+					"zioy_bian4_info":'限定技，回合开始阶段，你可以与一名角色议事，若结果为：红色，你与其各摸两张牌；黑色：你与其各展示并使用牌堆顶的4张牌；失败：你与其各失去1点体力。',
+					"zioy_gui":'归',
+					"zioy_gui_info":'①当你发动“彼岸式”时，你立即记录你当前手牌，体力，体力上限，护甲，“彼岸式”已发动状态。<br>②锁定技。一名角色的回合结束时，若你：1.体力值不为场上唯一最多；2.手牌中花色数不为场上唯一最多；3.此技能①效果有记录内容，则你可以将你的手牌，体力，体力上限，护甲，“彼岸式”已发动状态调整至此技能①效果的最早记录相同并删除此次记录。',
 					"zioy_junling":'君临',
 					"zioy_junling_info":'隐匿技，锁定技。当你登场时，若当前回合角色不为你则终止一切结算，当前回合结束。然后你增加3点体力上限，摸3张牌；其他角色增加2点体力上限，回复2点体力，摸4张牌，并将武将牌翻至背面朝上。',
 					"zioy_junming":'君命',
