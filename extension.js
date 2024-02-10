@@ -2608,8 +2608,9 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_sushuang": ["male", "wei", "4/5/1", ['zioy_jietian','zioy_yunshuang'], []],
 					"zioy_kaixier": ["female", "qun", "2/4/3", ["zioy_helu"], []],
 					"zioy_ji1": ["male", "jin", "3", ["zioy_shimeng",'zioy_heimeng'], ["hiddenSkill"]],
-					"zioy_pangxian": ["female", "shu", "20/24", ["zioy_zhu","zioy_bian1","zioy_bian2","zioy_bian3","zioy_bian4","zioy_gui"], ["des:新春特典.2024<br>春风又绿江南岸"]],
 					"zioy_tianqi": ["female", "daqin", "2", ["zioy_junling","zioy_junming","zioy_junci","zioy_junnu","zioy_junyun"], ["hiddenSkill"]],
+					"zioy_pangxian": ["female", "shu", "20/24", ["zioy_zhu","zioy_bian1","zioy_bian2","zioy_bian3","zioy_bian4","zioy_gui"], ["des:新春特典.2024<br>春风又绿江南岸"]],
+					"zioy_guanyu_cai": ["male", "shu", "6", ["zioy_zhaocai","zioy_jinbao"], []],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2661,6 +2662,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_ji1": '畸',
 					"zioy_pangxian": '逄暹',
 					"zioy_tianqi":'天启',
+					"zioy_guanyu_cai":`财神·关羽`
 				}
 			},
 			card: {
@@ -9643,6 +9645,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						limited:true,
 						skillAnimation:true,
 						animationColor:"soil",
+						marktext:'Ⅰ',
 						check:()=>true,
 						filter:()=>true,
 						content:function(){
@@ -9680,6 +9683,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						limited:true,
 						skillAnimation:true,
 						animationColor:"soil",
+						marktext:'Ⅱ',
 						check:(event,player)=>player.countCards('h') < event.player.countCards('h'),
 						filter:()=>true,
 						content:function(){
@@ -9697,21 +9701,24 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								trigger.player.gain(c)
 							}
 							'step 2'
-							if(Math.min(2,player.countCards('h')) > 0)
-								player.chooseCard('hej',`${get.translation(event.name)}：选择两张牌`,Math.min(2,player.countCards('h')),true)
+							if(Math.min(2,player.countCards('hej')) > 0)
+								player.chooseCard('hej',`${get.translation(event.name)}：选择两张牌`,Math.min(2,player.countCards('hej')),true)
 							'step 3'
 							event.cards = []
 							if(result&&result.cards)
 								event.cards = [...result.cards]
-							if(Math.min(2,trigger.player.countCards('h')) > 0)
-								trigger.player.chooseCard('hej',`${get.translation(event.name)}：选择两张牌`,Math.min(2,trigger.player.countCards('h')),true)
+							if(Math.min(2,trigger.player.countCards('hej')) > 0)
+								trigger.player.chooseCard('hej',`${get.translation(event.name)}：选择两张牌`,Math.min(2,trigger.player.countCards('hej')),true)
 							'step 4'
 							if(result&&result.cards){
 								for(let c of result.cards){
 									event.cards.push(c)
 								}
 							}
-							player.chooseTarget(true)
+							player.chooseTarget(true).set("ai", function (target) {
+								var att = get.attitude(_status.event.player, target);
+								return att*999;
+							});
 							'step 5'
 							for(let c of event.cards){
 								game.log(c)
@@ -9726,6 +9733,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						limited:true,
 						skillAnimation:true,
 						animationColor:"soil",
+						marktext:'Ⅲ',
 						filter:()=>true,
 						content:function(){
 							'step 0'
@@ -9779,6 +9787,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						limited:true,
 						skillAnimation:true,
 						animationColor:"soil",
+						marktext:'Ⅳ',
 						check:()=>true,
 						filter:()=>true,
 						content:function(){
@@ -9816,7 +9825,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									};
 								}else{
 									for(let p of [player,target]){
-										p.loseHp()
+										p.loseHp(2)
 									}
 								}
 							}).set('target',event.target);
@@ -9864,6 +9873,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							global:'phaseEnd'
 						},
 						forced:true,
+						skillAnimation:true,
+						animationColor:"soil",
 						content:function(){
 							'step 0'
 							player.discard(player.getCards('h'))
@@ -9879,10 +9890,17 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								skill = `zioy_bian${i}`
 								if(!r.skillMap.includes(skill)){
 									player.restoreSkill(skill)
+								}else{
+								    player.awakenSkill(skill)
 								}
 							}
 							player.storage.skillMap = r.skillMap
-						}
+							'step 3'
+							player.update()
+						},
+						ai: {
+							threaten:2024,
+						},
 					},
 					"zioy_junling":{
 						trigger:{
@@ -10174,6 +10192,217 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							threaten:95,
 						},
 					},
+					zioy_zhaocai:{
+						trigger:{
+							player:"phaseDrawBegin"
+						},
+						filter:()=>true,
+						direct:true,
+						init:function(player){
+							game.addGlobalSkillMiao('zioy_zhaocai_ignoredHandcard')
+						},
+						content:function(){
+							'step 0'
+							player.chooseTarget(`${get.translation(event.name)}：摸牌阶段开始时，你可选择一名角色，你令其将手牌摸至X张，若该角色不为你，你摸等量的牌。你可将你以此法获得的牌当作任意基本牌使用或打出。（X为其体力上限）}`,1,function (card, player, target) {
+								return target.countCards('h') < target.maxHp
+							}).set('ai', target => {
+								var att = get.attitude(player, target);
+								var index = target.maxHp - target.countCards('h')
+								return att * index;
+							})
+							'step 1'
+							if(result.bool){
+								player.logSkill(event.name);
+								game.log(player,'发动了','<span class="greentext">【'+get.translation(event.name)+'】</span>')
+								let target = result.targets[0]
+								let drawNum = target.maxHp - target.countCards('h')
+								target.draw(drawNum).gaintag=[event.name]
+								if(target !== player){
+									player.draw(drawNum).gaintag=[event.name]
+								}
+							}
+						},
+						group:['zioy_zhaocai_use'],
+						subSkill:{
+							use:{
+								enable:["chooseToUse","chooseToRespond"],
+								filter:function(event,player){
+									if(!event.player.hasCard(card=>card.hasGaintag('zioy_zhaocai'),'h')) return false;
+									for(var name of lib.inpile){
+										if(get.type2(name)!='basic') continue;
+										var card={name:name};
+										if(event.filterCard(card,player,event)) return true;
+										if(name=='sha'){
+											for(var nature of lib.inpile_nature){
+												card.nature=nature;
+												if(event.filterCard(card,player,event)) return true;
+											}
+										}
+									}
+									return false;
+								},
+								chooseButton:{
+									dialog:function(event,player){
+										var list=[];
+										for(var name of lib.inpile){
+											if(name=='sha'){
+												if(event.filterCard({name:name},player,event)) list.push(['基本','','sha']);
+												for(var nature of lib.inpile_nature){
+													if(event.filterCard({name:name,nature:nature},player,event)) list.push(['基本','','sha',nature]);
+												}
+											}
+											else if(get.type(name)=='basic'&&event.filterCard({name:name},player,event)) list.push(['基本','',name]);
+										}
+										var dialog=ui.create.dialog('招财',[list,'vcard']);
+										dialog.direct=true;
+										return dialog;
+									},
+									filter:function(button,player){
+										return _status.event.getParent().filterCard({name:button.link[2],nature:button.link[3]},player,_status.event.getParent());
+									},
+									check:function(button){
+										if(_status.event.getParent().type!='phase') return 1;
+										var player=_status.event.player;
+										if(['wugu','zhulu_card','yiyi','lulitongxin','lianjunshengyan','diaohulishan'].includes(button.link[2])) return 0;
+										return player.getUseValue({
+											name:button.link[2],
+											nature:button.link[3],
+										});
+									},
+									backup:function(links,player){
+										return {
+											filterCard: function (card) {
+												return card.hasGaintag('zioy_zhaocai');
+											},
+											popname:true,
+											check:function(card){
+												return 8-get.value(card);
+											},
+											position:'hes',
+											viewAs:{name:links[0][2],nature:links[0][3]},
+											precontent:function(){
+												delete event.result.skill;
+												var card=event.result.card;
+											},
+										}
+									},
+									prompt:function(links,player){
+										return '将一张牌当做'+(get.translation(links[0][3])||'')+get.translation(links[0][2])+'使用';
+									},
+								},
+								hiddenCard:function(player,name){
+									if(!lib.inpile.includes(name)) return false;
+									var type=get.type2(name);
+									return type=='basic'&&player.countCards('hes')>0&&!player.hasSkill('jsrgnianen_blocker');
+								},
+								ai:{
+									fireAttack:true,
+									respondSha:true,
+									respondShan:true,
+									order:1,
+									result:{
+										player:function(player){
+											if(_status.event.dying) return get.attitude(player,_status.event.dying);
+											return 1;
+										},
+									},
+								},
+							},
+							ignoredHandcard:{
+								mod:{
+									ignoredHandcard:function(card,player){
+										if(card.hasGaintag('zioy_zhaocai')){
+											return true;
+										}
+									},
+									cardDiscardable:function(card,player,name){
+										if(name=='phaseDiscard'&&card.hasGaintag('zioy_zhaocai')){
+											return false;
+										}
+									},
+								}
+							}
+						}
+					},
+					zioy_jinbao:{
+						enable:"phaseUse",
+						usable:1,
+						discard:false,
+						lose:false,
+						delay:false,
+						filterTarget:function(card,player,target){
+							return player.canCompare(target);
+						},
+						filter:function(event,player){
+							return player.countCards('h')>0;
+						},
+						content:function(){
+							"step 0"
+							player.chooseToCompare(target)
+							"step 1"
+                            if(result.bool){
+                                player.chooseTarget('令一名角色获得基本牌，锦囊牌，装备牌各一张。',true).set('ai', target => {
+                                    var att = get.attitude(player, target);
+                                    return att;
+                                })
+                            }
+                            else{
+                                target.gainPlayerCard('h', player, true).set('target',player).set('ai',lib.card.shunshou.ai.button);
+                                target.gainPlayerCard('e', player, true).set('target',player).set('ai',lib.card.shunshou.ai.button);
+                                event.goto(3)
+                            }
+                            "step 2"
+                            let target1 = result.targets[0]
+							var cards=[],types=['basic','trick','equip'];
+							for(var i of types){
+								var card=get.cardPile2(function(card){
+									return get.type2(card,false)==i;
+								});
+								if(card) cards.push(card);
+							}
+							if(cards.length) target1.gain(cards,'gain2');
+							'step 3'
+							player.chooseTarget(`令一名手牌数不多于你的角色获得本次拼点的牌。`,true,function (card, player, target) {
+								return target.countCards('h') <= player.countCards('h')
+							}).set('ai', target => {
+								var att = get.attitude(player, target);
+								return att;
+							})
+							'step 4'
+							result.targets[0].gain(player.storage.zioy_jinbao_cards,'gain2','log');
+						},
+						subSkill:{
+							gain:{
+								trigger:{
+									player:["chooseToCompareAfter","compareMultipleAfter"],
+								},
+								filter(event,player){
+									if(event.getParent().name != 'zioy_jinbao')return false
+									if(event.preserve) return false;
+									return [event.card1,event.card2].filterInD('od').length>0;
+								},
+								direct:true,
+								content(){
+									player.storage.zioy_jinbao_cards = [trigger.card1,trigger.card2]
+								},
+								sub:true,
+								"_priority":0,
+							},
+						},
+						group:['zioy_jinbao_gain'],
+						ai:{
+							result:{
+								player:function(player){
+									return 2024;
+								},
+								target:function(player,target){
+									return -0.5;
+								},
+							},
+							order:9,
+						},
+						"_priority":0,
+					}
 				},
 				translate: {
 					"zioy_xixue": "汲血",
@@ -10505,13 +10734,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_bian1":'彼岸式·Ⅰ',
 					"zioy_bian1_info":'限定技，回合结束时，你可以令一名其他角色摸2张牌并展示其所有手牌，然后若其手牌中包含4种花色，你进行一个额外的回合。',
 					"zioy_bian2":'彼岸式·Ⅱ',
-					"zioy_bian2_info":'限定技，当你造成伤害后，你可以与受伤角色交换手牌，然后你与其各选择两张手牌（不足则全选）并令一名角色获得之。',
+					"zioy_bian2_info":'限定技，当你造成伤害后，你可以与受伤角色交换手牌，然后你与其各选择两张区域内牌（不足则全选）并令一名角色获得之。',
 					"zioy_bian3":'彼岸式·Ⅲ',
 					"zioy_bian3_info":'限定技，出牌阶段，你可以重复展示牌堆顶第一张牌直至已展示4种花色，然后你可以使用其中至多2张牌。',
 					"zioy_bian4":'彼岸式·Ⅳ',
-					"zioy_bian4_info":'限定技，回合开始阶段，你可以与一名角色议事，若结果为：红色，你与其各摸两张牌；黑色：你与其各展示并使用牌堆顶的4张牌；失败：你与其各失去1点体力。',
+					"zioy_bian4_info":'限定技，回合开始阶段，你可以与一名角色议事，若结果为：红色，你与其各摸2张牌；黑色：你与其各展示并使用牌堆顶的4张牌；失败：你与其各失去2点体力。',
 					"zioy_gui":'归',
-					"zioy_gui_info":'①当你发动“彼岸式”时，你立即记录你当前手牌，体力，体力上限，护甲，“彼岸式”已发动状态。<br>②锁定技。一名角色的回合结束时，若你：1.体力值不为场上唯一最多；2.手牌中花色数不为场上唯一最多；3.此技能①效果有记录内容，则你可以将你的手牌，体力，体力上限，护甲，“彼岸式”已发动状态调整至此技能①效果的最早记录相同并删除此次记录。',
+					"zioy_gui_info":'①当你发动“彼岸式”时，你立即记录你当前手牌，体力，体力上限，“彼岸式”已发动状态。<br>②锁定技。一名角色的回合结束时，若你：1.体力值不为场上唯一最多；2.手牌中花色数不为场上唯一最多；3.此技能①效果有记录内容，则你可以将你的手牌，体力，体力上限，“彼岸式”已发动状态调整至此技能①效果的最早记录相同并删除此次记录。',
 					"zioy_junling":'君临',
 					"zioy_junling_info":'隐匿技，锁定技。当你登场时，若当前回合角色不为你则终止一切结算，当前回合结束。然后你增加3点体力上限，摸3张牌；其他角色增加2点体力上限，回复2点体力，摸4张牌，并将武将牌翻至背面朝上。',
 					"zioy_junming":'君命',
@@ -10522,6 +10751,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_junnu_info":'当你即将受到/造成伤害时，你可以展示你的所有手牌，若其中红色牌数量不小于黑色牌，你令此伤害+1且造成伤害的角色弃置等同于你手牌数的牌（不足则全弃）；若其中黑色牌数量不小于红色牌，你令此伤害+1且受到伤害的角色弃置等同于你手牌数的牌（不足则全弃）。',
 					"zioy_junyun":'君陨',
 					"zioy_junyun_info":'限定技。当你即将死亡时，你可以对任意名角色造成至多共X点无属性伤害。（X为你已损失体力/2且向下取整）',
+					"zioy_zhaocai":"招财",
+					"zioy_zhaocai_info":"摸牌阶段开始时，你可选择一名角色，你令其将手牌摸至X张，若该角色不为你，你摸等量的牌。以此法获得的牌不计入手牌上限。你可将你以此法获得的牌当作任意基本牌使用或打出。（X为其体力上限）",
+					"zioy_jinbao":"进宝",
+					"zioy_jinbao_info":"出牌阶段限1次，你可以与一名角色拼点，若你赢，你令一名角色获得基本牌，锦囊牌，装备牌各一张。若你没赢，你可令该角色获得你手牌区，装备区的牌各一张。你可将本次拼点双方的牌交给一名手牌数不多于你的角色。",
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
