@@ -1147,6 +1147,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 								.set(["sup_liyu", trigger.player])
 							"step 1"
 							if (result.bool) {
+								_status.event.trigger("sup_tianwei");
 								player.storage.liyu_num--
 								if (get.type(result.cards[0]) != "equip") {
 									player.draw()
@@ -1204,6 +1205,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 								return card.name == "sha"
 							})
 							player.gain(card, "gain2")
+							_status.event.trigger("sup_tianwei");
 						},
 						discard: false,
 						visible: true,
@@ -3655,7 +3657,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					},
 					"zioy_tianwei": {
 						trigger: {
-							player: "useSkillAfter"
+							player: "sup_tianwei"
 						},
 						direct:true,
 						frequent: false,
