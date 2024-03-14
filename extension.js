@@ -9658,8 +9658,12 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								return target != player;
 							},)
 							'step 2'
-							event.target = result.targets[0]
-							event.target.draw(2)
+							if(result.bool&&result.targets.length > 0){
+								event.target = result.targets[0]
+								event.target.draw(2)
+							}else{
+								event.finish()
+							}
 							'step 3'
 							event.target.showHandcards()
 							let cs = event.target.getCards('h')
