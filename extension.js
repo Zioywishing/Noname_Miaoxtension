@@ -7074,6 +7074,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player: ["damageEnd", "changeHujiaEnd"]
 								},
 								direct: true,
+								charlotte: true,
 								filter: function (event, player) {
 									return player.hasSkill("zioy_v07yuxie_yuxie") && player.hujia == 0;
 								},
@@ -7383,6 +7384,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								direct: true,
 								priority: 3254,
+								charlotte: true,
 								filter: function (event, player) {
 									return player.countMark("zioy_f42chongzai_1") < player.maxHp;
 								},
@@ -7402,6 +7404,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								skillAnimation: true,
 								animationColor: "thunder",
 								unique: true,
+								charlotte: true,
 								priority: 3278,
 								filter: function (event, player) {
 									return player.countMark("zioy_f42chongzai_1") >= player.maxHp;
@@ -7578,6 +7581,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								forced: true,
 								direct: true,
+								charlotte: true,
 								silent:false,
 								priority: 523455,
 								content: function () {
@@ -7886,6 +7890,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									source: "damageBegin1"
 								},
 								direct: true,
+								charlotte: true,
 								priority: 5045,
 								filter: function (event, player) {
 									return true;
