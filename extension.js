@@ -838,7 +838,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 							}
 							'step 1'
 							event.cards = result.links
-							let f1=event.cards.filter(c=>get.type(c)==='basic'),f2=event.cards.filter(c=>get.type(c)==='trick')
+							let f1=event.cards.filter(c=>get.type(c)==='basic').length!==0,f2=event.cards.filter(c=>get.type(c)==='trick').length!==0
+							game.log(f1,f2,event.cards.length === 0)
 							if(f1){
 								player.storage.sup2_tieqi_dHArray.push(trigger.target)
 							}
@@ -876,6 +877,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 									return player.storage.sup2_tieqi_dHArray.includes(event.target)
 								},
 								content(){
+									// game.log('boom')
 									trigger.directHit.push(trigger.target);
 								},
 								"_priority":9684462,
