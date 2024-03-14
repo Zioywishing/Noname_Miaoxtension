@@ -12,14 +12,16 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"sup2_caopi": ["male", "wei", "3/4", ["sup2_xingshang", "sup2_fangzhu", "songwei"], []],
 					"sup2_weiyan": ["male", "shu", "2/4/3", ["sup2_kuanggu", "sup2_qimou"], []],
 					"sup_caiwenji": ["female", "qun", 3, ["sup_beige", "sup_duanchang"], []],
-					"sup2_yuanshu": ["male", "qun", 5, ["sup2_yongsi", "sup2_weidi"], []]
+					"sup2_yuanshu": ["male", "qun", 5, ["sup2_yongsi", "sup2_weidi"], []],
+					"sup2_machao": ["male", "shu", 5, ["sup2_tieji", "sup2_mashu"], []],
 				},
 				translate: {
 					"sup2_luxun": "超陆逊",
 					"sup2_caopi": "超曹丕",
 					"sup2_weiyan": "超魏延",
 					"sup_caiwenji": "超蔡琰",
-					"sup2_yuanshu": "超袁术"
+					"sup2_yuanshu": "超袁术",
+					"sup2_machao": "超马超"
 				}
 			},
 			card: {
@@ -520,7 +522,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 								},
 								charlotte: true,
 								skillBlocker: function (skill, player) {
-									return skill !== "sup_duanchang_baiban";
+									return skill !== "sup_duanchang_baiban"&&!lib.skill[skill].charlotte;
 								},
 								mark: true,
 								intro: {
@@ -680,6 +682,241 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 							if (player.needsToDiscard() > 0) event.goto(0);
 						},
 						"_priority": 0
+					},
+					sup2_mashu:{
+						trigger:{
+							global:"phaseBefore",
+							player:"enterGame",
+						},
+						forced:true,
+						filter(event,player){
+							return (event.name!='phase'||game.phaseNumber==0);
+						},
+						content(){
+							player.disableEquip(2);
+							player.disableEquip(1);
+							let cards = []
+							for(let i = 0;i < 1;++i){
+								var card=get.cardPile2(function(c){
+									var type=get.subtype(c);
+									if(!['equip4'].includes(type)) return false;
+									if(cards.includes(c))return false
+									return true;
+								});
+								cards.push(card)
+								if(card){
+									player.useCard(card,player)
+								}
+							}
+						},
+						mod:{
+							canBeDiscarded:function(card){
+								if(get.position(card)=='e'&&['equip3','equip4'].includes(get.subtype(card))) return false;
+							},
+							canBeGained:function(card){
+								if(get.position(card)=='e'&&['equip3','equip4'].includes(get.subtype(card))) return false;
+							},
+							cardUsable:function(card,player,num){
+								if(card.name=='sha') return num+player.getCards('e',c=>get.subtype(c)==='equip4').length;
+							},
+							cardDiscardable:function(card,player,name){
+								if(get.position(card)=='e'&&['equip3','equip4'].includes(get.subtype(card))){
+									return false;
+								}
+							},
+							// cardEnabled2(card,player){
+							// 	if(get.position(card)=='e'&&['equip3','equip4'].includes(get.subtype(card))){
+							// 		return false;
+							// 	}
+							// },
+						},
+						"_priority":0,
+						group:['sup2_mashu_use','sup2_mashu_draw','sup2_mashu_loseBefore'],
+						subSkill:{
+							'loseBefore':{
+								trigger:{
+									player:['loseBefore'],
+								},
+								direct:true,
+								slient:true,
+								filter:function(event,player){
+									for(let card of event.cards){
+										if(get.position(card)=='e'&&['equip3','equip4'].includes(get.subtype(card))){
+											return true;
+										}
+									}
+									return false
+								},
+								content(){
+									trigger.cards = trigger.cards.filter(card=>!(get.position(card)=='e'&&['equip3','equip4'].includes(get.subtype(card))))
+								}
+							},
+							'use':{
+								trigger:{
+									player:['useCard'],
+								},
+								filter:function(event,player){
+									return ['equip3','equip4'].includes(get.subtype(event.card))
+								},
+								slient:true,
+								forced:true,
+								init:function(player){
+									player.storage.sup2_mashu_cCardA=[]
+								},
+								content:function(){
+									player.draw()
+									var card = trigger.card
+									if(player.storage.sup2_mashu_cCardA.filter(c=>get.name(c)===get.name(card)).length === 0){
+										var new_card = game.createCard(card)
+										new_card.discard()
+										player.storage.sup2_mashu_cCardA.push(new_card)
+									}
+									if(get.subtype(card) === 'equip4'){
+        								player.expandEquip(1);
+        								player.expandEquip(4);
+									}else{
+        								player.expandEquip(2);
+        								player.expandEquip(3);
+									}
+								}
+							},
+							'draw':{
+								trigger:{
+									player:"phaseDrawBegin2",
+								},
+								frequent:true,
+								filter(event,player){
+									return !event.numFixed;
+								},
+								async content(event,trigger,player){
+									trigger.num+=player.getCards('e',c=>get.subtype(c)==='equip3').length;
+								},
+								ai:{
+									threaten:1.3,
+								},
+								"_priority":0,
+							},
+						}
+					},
+					sup2_tieji:{
+						shaRelated:true,
+						audio:2,
+						audioname:["boss_lvbu3"],
+						trigger:{
+							player:"useCardToPlayered",
+						},
+						check:function(event,player){
+							return get.attitude(player,event.target)<=0;
+						},
+						init:function(p){
+							p.storage.sup2_tieqi_pArray=[]
+							p.storage.sup2_tieqi_dHArray=[]
+						},
+						filter:function(event,player){
+							return event.card.name=='sha'&&!player.storage.sup2_tieqi_pArray.includes(event.target)
+						},
+						logTarget:"target",
+						content:function(){
+							"step 0"
+							player.storage.sup2_tieqi_pArray.push(trigger.target)
+							let num = player.countCards('e',c=>['equip3','equip4'].includes(get.subtype(c)))
+							if(trigger.target.getCards('hej').length === 0){
+								player.storage.sup2_tieqi_dHArray.push(trigger.target)
+								trigger.target.addTempSkill('sup2_tieji_baiban')
+								event.finish()
+							}else{
+								player.chooseButton([`使用其中至多${num}张牌`,trigger.target.getCards('hej')],[0,num],true)
+								.set("filterButton",(button)=>{
+									let card = button.link
+									return player.hasUseTarget({name:get.name(card)})
+								}).set('ai',button=>{
+									var player=_status.event.player,card=button.link
+									var val=player.getUseValue(card)+0.01;
+									if(['equip3','equip4'].includes(get.subtype(card)))return 10
+									return val;
+								});
+							}
+							'step 1'
+							event.cards = result.links
+							let f1=event.cards.filter(c=>get.type(c)==='basic'),f2=event.cards.filter(c=>get.type(c)==='trick')
+							if(f1){
+								player.storage.sup2_tieqi_dHArray.push(trigger.target)
+							}
+							if(f2){
+								trigger.target.addTempSkill('sup2_tieji_baiban')
+							}
+							if(event.cards.length === 0){
+								player.storage.sup2_tieqi_dHArray.push(trigger.target)
+								trigger.target.addTempSkill('sup2_tieji_baiban')
+							}
+							'step 2'
+							for(let c of event.cards){
+								player.chooseUseTarget(true,c)
+							}
+						},
+						group:['sup2_tieji_phaseEnd','sup2_tieji_directHit'],
+						subSkill:{
+							phaseEnd:{
+								trigger:{
+									player:"phaseEnd",
+								},
+								direct:true,
+								slient:true,
+								content(){
+									player.storage.sup2_tieqi_pArray=[]
+								}
+							},
+							directHit:{
+								trigger:{
+									player:"useCardToPlayered",
+								},
+								direct:true,
+								filter:function(event,player){
+									// game.log( player.storage.sup2_tieqi_dHArray.includes(event.player))
+									return player.storage.sup2_tieqi_dHArray.includes(event.target)
+								},
+								content(){
+									trigger.directHit.push(trigger.target);
+								},
+								"_priority":9684462,
+							},
+							baiban:{
+								init: function (player, skill) {
+									player.addSkillBlocker(skill);
+								},
+								onremove: function (player, skill) {
+									player.removeSkillBlocker(skill);
+								},
+								charlotte: true,
+								skillBlocker: function (skill, player) {
+									return skill !== "sup2_tieji_baiban"&&!lib.skill[skill].charlotte;
+								},
+								mark: true,
+								intro: {
+									content: function (storage, player, skill) {
+										var list = player.getSkills(null, false, false).filter(function (i) {
+											return lib.skill.sup_duanchang_baiban.skillBlocker(i, player);
+										});
+										if (list.length) return "失效技能：" + get.translation(list);
+										return "无失效技能";
+									}
+								},
+								"_priority": 0
+							}
+						},
+						ai:{
+							ignoreSkill:true,
+							skillTagFilter:function(player,tag,arg){
+								if(tag=='directHit_ai'){
+									return get.attitude(player,arg.target)<=0;
+								}
+								if(!arg||arg.isLink||!arg.card||arg.card.name!='sha') return false;
+								if(!arg.target||get.attitude(player,arg.target)>=0) return false;
+								if(!arg.skill||!lib.skill[arg.skill]||lib.skill[arg.skill].charlotte||get.is.locked(arg.skill)||!arg.target.getSkills(true,false).includes(arg.skill)) return false;
+							},
+							"directHit_ai":true,
+						},
+						"_priority":9684463,
 					}
 				},
 				translate: {
@@ -703,7 +940,12 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						"锁定技，摸牌阶段，你额外摸X张牌（X为当时场上人数）；出牌阶段结束时，若你本回合：1.没有造成伤害，将手牌摸至当前体力值；2.造成的伤害超过1点，本回合手牌上限改为已损失体力值。",
 					"sup2_weidi": "伪帝",
 					"sup2_weidi_info":
-						"弃牌阶段开始时，若你的手牌数大于手牌上限，则你可以将至多X张手牌交给1名其他角色。然后若X大于0，你可重复此流程（X为你的手牌数与手牌上限之差）。"
+						"弃牌阶段开始时，若你的手牌数大于手牌上限，则你可以将至多X张手牌交给1名其他角色。然后若X大于0，你可重复此流程（X为你的手牌数与手牌上限之差）。",
+					'sup2_tieji':"铁骑",
+					'sup2_tieji_info':"每回合每名角色限1次。当你使用【杀】指定一名角色为目标时，你可以观看其区域内的牌并选择其中至多X张使用之（X为你坐骑栏内的牌数量）。若你以此法选择：基本牌：其无法响应你使用的牌直到回合结束；锦囊牌：其所有技能失效直到回合结束。若你未选择任何牌，你依次令其获得以上两种效果。",
+					"sup2_mashu":"马术",
+					"sup2_mashu_info":
+						"①游戏开始时，你废除你的武器栏与防具栏并使用牌堆中的1张进攻坐骑牌。<br>②当你使用坐骑牌时，你摸一张牌并复制一张相同的坐骑牌置入弃牌堆（复制牌每种牌名限一次）。若此牌为进攻/防御坐骑牌，你获得一个额外的武器栏与进攻马栏/防具栏与防御马栏。<br>③你坐骑栏内的牌无法被其他角色弃置或获得。<br>④摸牌阶段你摸牌数+X，出牌阶段你可以额外使用Y张【杀】（X/Y为你的装备栏的防御马/进攻马数量）。"
 				}
 			},
 			intro: "",
