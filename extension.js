@@ -10435,7 +10435,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						content:function(){
 							'step 0'
 							if(player.storage.checkOnly() === true){
-								player.chooseBool(`是否发动〖${get.translation(event.name)}〗?`).set('ai',()=>{
+								player.chooseBool(`是否对${trigger.player}发动〖${get.translation(event.name)}〗?`).set('ai',()=>{
 									return get.attitude(trigger.player,player)<0;
 								})
 							}else{
@@ -10469,7 +10469,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						content:function(){
 							'step 0'
 							if(trigger.player !== player){
-								player.chooseBool(`是否发动〖${get.translation(event.name)}〗?`).set('ai',()=>{
+								player.chooseBool(`是否对${trigger.player}发动〖${get.translation(event.name)}〗?`).set('ai',()=>{
 									return true;
 								})
 							}else{
