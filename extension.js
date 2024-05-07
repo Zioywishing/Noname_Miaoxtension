@@ -10461,7 +10461,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						filter:function(event,player){
 							if(player.storage.yuanshen.includes(event.player))return false
-							player.storage.yuanshen.push(event.player)
 							return true
 						},
 						init:function(player){
@@ -10469,13 +10468,27 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						content:function(){
 							'step 0'
+							if(trigger.player !== player){
+								player.chooseBool(`是否发动〖${get.translation(event.name)}〗?`).set('ai',()=>{
+									return true;
+								})
+							}else{
+								event.goto(2)
+							}
+							'step 1'
+							if(result && result.bool === true){
+								player.storage.yuanshen.push(trigger.player);
+							}else{
+								event.finish()
+							}
+							'step 2'
 							if(player.storage.checkOnly() === true){
 								player.gainMaxHp(1)
 							}else{
 								trigger.player.die()
 								event.finish()
 							}
-							'step 1'
+							'step 3'
 							player.recover(player.maxHp - player.hp)
 							player.draw(player.maxHp)
 						}
@@ -10835,7 +10848,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yuansi":"怨肆",
 					"zioy_yuansi_info":'当你造成/受到伤害时，受伤角色失去1点体力并将其武将牌翻面。若场上没有与你相同身份的其他角色，你可以选择不发动此技能。',
 					"zioy_yuanshen":"怨晟",
-					"zioy_yuanshen_info":'每名角色限1次，一名角色进入濒死状态时，若场上没有与你相同身份的其他角色，你获得1点体力上限，将体力回复至体力上限，摸等同于体力上限的牌，否则其死亡。',
+					"zioy_yuanshen_info":'每名角色限1次。一名角色进入濒死状态时，若场上没有与你相同身份的其他角色，你获得1点体力上限，将体力回复至体力上限，摸等同于体力上限的牌，否则其死亡。若进入濒死阶段的角色不为你，你可以选择不发动此技能。',
 
 				}
 			},
