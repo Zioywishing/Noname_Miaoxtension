@@ -2611,6 +2611,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_tianqi": ["female", "daqin", "2", ["zioy_junling","zioy_junming","zioy_junci","zioy_junnu","zioy_junyun"], ["hiddenSkill"]],
 					"zioy_pangxian": ["female", "shu", "20/24", ["zioy_zhu","zioy_bian1","zioy_bian2","zioy_bian3","zioy_bian4","zioy_gui"], ["des:新春特典.2024<br>春风又绿江南岸"]],
 					"zioy_guanyu_cai": ["male", "shu", "6", ["zioy_zhaocai","zioy_jinbao"], []],
+					"zioy_zhi": ["female", "shu", "3/6", ["zioy_yuansi","zioy_yuanshen"], []],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2662,7 +2663,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_ji1": '畸',
 					"zioy_pangxian": '逄暹',
 					"zioy_tianqi":'天启',
-					"zioy_guanyu_cai":`财神·关羽`
+					"zioy_guanyu_cai":`财神·关羽`,
+					zioy_zhi:'徵'
 				}
 			},
 			card: {
@@ -10411,6 +10413,72 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							order:9,
 						},
 						"_priority":0,
+					},
+					'zioy_yuansi':{
+						direct:true,
+						trigger:{
+							player:"damageBegin3",
+							source:'damageBegin3'
+						},
+						filter:()=>true,
+						init:function(player){
+							let pl = player
+							player.storage.checkOnly=()=>{
+								for(let p of game.players){
+									if(p.identity === pl.identity && p !== pl){
+										return false
+									}
+								}
+								return true
+							}
+						},
+						content:function(){
+							'step 0'
+							if(player.storage.checkOnly() === true){
+								player.chooseBool(`是否发动〖${get.translation(event.name)}〗?`).set('ai',()=>{
+									return get.attitude(trigger.player,player)<0;
+								})
+							}else{
+								event.goto(2)
+							}
+							'step 1'
+							if(result && result.bool === true){
+								;
+							}else{
+								event.finish()
+							}
+							'step 2'
+							let target = trigger.player
+							target.loseHp(1)
+							target.turnOver()
+						}
+
+					},
+					'zioy_yuanshen':{
+						direct:true,
+						trigger:{
+							global:'dying'
+						},
+						filter:function(event,player){
+							if(player.storage.yuanshen.includes(event.player))return false
+							player.storage.yuanshen.push(event.player)
+							return true
+						},
+						init:function(player){
+							player.storage.yuanshen = []
+						},
+						content:function(){
+							'step 0'
+							if(player.storage.checkOnly() === true){
+								player.gainMaxHp(1)
+							}else{
+								trigger.player.die()
+								event.finish()
+							}
+							'step 1'
+							player.recover(player.maxHp - player.hp)
+							player.draw(player.maxHp)
+						}
 					}
 				},
 				translate: {
@@ -10764,6 +10832,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_zhaocai_info":"摸牌阶段开始时，你可选择一名角色，你令其将手牌摸至X张，若该角色不为你，你摸等量的牌。以此法获得的牌不计入手牌上限。你可将你以此法获得的牌当作任意基本牌使用或打出。（X为其体力上限）",
 					"zioy_jinbao":"进宝",
 					"zioy_jinbao_info":"出牌阶段限1次，你可以与一名角色拼点，若你赢，你令一名角色获得基本牌，锦囊牌，装备牌各一张。若你没赢，你可令该角色获得你手牌区，装备区的牌各一张。你可将本次拼点双方的牌交给一名手牌数不多于你的角色。",
+					"zioy_yuansi":"怨肆",
+					"zioy_yuansi_info":'当你造成/受到伤害时，受伤角色失去1点体力并将其武将牌翻面。若场上没有与你相同身份的其他角色，你可以选择不发动此技能。',
+					"zioy_yuanshen":"怨晟",
+					"zioy_yuanshen_info":'每名角色限1次，一名角色进入濒死状态时，若场上没有与你相同身份的其他角色，你获得1点体力上限，将体力回复至体力上限，摸等同于体力上限的牌，否则其死亡。',
+
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
