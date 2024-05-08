@@ -9317,7 +9317,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							player: "phaseBegin"
 						},
 						filter: function (event, player) {
-							return true
+							return player.hujia < player.hp
 						},
 						forced:true,
 						locked:true,
@@ -9338,8 +9338,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								player.storage.zioy_yunshuang_roundNumber = game.roundNumber
 								player.storage.zioy_yunshuang_count = 0
 							}
-							return event.source&&event.source.isIn()&&player.storage.zioy_yunshuang_count < 4
-							&&event.player.getCards('hej').length>1;
+							return event.source&&event.source.isIn()&&player.storage.zioy_yunshuang_count < 2
+							// &&event.player.getCards('hej').length>1;
 						},
 						direct:true,
 						init:function(player){
@@ -9352,7 +9352,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							player
 								.chooseControl(choices)
 								// .set("prompt", "陨霜：请选择一项")
-								.set("prompt", '是否防止'+get.translation(trigger.source)+'对'+get.translation(trigger.player)+'造成伤害并令'+get.translation(trigger.source)+'弃置'+get.translation(trigger.player)+'2张牌')
+								.set("prompt", '是否防止'+get.translation(trigger.source)+'对'+get.translation(trigger.player)+'造成伤害并令'+get.translation(trigger.source)+'弃置'+get.translation(trigger.player)+'至多2张牌')
 								.set("ai", () => {
 									var target=trigger.player;
 									var player = trigger.source;
@@ -10423,8 +10423,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						filter:()=>true,
 						init:function(player){
 							let pl = player
-							player.storage.checkOnly=()=>{
+							player.storage.checkOnly=function(dp){
 								for(let p of game.players){
+									// if(p===dp) continue
 									if(p.identity === pl.identity && p !== pl){
 										return false
 									}
@@ -10477,12 +10478,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}
 							'step 1'
 							if(result && result.bool === true){
-								player.storage.yuanshen.push(trigger.player);
+								;
 							}else{
 								event.finish()
 							}
 							'step 2'
-							if(player.storage.checkOnly() === true){
+							player.storage.yuanshen.push(trigger.player);
+							if(player.storage.checkOnly(trigger.player) === true){
 								player.gainMaxHp(1)
 							}else{
 								trigger.player.die()
@@ -10810,9 +10812,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_liwuyaomiao":"鹂舞要眇",
 					"zioy_liwuyaomiao_info":"<br>①一轮游戏开始时，若当前轮数是你当前体力的整数倍，你回复1点体力。",
 					"zioy_jietian":'嗟天',
-					"zioy_jietian_info":'锁定技，你的回合开始时，你对自己造成1点伤害，然后获得1点护甲',
+					"zioy_jietian_info":'锁定技，你的回合开始时，若你的护甲小于你的体力，你对自己造成1点伤害，然后获得1点护甲',
 					"zioy_yunshuang":'陨霜',
-					"zioy_yunshuang_info":'每轮游戏限4次，一名角色即将造成伤害时，若受伤角色区域内的牌数量不小于2，你可以防止此伤害，改为造成伤害的角色弃置受伤角色至多2张牌。',
+					"zioy_yunshuang_info":'每轮游戏限2次，一名角色即将造成伤害时，你可以防止此伤害，改为造成伤害的角色弃置受伤角色至多2张牌。',
 					"zioy_helu":'吓赂',
 					"zioy_helu_info":'当你使用牌指定一名其他角色为目标时，你可以选择一张手牌，其获得此牌并无法响应你本次对其使用的牌。其回合结束阶段，你摸2X张牌并令X=0（X为其通过〖吓赂〗从你的区域内获得的牌的数量）。',
 					"zioy_shimeng":'逝梦',
@@ -10848,7 +10850,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yuansi":"怨肆",
 					"zioy_yuansi_info":'当你造成/受到伤害时，受伤角色失去1点体力并将其武将牌翻面。若场上没有与你相同身份的其他角色，你可以选择不发动此技能。',
 					"zioy_yuanshen":"怨晟",
-					"zioy_yuanshen_info":'每名角色限1次。一名角色进入濒死状态时，若场上没有与你相同身份的其他角色，你获得1点体力上限，将体力回复至体力上限，摸等同于体力上限的牌，否则其死亡。若进入濒死阶段的角色不为你，你可以选择不发动此技能。',
+					"zioy_yuanshen_info":'每名角色限1次。一名角色进入濒死状态时，若场上没有与你相同身份的其他角色，你获得1点体力上限，将体力回复至体力上限，摸等同于体力上限的牌，否则其死亡。若进入濒死状态的角色不为你，你可以选择不发动此技能。',
 
 				}
 			},
