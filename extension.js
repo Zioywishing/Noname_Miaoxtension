@@ -2566,7 +2566,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_shuijinxiezi": ["male", "qun", 3, ["zioy_jinjia", "zioy_jinsui"], []],
 					"zioy_dreamaker": ["female", "jin", 4, ["zioy_chenmeng", "zioy_xiaoxiang"], []],
 					"zioy_drugdoctor": ["male", "qun", 4, ["zioy_heiyi"], []],
-					"zioy_zhigaotian": ["female", "shen", '4/16', ["zioy_eye","zioy_minjian","zioy_damie"], []],
+					"zioy_zhigaotian": ["female", "shen", '6/24', ["zioy_eye","zioy_damie"], []],
 					"zioy_huajian": ["female", "jin", "3/7/4", ["zioy_huashou", "zioy_longyue"], []],
 					"zioy_renturtle": ["male", "wei", "1/1/10", ["zioy_jike"], []],
 					"zioy_shenxianxiang": ["female", "shu", "3/4/2", ["zioy_happyNewYear"], ["des:新春特典"]],
@@ -2893,8 +2893,8 @@ target.storage.jss.changeHujia(1);
 						content: function () {
 							// trigger.cancel()
 							// trigger.player.loseHp()
-							trigger.player.gainMaxHp(trigger.num)
-							player.loseMaxHp(trigger.num)
+							trigger.player.gainMaxHp(2*trigger.num)
+							player.loseMaxHp(2*trigger.num)
 						},
 						"_priority": 0,
 						group:['zioy_eye_player','zioy_eye_draw','zioy_eye_draw_dying','zioy_eye_draw_loseMaxHp1','zioy_eye_draw_loseMaxHp2'],
@@ -2912,8 +2912,8 @@ target.storage.jss.changeHujia(1);
 								content: function () {
 									// trigger.cancel()
 									// trigger.player.loseHp()
-									trigger.source.gainMaxHp(trigger.num)
-									player.loseMaxHp(trigger.num)
+									trigger.source.gainMaxHp(2*trigger.num)
+									player.loseMaxHp(2*trigger.num)
 								},
 							},
 							draw:{
@@ -2922,7 +2922,7 @@ target.storage.jss.changeHujia(1);
 								},
 								forced: true,
 								charlotte: true,
-								filter:(event)=>{
+								filter:(event,player)=>{
 									// game.log(event.getParent().name)
 									return event.getParent().name !== 'damage' && event.getParent().name !== 'recover'
 								},
@@ -2943,8 +2943,8 @@ target.storage.jss.changeHujia(1);
 								},
 								forced: true,
 								charlotte: true,
-								filter:(event)=>{
-									return true
+								filter:(event,player)=>{
+									return event.player !== player
 								},
 								content:function(){
 									// 'step 1'
@@ -3006,11 +3006,14 @@ target.storage.jss.changeHujia(1);
 						line:"fire",
 						content:function(){
 							'step 0'
+							player.storage.isDamie = true
 							// player.awakenSkill(event.name)
 							event.p = player
 							'step 1'
-							if(event.p.getDamagedHp() > 0)
+							if(event.p.getDamagedHp() > 0){
+								player.line(event.p)
 								event.p.loseHp(event.p.getDamagedHp())
+							}
 							'step 2'
 							if(event.p.isAlive()||1){
 								event.p = event.p.next
@@ -3025,16 +3028,33 @@ target.storage.jss.changeHujia(1);
 							// }else{
 							// 	player.recover(hp-player.hp)
 							// }
+							player.storage.isDamie = false
 							if(player.maxHp > mhp){
 								player.loseMaxHp(player.maxHp - mhp)
 							}else{
 								player.gainMaxHp(mhp - player.maxHp)
+						
+							}
+						},
+						group:['zioy_damie_banRecover'],
+						subSkill:{
+							banRecover:{
+								trigger:{
+									global:'recoverBefore'
+								},
+								filter:(event,player)=>{
+									return player.storage.isDamie === true
+								},
+								content:function(){
+									trigger.cancel()
+								}
 							}
 						},
 						ai:{
 							order:1,
 							result:{
 								player:function(player){
+									return  player.hp - player.getDamagedHp()
 									var num=0,players=game.filterPlayer();
 									for(var i=0;i<players.length;i++){
 										var att=get.attitude(player,players[i]);
@@ -10705,9 +10725,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					'zioy_minjian':'瞑渐',
 					'zioy_minjian_info':'一轮游戏开始时，你可以令一名角色加X点体力上限，然后你令你上一次以此法选择的角色减X点体力上限（X为当前游戏轮数）。',
 					"zioy_eye": "厄夜",
-					"zioy_eye_info": "锁定技。①当你对一名角色造成伤害或受到一名角色造成的伤害时，你与该角色各减/加X点体力上限（X为本次造成的伤害值）。<br>②一名角色不因受到伤害或回复体力而变化1点体力或进入濒死状态时，你摸1张牌并回复1点体力。",
+					"zioy_eye_info": "锁定技。①当你对一名角色造成伤害或受到一名角色造成的伤害时，你与该角色各减/加2X点体力上限（X为本次造成的伤害值）。<br>②一名角色不因受到伤害或回复体力而变化1点体力或其他角色进入濒死状态时，你摸1张牌并回复1点体力。",
 					"zioy_damie": "大灭",
-					"zioy_damie_info": "出牌阶段限1次。你可令从你开始的每名角色依次失去X点体力，然后你将你的体力上限调整至16。（X为其已损失体力）。",
+					"zioy_damie_info": "出牌阶段限1次。你可令从你开始的每名角色依次失去X点体力，然后你将你的体力上限调整至16。技能结算期间防止非濒死状态的角色回复体力。（X为其已损失体力）。",
 					"zioy_eye_old": "厄夜",
 					"zioy_eye_old_info": "锁定技，你即将造成的伤害均视为抹除体力。",
 					"zioy_damie_old": "大灭",
