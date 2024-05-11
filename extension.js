@@ -2566,7 +2566,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_shuijinxiezi": ["male", "qun", 3, ["zioy_jinjia", "zioy_jinsui"], []],
 					"zioy_dreamaker": ["female", "jin", 4, ["zioy_chenmeng", "zioy_xiaoxiang"], []],
 					"zioy_drugdoctor": ["male", "qun", 4, ["zioy_heiyi"], []],
-					"zioy_zhigaotian": ["female", "shen", 3, ["zioy_eye", "zioy_damie"], ["hiddenSkill"]],
+					"zioy_zhigaotian": ["female", "shen", '4/16', ["zioy_eye","zioy_minjian","zioy_damie"], []],
 					"zioy_huajian": ["female", "jin", "3/7/4", ["zioy_huashou", "zioy_longyue"], []],
 					"zioy_renturtle": ["male", "wei", "1/1/10", ["zioy_jike"], []],
 					"zioy_shenxianxiang": ["female", "shu", "3/4/2", ["zioy_happyNewYear"], ["des:新春特典"]],
@@ -2856,7 +2856,197 @@ target.storage.jss.changeHujia(1);
 						},
 						"_priority": 0
 					},
-					"zioy_eye": {
+					'zioy_minjian':{
+						trigger:{
+							global:'roundStart'
+						},
+						content:function(){
+							'step 0'
+							player.chooseTarget(()=>true,get.prompt(event.name),true).set('ai',function(target){
+								// return 1
+								return get.attitude(_status.event.player,target);
+							});
+							'step 1'
+							if(result&&result.bool){
+								let target = result.targets[0]
+								let num = game.roundNumber
+								// game.log(target,num)
+								target.gainMaxHp(num)
+								// target.recover(num)
+								if(player.storage.minjian_lastTarget !== undefined){
+									player.storage.minjian_lastTarget.loseMaxHp(num)
+								}
+								player.storage.minjian_lastTarget = target
+							}
+						}
+					},
+					'zioy_eye':{
+						trigger: {
+							source: "damageBegin4"
+						},
+						locked:true,
+						forced: true,
+						charlotte: true,
+						filter: function (event, player) {
+							return true
+						},
+						content: function () {
+							// trigger.cancel()
+							// trigger.player.loseHp()
+							trigger.player.gainMaxHp(trigger.num)
+							player.loseMaxHp(trigger.num)
+						},
+						"_priority": 0,
+						group:['zioy_eye_player','zioy_eye_draw','zioy_eye_draw_dying','zioy_eye_draw_loseMaxHp1','zioy_eye_draw_loseMaxHp2'],
+						subSkill:{
+							player:{
+								trigger: {
+									player: "damageBegin4"
+								},
+								locked:true,
+								forced: true,
+								charlotte: true,
+								filter: function (event, player) {
+									return event.source
+								},
+								content: function () {
+									// trigger.cancel()
+									// trigger.player.loseHp()
+									trigger.source.gainMaxHp(trigger.num)
+									player.loseMaxHp(trigger.num)
+								},
+							},
+							draw:{
+								trigger: {
+									global: "changeHp"
+								},
+								forced: true,
+								charlotte: true,
+								filter:(event)=>{
+									// game.log(event.getParent().name)
+									return event.getParent().name !== 'damage' && event.getParent().name !== 'recover'
+								},
+								content:function(){
+									'step 0'
+									event.num = trigger.getParent().num
+									'step 1'
+									player.draw(1)
+									player.recover()
+									'step 2'
+									event.num--
+									if(event.num > 0)event.goto(1)
+								}
+							},
+							draw_dying:{
+								trigger: {
+									global: "dying"
+								},
+								forced: true,
+								charlotte: true,
+								filter:(event)=>{
+									return true
+								},
+								content:function(){
+									// 'step 1'
+									player.draw(1)
+									player.recover()
+								}
+							},
+							draw_loseMaxHp1:{
+								trigger: {
+									global: "loseMaxHpBefore"
+								},
+								forced: true,
+								charlotte: true,
+								filter:(event,player)=>true,
+								content:function(){
+									// game.log(trigger.player.hp)
+									trigger.player.eye_hp = trigger.player.hp
+								}
+							},
+							draw_loseMaxHp2:{
+								trigger: {
+									global: "loseMaxHpEnd"
+								},
+								forced: true,
+								charlotte: true,
+								filter:(event,player)=>{
+									// game.log(event.player,event.player.eye_hp)
+									return event.player.eye_hp !== undefined
+								},
+								content:function(){
+									'step 0'
+									event.num = 0
+									if(trigger.player.eye_hp > trigger.player.hp){
+										event.num = trigger.player.eye_hp - trigger.player.hp
+										// player.draw(trigger.player.eye_hp - trigger.player.hp)
+									}
+									delete trigger.player.eye_hp
+									if(event.num <= 0){
+										event.finish()
+									}
+									'step 1'
+									player.draw(1)
+									player.recover()
+									'step 2'
+									event.num--
+									if(event.num > 0)event.goto(1)
+								}
+							}
+						}
+						
+					},
+					'zioy_damie':{
+						usable:1,
+						skillAnimation:"epic",
+						animationColor:"fire",
+						audio:2,
+						enable:"phaseUse",
+						// limited:true,
+						line:"fire",
+						content:function(){
+							'step 0'
+							// player.awakenSkill(event.name)
+							event.p = player
+							'step 1'
+							if(event.p.getDamagedHp() > 0)
+								event.p.loseHp(event.p.getDamagedHp())
+							'step 2'
+							if(event.p.isAlive()||1){
+								event.p = event.p.next
+								if(event.p !== player){
+									event.goto(1)
+								}
+							}
+							'step 3'
+							let hp = 4,mhp = 16
+							// if(player.hp > hp){
+							// 	player.loseHp(player.hp-hp)
+							// }else{
+							// 	player.recover(hp-player.hp)
+							// }
+							if(player.maxHp > mhp){
+								player.loseMaxHp(player.maxHp - mhp)
+							}else{
+								player.gainMaxHp(mhp - player.maxHp)
+							}
+						},
+						ai:{
+							order:1,
+							result:{
+								player:function(player){
+									var num=0,players=game.filterPlayer();
+									for(var i=0;i<players.length;i++){
+										var att=get.attitude(player,players[i]);
+										if(players[i] === player) att = 3
+										num -= att*players[i].getDamagedHp()
+									}
+									return num
+								},
+							},
+						},
+					},
+					"zioy_eye_old": {
 						trigger: {
 							source: "damageBefore"
 						},
@@ -2875,7 +3065,7 @@ target.storage.jss.changeHujia(1);
 						},
 						"_priority": 0
 					},
-					"zioy_damie": {
+					"zioy_damie_old": {
 						trigger: {
 							global: "roundStart"
 						},
@@ -10512,10 +10702,16 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"锁定技，其他角色造成伤害时，你令其失去一点体力上限并获得〖尘〗标记，然后你获得一点体力上限。你对拥有〖尘〗标记的角色造成伤害时，你移除其〖尘〗标记，恢复其以此法失去的体力上限，然后其失去一点体力，你获得其一张手牌，回复1点体力并失去以此法获得的体力上限。",
 					"zioy_chenmeng1": "尘梦",
 					"zioy_chenmeng1_info": "当你受到由〖长野原神乐〗造成的伤害时，你回复一点体力上限并失去一点体力，其失去一点体力上限，回复一点体力并获得你一张牌。",
+					'zioy_minjian':'瞑渐',
+					'zioy_minjian_info':'一轮游戏开始时，你可以令一名角色加X点体力上限，然后你令你上一次以此法选择的角色减X点体力上限（X为当前游戏轮数）。',
 					"zioy_eye": "厄夜",
-					"zioy_eye_info": "锁定技，你即将对其他角色造成的伤害改为抹除体力。",
+					"zioy_eye_info": "锁定技。①当你对一名角色造成伤害或受到一名角色造成的伤害时，你与该角色各减/加X点体力上限（X为本次造成的伤害值）。<br>②一名角色不因受到伤害或回复体力而变化1点体力或进入濒死状态时，你摸1张牌并回复1点体力。",
 					"zioy_damie": "大灭",
-					"zioy_damie_info": "一轮游戏开始时，若场上已有角色死亡，则你可以抹除一名角色的所有体力，你以此法无法使该角色死亡。",
+					"zioy_damie_info": "出牌阶段限1次。你可令从你开始的每名角色依次失去X点体力，然后你将你的体力上限调整至16。（X为其已损失体力）。",
+					"zioy_eye_old": "厄夜",
+					"zioy_eye_old_info": "锁定技，你即将造成的伤害均视为抹除体力。",
+					"zioy_damie_old": "大灭",
+					"zioy_damie_old_info": "一轮游戏开始时，若场上已有角色死亡，则你可以抹除一名角色的所有体力，你以此法无法使该角色死亡。",
 					"zioy_heiyi": "黑疫",
 					"zioy_heiyi_info": "锁定技，当你成为【杀】的目标时，此【杀】的来源获得技能〖黑死〗。",
 					"zioy_duyi": "黑死",
