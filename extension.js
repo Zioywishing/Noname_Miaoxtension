@@ -2771,7 +2771,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						},
 						direct: true,
 						content: function () {
-							player.changeHujia(1);
+							player.changeHujia(2);
 						},
 						"_priority": 0
 					},
