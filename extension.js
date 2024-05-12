@@ -3056,7 +3056,7 @@ target.storage.jss.changeHujia(1);
 							}
 						},
 						ai:{
-							order:1,
+							order:10086,
 							result:{
 								player:function(player){
 									return  player.hp - player.getDamagedHp()
@@ -4885,7 +4885,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						enable: "phaseUse",
 						usable: 1,
 						filter: function (event, player) {
-							return player.countCards("he", { color: "red" }) > 0;
+							return player.countCards("he") - player.countCards("he", { color: "red" }) > 0;
 						},
 						filterTarget: function (card, player, target) {
 							if (player == target) return false;
@@ -9771,7 +9771,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									if(player.storage.shidai_card != null && (game.filterPlayer(current=>{
 										return lib.filter.targetEnabled2(player.storage.shidai_card,event.player,current);
 									}).length != 0 || player.storage.shidai_card.name == 'jiu') && get.type(player.storage.shidai_card) != 'equip'){
-										player.chooseUseTarget(player.storage.shidai_card.name,'视为使用一张【'+get.translation(player.storage.shidai_card)+'】');
+										
+										// player.useCard({ name: "sha", isCard: false }, target, false);
+										player.chooseUseTarget({name:player.storage.shidai_card.name,isCard:false},'视为使用一张【'+get.translation(player.storage.shidai_card)+'】',false);
 									};
 									'step 1'
 									if(get.type(trigger.card) != 'equip')player.storage.shidai_card = trigger.card
@@ -11040,7 +11042,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_helu":'吓赂',
 					"zioy_helu_info":'当你使用牌指定一名其他角色为目标时，你可以选择一张手牌，其获得此牌并无法响应你本次对其使用的牌。其回合结束阶段，你摸2X张牌并令X=0（X为其通过〖吓赂〗从你的区域内获得的牌的数量）。',
 					"zioy_shimeng":'逝梦',
-					"zioy_shimeng_info":'你拥有以下效果，当一名角色死亡或一轮游戏开始时，你按顺序移去你拥有的序号最小的效果。<br>①你使用的牌无法被响应。<br>②你每轮第一次造成的伤害+X。（X=3-游戏轮数）<br>③你的进攻距离+X。（X=3-游戏轮数）<br>④你使用的牌可以额外指定X名角色为目标。（X=3-游戏轮数）<br>⑤你获得你杀死的角色区域内的所有牌。<br>⑥当你造成伤害后，你回复1点体力。<br>⑦当你使用牌时，若时机合法，你可以视为使用一张与你上一次使用的非虚拟非装备牌牌名相同的无属性虚拟牌。',
+					"zioy_shimeng_info":'你拥有以下效果，当一名角色死亡或一轮游戏开始时，你按顺序移去你拥有的序号最小的效果。<br>①你使用的牌无法被响应。<br>②你每轮第一次造成的伤害+X。（X=3-游戏轮数）<br>③你的进攻距离+X。（X=3-游戏轮数）<br>④你使用的牌可以额外指定X名角色为目标。（X=3-游戏轮数）<br>⑤你获得你杀死的角色区域内的所有牌。<br>⑥当你造成伤害后，你回复1点体力。<br>⑦当你使用牌时，你可以视为使用一张与你上一次使用的非虚拟非装备牌牌名相同的无属性虚拟牌。',
 					"zioy_heimeng":'黑梦',
 					"zioy_heimeng_info":'隐匿技，锁定技。当你登场后，你获得你判定区内的牌。',
 					"zioy_zhu":'烛',
