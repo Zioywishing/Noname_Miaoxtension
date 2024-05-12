@@ -108,7 +108,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 							"step 1"
 							if (result.bool) {
 								player.logSkill("fangzhu", result.targets);
-								var draw = player.getDamagedHp();
+								var draw = player.getDamagedHp() + trigger.num;
 								if (draw == 0) {
 									draw = 1;
 									//return event.finish()
