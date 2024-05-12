@@ -2997,13 +2997,17 @@ target.storage.jss.changeHujia(1);
 						
 					},
 					'zioy_damie':{
-						usable:1,
+						usable:24,
 						skillAnimation:"epic",
 						animationColor:"fire",
 						audio:2,
 						enable:"phaseUse",
 						// limited:true,
 						line:"fire",
+						filter:function(event,player){
+							// return player.getDamagedHp() > 0
+							return true
+						},
 						content:function(){
 							'step 0'
 							player.storage.isDamie = true
@@ -3022,7 +3026,7 @@ target.storage.jss.changeHujia(1);
 								}
 							}
 							'step 3'
-							let hp = 4,mhp = 16
+							let hp = 4,mhp = 24
 							// if(player.hp > hp){
 							// 	player.loseHp(player.hp-hp)
 							// }else{
@@ -3042,6 +3046,7 @@ target.storage.jss.changeHujia(1);
 								trigger:{
 									global:'recoverBefore'
 								},
+								direct:true,
 								filter:(event,player)=>{
 									return player.storage.isDamie === true
 								},
@@ -4184,6 +4189,7 @@ return false;*/
 							a.disableEquip("equip5");
 						},
 						ai: {
+							revertsave:true,
 							threaten: function (player, target) {
 								if (target.hp == 1) return 0.2;
 								return 1.5;
@@ -10727,7 +10733,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_eye": "厄夜",
 					"zioy_eye_info": "锁定技。①当你对一名角色造成伤害或受到一名角色造成的伤害时，你与该角色各减/加2X点体力上限（X为本次造成的伤害值）。<br>②一名角色不因受到伤害或回复体力而变化1点体力或其他角色进入濒死状态时，你摸1张牌并回复1点体力。",
 					"zioy_damie": "大灭",
-					"zioy_damie_info": "出牌阶段限1次。你可令从你开始的每名角色依次失去X点体力，然后你将你的体力上限调整至16。技能结算期间防止非濒死状态的角色回复体力。（X为其已损失体力）。",
+					"zioy_damie_info": "出牌阶段限24次。你可令从你开始的每名角色依次失去X点体力，然后你将你的体力上限调整至24。技能结算期间防止非濒死状态的角色回复体力。（X为其已损失体力）。",
 					"zioy_eye_old": "厄夜",
 					"zioy_eye_old_info": "锁定技，你即将造成的伤害均视为抹除体力。",
 					"zioy_damie_old": "大灭",
