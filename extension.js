@@ -2612,6 +2612,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_pangxian": ["female", "shu", "20/24", ["zioy_zhu","zioy_bian1","zioy_bian2","zioy_bian3","zioy_bian4","zioy_gui"], ["des:新春特典.2024<br>春风又绿江南岸"]],
 					"zioy_guanyu_cai": ["male", "shu", "6", ["zioy_zhaocai","zioy_jinbao"], []],
 					"zioy_zhi": ["female", "shu", "3/6", ["zioy_yuansi","zioy_yuanshen"], []],
+					zioy_jingwu: ["female", "shu", "1/3/5", ["zioy_que"], []],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2664,7 +2665,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_pangxian": '逄暹',
 					"zioy_tianqi":'天启',
 					"zioy_guanyu_cai":`财神·关羽`,
-					zioy_zhi:'徵'
+					zioy_zhi:'徵',
+					zioy_jingwu:'靖芜'
 				}
 			},
 			card: {
@@ -10712,6 +10714,106 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							player.recover(player.maxHp - player.hp)
 							player.draw(player.maxHp)
 						}
+					},
+					zioy_que:{
+						trigger:{
+							player:'loseHpBefore'
+						},
+						filter:()=>true,
+						forced:true,
+						content:function(){
+							trigger.cancel()
+							player.damage(1)
+						},
+						group:['zioy_que_2','zioy_que_3','zioy_que_3_1','zioy_que_4','zioy_que_4_1'],
+						subSkill:{
+							2:{
+								trigger:{
+									player:'damageEnd',
+									source:'damageEnd'
+								},
+								filter:()=>true,
+								forced:true,
+								content:function(){
+									player.recover(1)
+								},
+								"_priority":123564,
+							},
+							3:{
+								mod:{
+									targetInRange(card,player){
+										if(player.getDamagedHp() === 0) return true;
+									},
+									cardUsable(card,player){
+										if(player.getDamagedHp() === 0) return Infinity;
+									},
+								},
+								trigger:{
+									player:"useCard",
+								},
+								forced:true,
+								filter:function(event,player){
+									return player.getDamagedHp() === 0
+								},
+								content:function(){
+									trigger.directHit.addArray(game.filterPlayer(function(current){
+										return current!=player;
+									}));
+								},
+								"_priority":-150,
+							},
+							'3_1':{
+								trigger:{
+									source:"damageBegin1",
+								},
+								filter:function (event,player) {
+									return player.getDamagedHp() === 0 && event.card && event.card.name == "sha"
+								},
+								forced:true,
+								content:function () {
+									trigger.num += player.hp - 1
+								},
+								ai:{
+									// damageBonus:true,
+								},
+								"_priority":-300,
+							},
+							4:{
+								trigger:{
+									player:"useCardToBefore",
+								},
+								filter:function (event,player) {
+									// game.log(event.target,event.player,event.to)
+									return player.getDamagedHp() === 0 && event.target !== player
+								},
+								forced:true,
+								init:function(player){
+									player.storage.zioy_que4 = false
+								},
+								content:function () {
+									game.log(111)
+									player.storage.zioy_que4 = true
+								},
+								"_priority":1564654300,
+							},
+							"4_1":{
+								trigger:{
+									player:"useCardToEnd",
+								},
+								filter:function (event,player) {
+									// game.log(event.target,event.player,event.to)
+									return player.storage.zioy_que4 === true
+								},
+								forced:true,
+								content:function () {
+									player.changeHujia(player.hp-1)
+									player.hp = 1
+									player.update()
+									player.storage.zioy_que4 = false
+								},
+								"_priority":1564654300,
+							}
+						}
 					}
 				},
 				translate: {
@@ -11075,7 +11177,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yuansi_info":'当你造成/受到伤害时，受伤角色失去1点体力并将其武将牌翻面。若场上没有与你相同身份的其他角色，你可以选择不发动此技能。',
 					"zioy_yuanshen":"怨晟",
 					"zioy_yuanshen_info":'每名角色限1次。一名角色进入濒死状态时，若场上没有与你相同身份的其他角色，你获得1点体力上限，将体力回复至体力上限，摸等同于体力上限的牌，否则其死亡。若进入濒死状态的角色不为你，你可以选择不发动此技能。',
-
+					zioy_que:'袪恶',
+					zioy_que_info:'锁定技。<br>①你即将流失体力时，取消之，改为受到1点无来源伤害。<br>②你造成/受到伤害后，你回复1点体力。<br>③当你未受伤时，你使用牌无距离/次数限制，其他角色不能响应你使用的牌，你使用【杀】造成的伤害+X（X为你当前体力-1）。<br>④当你对其他角色使用一张牌时，若你未受伤，此牌结算后你获得X点护甲并将你的体力修改为1点（X为你当前体力-1）。',
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
