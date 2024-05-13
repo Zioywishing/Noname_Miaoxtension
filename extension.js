@@ -10791,7 +10791,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.storage.zioy_que4 = false
 								},
 								content:function () {
-									game.log(111)
+									// game.log(111)
 									player.storage.zioy_que4 = true
 								},
 								"_priority":1564654300,
