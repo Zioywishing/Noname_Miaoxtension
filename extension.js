@@ -949,6 +949,12 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					type: "weather",
 					intro: "回合结束阶段令当前回合角色执行[失去1点体力，将牌弃置至X张（X为体力值，至少弃置1张），获得“睡眠”异常]中随机任意项。"
 				},
+				"heiwu": {
+					translation: "黑雾",
+					skill: "zioy_status_heiwu",
+					type: "weather",
+					intro: "所有角色体力上限-1直到“黑雾”天气结束。"
+				},
 
 				/*以下为环境 */
 
@@ -1180,6 +1186,29 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						},
 						mod: {},
 					},
+					
+					heiwu: {
+						trigger: {
+							global: "phaseEnd"
+						},
+						sub: true,
+						forced: true,
+						direct: true,
+						unique: true,
+						silent:true,
+						charlotte: true,
+						filter: function (event, player) {
+							return false;
+						},
+						init: function (player) {
+							player.loseMaxHp(1);
+						},
+						onremove: function (player) {
+							player.gainMaxHp(1);},
+						content: function () {},
+						mod: {},
+					},
+
 					test: {
 						sub: true,
 						forced: true,
@@ -2613,6 +2642,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_guanyu_cai": ["male", "shu", "6", ["zioy_zhaocai","zioy_jinbao"], []],
 					"zioy_zhi": ["female", "shu", "3/6", ["zioy_yuansi","zioy_yuanshen"], []],
 					zioy_jingwu: ["female", "shu", "1/3/5", ["zioy_que"], []],
+					zioy_sanjijie:["male", "qun", "3/3/3", ["zioy_fouzhiyu",'zioy_ningguxi'], []],
+					zioy_yuze:["none", "wei", "2", ["zioy_juhun"], []],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2666,7 +2697,9 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_tianqi":'天启',
 					"zioy_guanyu_cai":`财神·关羽`,
 					zioy_zhi:'徵',
-					zioy_jingwu:'靖芜'
+					zioy_jingwu:'靖芜',
+					zioy_sanjijie:'三畿界',
+					zioy_yuze:'羽泽'
 				}
 			},
 			card: {
@@ -5136,8 +5169,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								player.recover();
 							}
 							"step 1"
-							trigger.targets.remove(trigger.targets);
-							trigger.getParent().triggeredTargets2.remove(trigger.targets);
+							trigger.getParent().excluded.addArray(trigger.targets)
+							// trigger.targets.remove(trigger.targets);
+							// trigger.getParent().triggeredTargets2.remove(trigger.targets);
 							trigger.untrigger();
 						},
 						"_priority": 0
@@ -5163,7 +5197,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							player.chooseControl(choices).set("prompt", "请选择移去的“黑血”数量");
 							"step 1"
 							player.storage.puai_round = result.control;
-							player.loseMaxHp(result.control);
+							game.changeGlobalStatus('heiwu',parseInt(player.storage.puai_round),'round')
+							// player.loseMaxHp(result.control);
 							player.removeMark("zioy_wuya", result.control);
 							player.addSkill("zioy_puai2");
 							player.awakenSkill(event.name);
@@ -10828,6 +10863,106 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								"_priority":1564654300,
 							}
 						}
+					},
+					zioy_fouzhiyu:{
+						trigger:{
+							player:['loseHpBefore','recoverBefore']
+						},
+						filter:()=>true,
+						forced:true,
+						content:function(){
+							trigger.cancel()
+						},
+						group:['zioy_fouzhiyu_1'],
+						subSkill:{
+							1:{
+								trigger:{
+									player:['damageBefore']
+								},
+								filter:(event,player)=>(player.hujia > 0) === (game.roundNumber % 2 === 1),
+								forced:true,
+								content:function(){
+									trigger.cancel()
+								},
+								ai:{
+									effect:{
+										target:function(card,player,target){
+											if((target.hujia > 0) === (game.roundNumber % 2 === 1)) return 'zerotarget';
+										},
+									},
+								},
+							}
+						}
+					},
+					zioy_ningguxi:{
+						trigger:{
+							player:['phaseBegin']
+						},
+						_priority:85465165,
+						filter:()=>true,
+						direct:true,
+						content:async function(event,trigger,player){
+							// lib.translate.zioy_ningguxi_info
+							let c = await player.chooseTarget(`对一名角色造成${game.roundNumber}点伤害`,false,function (card, player, target) {
+								return true
+							}).set('ai', target => {
+								// var att = get.attitude(player, target);
+								// return -att;
+								let eff = get.damageEffect(target,player,player)
+								return eff
+							})
+							if(c.result.bool){
+								let tg = c.result.targets[0]
+								player.logSkill(event.name,c.result.targets)
+								tg.damage(game.roundNumber)
+							}
+						},
+						ai:{
+							threaten:5415341,
+						},
+					},
+					zioy_juhun:{
+						trigger:{
+							global:'roundStart'
+						},
+						init:function(p){
+							p.storage.zioy_juhun_count = 0;
+						},
+						filter:(event,p)=>p.storage.zioy_juhun_count <= 1,
+						direct:true,
+						async content(event,trigger,player){
+							let res = await player.chooseTarget(`选点人死掉`,false,[1,2-player.storage.zioy_juhun_count],function (card, player, target) {
+								return player !== target
+							}).set('ai', target => {
+								var att = get.attitude(player, target);
+								return att;
+							})
+							res = res.result
+							if(res.bool){
+								player.logSkill(event.name,res.targets)
+								for(let p of res.targets){
+									let resp = await p.chooseBool('死不死').set('ai',()=>{
+										// game.log(get.attitude(p, player))
+										return get.attitude(p, player) > 0;
+									})
+									resp = resp.result
+									if(resp.bool){
+										player.storage.zioy_juhun_count++
+										let list=[];
+										if(lib.character[p.name]) list.addArray(lib.character[p.name][3]);
+										if(lib.character[p.name1]) list.addArray(lib.character[p.name1][3]);
+										if(lib.character[p.name2]) list.addArray(lib.character[p.name2][3]);
+										player.addSkills(list);
+										player.hp += p.hp
+										player.maxHp += p.maxHp
+										player.hujia += p.hujia
+										p.hp = p.maxHp = p.hujia = 0
+										player.update()
+										p.die()
+									}
+								}
+							}
+						}
 					}
 				},
 				translate: {
@@ -10997,7 +11132,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_sheji_info": "当你使用【杀】指定一名角色为目标时，你可以失去一点“黑血”，然后令【杀】失效，你偷取目标角色一点体力值。",
 					"zioy_puai": "瀑霭",
 					"zioy_puai_info":
-						"限定技，回合结束阶段，你可以移去任意点“黑血”并失去等量体力上限，然后从下轮游戏开始，持续X轮，获得以下效果：<br>①.“鸦”不被强制要求抵挡伤害 <br>②.“鸦”不被强制要求移动 <br>③.发动〖雾鸦〗时失去体力上限改为获得体力上限。 <br>④.你与其他角色的距离为负无穷大，其他角色与你的距离为无穷大，防止你成为伤害类卡牌的目标。",
+						"限定技，回合结束阶段，你可以移去任意点“黑血”并召唤X轮“黑雾”天气，从下轮游戏开始，持续X轮，获得以下效果：<br>①.“鸦”不被强制要求抵挡伤害 <br>②.“鸦”不被强制要求移动 <br>③.发动〖雾鸦〗时失去体力上限改为获得体力上限。 <br>④.你与其他角色的距离为负无穷大，其他角色与你的距离为无穷大，防止你成为伤害类卡牌的目标。",
 					"zioy_wuya2": "雾鸦",
 					"zioy_wuya2_info": "",
 					"zioy_wuya3": "雾鸦",
@@ -11192,7 +11327,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_yuanshen":"怨晟",
 					"zioy_yuanshen_info":'每名角色限1次。一名角色进入濒死状态时，若场上没有与你相同身份的其他角色，你获得1点体力上限，将体力回复至体力上限，摸等同于体力上限的牌，否则其死亡。若进入濒死状态的角色不为你，你可以选择不发动此技能。',
 					zioy_que:'袪恶',
-					zioy_que_info:'锁定技。<br>①你即将流失体力时，取消之，改为受到1点无来源伤害。<br>②每回合限1次，当你造成/受到伤害后，你回复1点体力并摸1张牌。<br>③当你未受伤时，你使用牌无距离/次数限制，其他角色不能响应你使用的牌，你使用【杀】造成的伤害+X（X为你当前体力-1）。<br>④当你对其他角色使用一张牌时，若你未受伤，此牌结算后你获得X点护甲并将你的体力修改为1点（X为你当前体力-1）。',
+					zioy_que_info:'锁定技。<br>①你即将失去体力时，取消之，改为受到1点无来源伤害。<br>②每回合限1次，当你造成/受到伤害后，你回复1点体力并摸1张牌。<br>③当你未受伤时，你使用牌无距离/次数限制，其他角色不能响应你使用的牌，你使用【杀】造成的伤害+X（X为你当前体力-1）。<br>④当你对其他角色使用一张牌时，若你未受伤，此牌结算后你获得X点护甲并将你的体力修改为1点（X为你当前体力-1）。',
+					zioy_fouzhiyu:'否知域',
+					zioy_fouzhiyu_info:'锁定技。防止你回复体力，防止你体力流失。若[你拥有护盾]异或[游戏轮数为奇数]为1，防止你受到伤害。',
+					zioy_ningguxi:'宁古息',
+					zioy_ningguxi_info:'回合开始阶段，你可对一名角色造成X点伤害（X为游戏轮数）。',
+					zioy_juhun:'聚魂',
+					zioy_juhun_info:'一轮游戏开始时，你可选择至多X名角色，你依次询问该角色是否令你获得其死亡前的体力，护甲，体力上限，技能并令其死亡（X为2-因你以此法选择“是”的角色）。',
+
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
