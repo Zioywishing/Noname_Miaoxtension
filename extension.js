@@ -6872,6 +6872,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					},
 					"zioy_yuezhuiyunwei": {
 						enable: "phaseUse",
+						charlotte: true,
 						usable: 1,
 						filter: function (event, player) {
 							return player.countMark("zioy_hexuchongxiang_mark") > 0;
@@ -6925,24 +6926,79 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									var att = get.attitude(_status.event.player, target);
 									return att;
 								});
-							"step 2"
-							var target = result.targets[0];
-							target.recover(event.num);
-							player
-								.chooseTarget(
-									"令一名角色摸" + event.num + "张牌",
-									function (card, player, target) {
-										return true;
-									},
-									true
-								)
-								.set("ai", function (target) {
-									var att = get.attitude(_status.event.player, target);
-									return att;
-								});
-							"step 3"
-							var target = result.targets[0];
-							target.draw(event.num);
+								"step 2"
+								var target = result.targets[0];
+								target.recover(event.num);
+								player
+									.chooseTarget(
+										"令一名角色摸" + event.num + "张牌",
+										function (card, player, target) {
+											return true;
+										},
+										true
+									)
+									.set("ai", function (target) {
+										var att = get.attitude(_status.event.player, target);
+										return att;
+									});
+								"step 3"
+								var target = result.targets[0];
+								target.draw(event.num);
+								
+								"step 4"
+								player
+									.chooseTarget(
+										"对一名角色造成" + event.num + "点伤害",
+										function (card, player, target) {
+											return true;
+										},
+										true
+									)
+									.set("ai", function (target) {
+										var att = get.attitude(_status.event.player, target);
+										return -att;
+									});
+								"step 5"
+								var target = result.targets[0];
+								target.damage(event.num);
+								
+								"step 6"
+								player
+									.chooseTarget(
+										"弃置一名角色至多" + event.num + "张牌",
+										function (card, player, target) {
+											return target.countCards() > 0;
+										},
+										false
+									)
+									.set("ai", function (target) {
+										var att = get.attitude(_status.event.player, target);
+										return -att;
+									});
+								"step 7"
+								if(result.bool){
+									var target = result.targets[0];
+									player.discardPlayerCard(target, "hej", false, "visible", [1, event.num])
+								}
+								
+								// "step 8"
+								// player
+								// 	.chooseTarget(
+								// 		"弃置一名角色至多" + event.num + "张牌",
+								// 		function (card, player, target) {
+								// 			return target.countCards() > 0;
+								// 		},
+								// 		false
+								// 	)
+								// 	.set("ai", function (target) {
+								// 		var att = get.attitude(_status.event.player, target);
+								// 		return -att;
+								// 	});
+								// "step 9"
+								// if(result.bool){
+								// 	var target = result.targets[0];
+								// 	player.discardPlayerCard(target, "hej", false, "visible", [1, event.num])
+								// }
 						},
 						group: [
 							"zioy_yuezhuiyunwei_0",
@@ -11204,7 +11260,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_hexuchongxiang_revive": "鹤墟重香②",
 					"zioy_yuezhuiyunwei": "月坠云微",
 					"zioy_yuezhuiyunwei_info":
-						"梦回芳草思依依，天远雁声稀。<br>①根据当前“蜃气”的数量执行下列效果：<br>不大于50%体力上限：一名角色的回合开始阶段你失去1级防御，攻击强化，你的判定区视为被废除，你免疫任何异常状态，你的武将牌始终正面向上。<br>大于25%体力上限：当你成为其他角色使用牌的目标时，其弃置一张与此牌同名的手牌（没有则不弃）<br>大于6：当你造成超过1点伤害后，你失去1点体力上限并令其获得1点体力上限，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加20%（与〖鹤墟重香〗同乘区）。<br>等于体力上限：每局游戏限一次，发动〖鹤墟重香②〗或〖月坠云微②〗时重置计数。当你使用牌对指定一名角色为唯一目标时，你与其交换体力与体力上限。以此法交换的体力和体力上限不超过X点（X为你发动〖鹤墟重香③〗的次数）<br>②每回合限1次，出牌阶段，若你有“蜃气”，你可以主动发动此技能：你失去所有“蜃气”，倒置负面强化并清除所有异常状态，召唤等量回合的“海市蜃楼”天气，令一名角色获得等量护甲，令一名角色回复等量体力，令一名角色摸等量牌（X=你的体力上限/2且向下取整）<br>③你永久免疫“睡眠”异常，永久免疫“海市蜃楼”的任何效果。",
+						"梦回芳草思依依，天远雁声稀。<br>①根据当前“蜃气”的数量执行下列效果：<br>不大于50%体力上限：一名角色的回合开始阶段你失去1级防御，攻击强化，你的判定区视为被废除，你免疫任何异常状态，你的武将牌始终正面向上。<br>大于25%体力上限：当你成为其他角色使用牌的目标时，其弃置一张与此牌同名的手牌（没有则不弃）<br>大于6：当你造成超过1点伤害后，你失去1点体力上限并令其获得1点体力上限，令你本局游戏摸牌阶段摸牌数，造成/受到伤害，失去体力的数值永久增加20%（与〖鹤墟重香〗同乘区）。<br>等于体力上限：每局游戏限一次，发动〖鹤墟重香②〗或〖月坠云微②〗时重置计数。当你使用牌对指定一名角色为唯一目标时，你与其交换体力与体力上限。以此法交换的体力和体力上限不超过X点（X为你发动〖鹤墟重香③〗的次数）<br>②每回合限1次，出牌阶段，若你有“蜃气”，你可以主动发动此技能：你失去所有“蜃气”，倒置负面强化并清除所有异常状态，召唤等量回合的“海市蜃楼”天气，令一名角色获得等量护甲，令一名角色回复等量体力，令一名角色摸等量牌（X=你的体力上限/2且向下取整），对一名角色造成等量伤害，弃置一名角色等量牌。<br>③你永久免疫“睡眠”异常，永久免疫“海市蜃楼”的任何效果。",
 					"zioy_zhumingxiangan": "烛明香暗",
 					"zioy_zhumingxiangan_info": "凭阑半日独无言，依旧竹声新月似当年。<br>转换技：<br>阳：<br>>>①若你。<br>阴：<br>>>①若你。",
 					"zioy_hanbosuliu": "寒波泝流",
