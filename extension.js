@@ -2780,7 +2780,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 							}
 						},
 						trigger: {
-							source: "damageBegin1"
+							source: "damageBegin4"
 						},
 						filter: function (event, player) {
 							return true;
