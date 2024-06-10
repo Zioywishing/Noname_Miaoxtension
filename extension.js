@@ -2787,7 +2787,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 						},
 						forced: true,
 						content: function () {
-							player.changeHujia(1);
+							player.changeHujia(trigger.num);
 
 							//player.update();
 						},
@@ -11025,7 +11025,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_xixue": "汲血",
 					"zioy_xixue_info": "出牌阶段，你可以弃置一张牌并选择一名非上一回合以此法选择角色，你偷取其一点体力值。",
 					"zioy_shiyi": "石翼",
-					"zioy_shiyi_info": "锁定技<br>①：当你造成伤害时，你获得一点护甲。<br>②：你的与其他角色的距离-X，其他角色与你的距离+X，你的手牌上限+X(X为你的护甲值)",
+					"zioy_shiyi_info": "锁定技<br>①：当你造成1点伤害时，你获得1点护甲。<br>②：你的与其他角色的距离-X，其他角色与你的距离+X，你的手牌上限+X(X为你的护甲值)",
 					"zioy_jinjia": "晶甲",
 					"zioy_jinjia_info": "锁定技，一轮游戏开始时，若你没有护甲，你获得两点护甲。",
 					"zioy_jinsui": "晶髓",
