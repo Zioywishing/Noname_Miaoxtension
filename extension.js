@@ -947,7 +947,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					translation: "海市蜃楼",
 					skill: "zioy_status_shenlou",
 					type: "weather",
-					intro: "回合结束阶段令当前回合角色执行[失去1点体力，将牌弃置至X张（X为体力值，至少弃置1张），获得“睡眠”异常]中随机任意项。"
+					intro: "回合结束阶段令当前回合角色执行[失去log3(X)点体力（X为海市蜃楼剩余回合数，向上取整），将牌弃置至Y张（Y为体力值，至少弃置1张），获得“睡眠”异常]中随机任意项。"
 				},
 				"heiwu": {
 					translation: "黑雾",
@@ -1106,7 +1106,12 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 								return [true, false].randomGet();
 							};
 							if (r()) {
-								player.loseHp();
+								let n = game.globalStatus.end
+								if(game.globalStatus.timing_type === 'round'){
+									n = (n - game.roundNumber)*game.players.length
+								}
+								n = Math.ceil(Math.log(n)/Math.log(3))
+								player.loseHp(n);
 							}
 							if (r()) {
 								var n = player.countCards() - player.hp;
@@ -6119,7 +6124,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						trigger: {
 							source: "damageBegin1"
 						},
-						priority: -70582140451,
+						priority: -70582140345341,
 						forced: true,
 						locked: true,
 						filter: function (card, player, target) {
@@ -9435,24 +9440,29 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								return att*index;
 							});
 							"step 2"
+							
+							// game.log(result,result.bool,result.targets,result.targets[0])
 							if(result.bool){
-								var target = result.targets[0]
+								// game.log(123)
+								let tgt = result.targets[0]
+								// game.log(tgt)
 								if(get.status(game.globalStatus.name).type == 'weather'){
-									if(!target.hasSkill('zioy_zhifenghuifang_huayu')){
-										var hj = target.hujia
-										target.changeHujia(-hj)
-										target.recover(hj+1)
-										target.draw(3)
+									if(!tgt.hasSkill('zioy_zhifenghuifang_huayu')){
+										let hj = tgt.hujia
+										tgt.changeHujia(-hj)
+										tgt.recover(hj+1)
+										tgt.draw(3)
 									}
-									lib.skill['zioy_zhifenghuifang'].addH('huayu',target)
+									lib.skill['zioy_zhifenghuifang'].addH('huayu',tgt)
 								}else if(get.status(game.globalStatus.name).type == 'environment'){
-									if(!target.hasSkill('zioy_zhifenghuifang_huangman')){
-										var hp = target.hp
-										target.loseHp(hp-1)
-										target.changeHujia(hp-1)
-										player.discardPlayerCard(target,[1,Math.min(target.countCards("hej"),3)],"hej")
+									if(!tgt.hasSkill('zioy_zhifenghuifang_huangman')){
+										let hp = tgt.hp
+										// game.log(hp,tgt)
+										tgt.loseHp(hp-1)
+										tgt.changeHujia(hp-1)
+										player.discardPlayerCard(tgt,[1,Math.min(tgt.countCards("hej"),3)],"hej")
 									}
-									lib.skill['zioy_zhifenghuifang'].addH('huangman',target)
+									lib.skill['zioy_zhifenghuifang'].addH('huangman',tgt)
 								}
 							}
 						},
@@ -9485,7 +9495,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								unique: true,
 								charlotte: true,
 								locked: true,
-								priority: 52344135,
+								// priority: 5234413455454545,
 								trigger: {
 									global: "phaseBegin"
 								},
@@ -9496,7 +9506,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									lib.skill['zioy_zhifenghuifang'].addH('huayu',player)
 								},
 								sub: true,
-								"_priority": 523075878
+								"_priority": 52305151541575878
 							},
 							"huayu":{
 								mark:true,
@@ -9619,7 +9629,54 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						content: function () {
 							player.recover(1)
 						},
-						"_priority": 52345007865
+						"_priority": 52345007865,
+						group:['zioy_liwuyaomiao_damageBegin1','zioy_liwuyaomiao_judge'],
+						subSkill:{
+							damageBegin1:{
+								trigger: {
+									player: "damageBegin1"
+								},
+								silent:true,
+								direct:true,
+								init:(p)=>p.storage.liwuyaomiao_dff = false,
+								filter(event,player){
+									// if(p.storage.liwuyaomiao_dff === true){
+									// 	return false
+									// }
+									// p.storage.liwuyaomiao_dff = true
+									
+									for(let i = 0;i < 20;++i){
+										if(event.getParent(i) && event.getParent(i).name === 'phase'){
+											if(event.getParent(i).player === player)
+												return false
+										}
+									}
+									return true
+								},
+								async content(event,trigger,player){
+									for(let i = 0;i < 20;++i){
+										if(event.getParent(i) && event.getParent(i).name === 'phase'){
+											event.getParent(i).player = player
+										}
+									}
+								}
+							},
+							judge:{
+								trigger: {
+									global: "roundStart"
+								},
+								filter: function (event, player) {
+									return game.roundNumber === 2
+								},
+								silent:true,
+								direct:true,
+								init:(player)=>
+									player.disableJudge(),
+								async content(event,trigger,player){
+									player.enableJudge()
+								}
+							}
+						}
 					},
 					"zioy_jietian":{
 						trigger: {
@@ -11341,7 +11398,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_zhifenghuifang":"栉风绘芳",
 					"zioy_zhifenghuifang_info":"<br>①出牌阶段限1次，若为奇数轮且场上不为“芬芳”则尝试召唤3轮“芬芳”，若为偶数轮且场上为天气，则强制召唤3轮“森罗万象”。然后若当前场上存在天气，则你可以选择1名角色，若其没有“华予”，你令其失去所有护甲，回复等同于失去护甲量+1点体力，摸3张牌。然后你令其获得/重置“华予”。若当前场上存在环境，则你可以选择则你可以选择1名角色，若其没有“篁蔓”，你令其失去体力至1点并获得等量的护甲，弃置手牌至1张牌。然后你令其获得“篁蔓”。一名角色获得“华予”/“篁蔓”时会自动失去“篁蔓”/“华予”。<br>②一名角色的回合开始时，若你未拥有“华予”，你获得“华予”。<br>·“华予”状态下使拥有者获得以下效果:<br>>>①你获得全异常免疫。<br>>>②受到伤害后，你有100*0.75^(N+1)%几率回复1点体力(N为此效果触发次数，每次获得“华予”时重置为0)<br>>>③当你即将受到伤害时，若此伤害值不小于你当前体力值，限制你受到的伤害不超过1直到任意伤害结算完成。<br>>>④防止你的手牌于回合外被弃置。<br>>>⑤当你受到伤害后，伤害来源获得“篁蔓”。<br>·“篁蔓”状态下使拥有者获得以下效果:<br>>>①你计算与其他角色的距离+2。<br>>>②当你造成伤害后，你弃置等同于你本回合造成过伤害值总和数量的牌。<br>>>③当你造成伤害后，受伤角色获得“华予”。",
 					"zioy_liwuyaomiao":"鹂舞要眇",
-					"zioy_liwuyaomiao_info":"<br>①一轮游戏开始时，若当前轮数是你当前体力的整数倍，你回复1点体力。",
+					"zioy_liwuyaomiao_info":"<br>①一轮游戏开始时，若当前轮数是你当前体力的整数倍，你回复1点体力。<br>②当你于一名角色的出牌阶段外受到伤害后，当前回合角色改为你。<br>③废除你的判定区直到第二轮游戏开始时。",
 					"zioy_jietian":'嗟天',
 					"zioy_jietian_info":'锁定技，你的回合开始时，若你的护甲小于你的体力，你对自己造成1点伤害，然后获得1点护甲',
 					"zioy_yunshuang":'陨霜',
