@@ -897,7 +897,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 								intro: {
 									content: function (storage, player, skill) {
 										var list = player.getSkills(null, false, false).filter(function (i) {
-											return lib.skill.sup_duanchang_baiban.skillBlocker(i, player);
+											return lib.skill.sup2_tieji_baiban.skillBlocker(i, player);
 										});
 										if (list.length) return "失效技能：" + get.translation(list);
 										return "无失效技能";
