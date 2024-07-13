@@ -1,7 +1,8 @@
 import miaoTool from "./miaoTool.js";
 
-export default function content (config, pack) {
-    lib.miaoTool = miaoTool
+export default (lib, game, ui, get, ai, _status) => (config, pack) => {
+    lib.miaoTool = miaoTool(lib, game, ui, get, ai, _status)
+    console.log(666,miaoTool(lib, game, ui, get, ai, _status))
     /*---------------------------------------------------------------以下为杂项---------------------------------------------------------------*/
     get.is.xuemai = function (skill) {
         var info = lib.skill[skill];
@@ -506,7 +507,7 @@ export default function content (config, pack) {
     };
 
     game.changeGlobalStatus = function () {
-        /*改变场上状态，example：game.changeGlobalStatus(5,3,"xiyu",ture,"phase") 表示强制转换为细雨天气5回合并锁定3回合，来源默认为event.player*/
+        /*改变场上状态，example：game.changeGlobalStatus(5,3,"xiyu",true,"phase") 表示强制转换为细雨天气5回合并锁定3回合，来源默认为event.player*/
         if (!game.hasGlobalStatusButton) {
             game.hasGlobalStatusButton = true;
             ui.globalStatusButton = ui.create.system("喵喵", null, true);

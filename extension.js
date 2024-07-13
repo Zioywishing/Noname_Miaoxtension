@@ -1,8 +1,10 @@
 import content from "./content.js";
+import _miaoTool from "./miaoTool.js";
 game.import("extension", function (lib, game, ui, get, ai, _status) {
+	const miaoTool = _miaoTool(lib, game, ui, get, ai, _status)
 	return {
 		name: "喵喵喵喵",
-		content,
+		content:content(lib, game, ui, get, ai, _status),
 		precontent: function () {},
 		help: {},
 		config: {},
