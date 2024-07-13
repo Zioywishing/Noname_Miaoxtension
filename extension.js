@@ -2654,6 +2654,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_jingwu: ["female", "shu", "1/3/5", ["zioy_que"], []],
 					zioy_sanjijie:["male", "qun", "3/3/3", ["zioy_fouzhiyu",'zioy_ningguxi'], []],
 					zioy_yuze:["none", "wei", "2", ["zioy_juhun"], []],
+					zioy_luosa:["male", "wu", '4', ["zioy_minchao", "zioy_kuangyong"]]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -2709,7 +2710,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_zhi:'徵',
 					zioy_jingwu:'靖芜',
 					zioy_sanjijie:'三畿界',
-					zioy_yuze:'羽泽'
+					zioy_yuze:'羽泽',
+					zioy_luosa:'罗萨'
 				}
 			},
 			card: {
@@ -11081,6 +11083,60 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								}
 							}
 						}
+					},
+					zioy_minchao:{
+						trigger:{
+							global:'phaseBegin'
+						},
+						forced:true,
+						marktext:'涌',
+						intro: {
+							name: "涌",
+						},
+						filter:function(event,player){
+							const num = Math.min(3+player.getAttackRange()-player.countMark('zioy_minchao'),9)
+							return player.countMark('zioy_minchao') !== num
+						},
+						content:async function(event,trigger,player){
+							const num = Math.min(3+player.getAttackRange()-player.countMark('zioy_minchao'),9)
+							if(num > 0){
+								player.addMark('zioy_minchao',num)
+							}else{
+								player.removeMark('zioy_minchao',-num)
+							}
+						},
+						mod:{
+							globalFrom(from,to,distance){
+								return distance-from.countMark('zioy_minchao');
+							},
+							playerEnabled(card,player,target){
+								if(!player.inRange(target) && target !== player){
+									return false
+								}
+							}
+						},
+					},
+					zioy_kuangyong:{
+						trigger:{
+							player:"useCardToPlayered",
+						},
+						filter:function(event,player){
+							var type=get.type(event.card);
+							if(type!='basic'&&type!='trick') return false;
+							// if(event.target === player) return false;
+							return player.countMark('zioy_minchao') > 0
+						},
+						content:async function(event,trigger,player){
+							let num = 0
+							for(let i = 0; i < player.countMark('zioy_minchao');i++){
+								if(Math.random() > 0.5){
+									num += 1
+								}
+							}
+							trigger.getParent().effectCount+=num;
+							player.removeMark('zioy_minchao');
+							// console.log(Object.getOwnPropertyDescriptors(player))
+						},
 					}
 				},
 				translate: {
@@ -11452,7 +11508,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_ningguxi_info:'回合开始阶段，你可对一名角色造成X点伤害（X为游戏轮数）。',
 					zioy_juhun:'聚魂',
 					zioy_juhun_info:'一轮游戏开始时，你可选择至多X名角色，你依次询问该角色是否令你获得其死亡前的体力，护甲，体力上限，技能并令其死亡（X为2-因你以此法选择“是”的角色）。',
-
+					zioy_minchao:'冥潮',
+					zioy_minchao_info:'<br>①一名角色的回合开始阶段，你将“涌”标记获得/弃置至X枚（X为3+你的攻击范围，至多为9）。<br>②你计算与其他角色的距离时-X（X为你“涌”标记的数量）。<br>③你攻击范围外的角色无法成为你使用牌的目标。',
+					zioy_kuangyong:'狂涌',
+					zioy_kuangyong_info:'当你于出牌阶段内使用基本牌或普通锦囊牌指定一名角色为目标时，你可以结算X次以下效果：你有50%概率令此牌额外结算一次。然后弃置1枚“涌”（X为你“涌”标记的数量）。',
 				}
 			},
 			intro: "??????????????????????????<br>拒绝规范描述",
