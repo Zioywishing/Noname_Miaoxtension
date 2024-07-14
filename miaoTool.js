@@ -4,8 +4,10 @@ export function skillFactory(skill) {
 		const skill_content = skill.skill[skill_name];
 		// 自动导入在autoSubSkill下的子技能
 		if (skill_content.autoSubSkill) {
-			skill_content.subSkill = skill_content.subSkill ?? {};
-			skill_content.group = skill_content.group ?? [];
+			skill_content.subSkill || (skill_content.subSkill = {})
+			skill_content.group || (skill_content.group = []);
+			// skill_content.subSkill = skill_content.subSkill ?? {};
+			// skill_content.group = skill_content.group ?? [];
 			for (let autoSubSkillName in skill_content.autoSubSkill) {
 				skill_content.subSkill[autoSubSkillName] = skill_content.autoSubSkill[autoSubSkillName];
 				skill_content.group.push(`${skill_name}_${autoSubSkillName}`);
@@ -13,8 +15,8 @@ export function skillFactory(skill) {
 		}
 		// 自动根据autoTranslate设置技能的translate相关内容
 		if (skill_content.autoTranslate) {
-			skill.translate[`${skill_name}`] = skill_content.autoTranslate.name ?? "未发现name";
-			skill.translate[`${skill_name}_info`] = skill_content.autoTranslate.info ?? "未发现info";
+			skill.translate[`${skill_name}`] = skill_content.autoTranslate.name;
+			skill.translate[`${skill_name}_info`] = skill_content.autoTranslate.info;
 		}
 	}
 	return skill;
@@ -31,7 +33,7 @@ export default (lib, game, ui, get, ai, _status) => {
 		// 提供一些便捷的math功能
 		math: {
 			randInt: function (num) {
-				num = num ?? 1000000000;
+				num || (num = 1000000000);
 				if (num === -1) {
 					num = -1000000000;
 				} else if (num === 1) {
