@@ -1,7 +1,8 @@
 import content from "./content.js";
 import _miaoTool from "./miaoTool.js";
+import {skillFactory} from "./miaoTool.js";
 game.import("extension", function (lib, game, ui, get, ai, _status) {
-	const miaoTool = _miaoTool(lib, game, ui, get, ai, _status)
+	const mtool = _miaoTool(lib, game, ui, get, ai, _status)
 	return {
 		name: "喵喵喵喵",
 		content:content(lib, game, ui, get, ai, _status),
@@ -155,7 +156,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 				},
 				list: []
 			},
-			skill: {
+			skill: skillFactory({
 				skill: {
 					"zioy_xixue": {
 						enable: "phaseUse",
@@ -3716,8 +3717,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							'step 1'
 							var c = result.control
 							if(c == 1){
-								// player.addBuffImmune("all",2)
-								// player.discardPlayerCard(player.next,'hej',[0,999])
 								player.next.damage(1)
 							}else if(c == 2){
 								player.removeBuffImmune("all",'id=testtest')
@@ -3728,64 +3727,34 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}else if(c == 5){
 								player.changeHujia(999)
 							}
-							// player.addDamageMitigationer(0.25, "zioy_t");
-							// if ([true, false].randomGet()) {
-							// 	player.removeDamageMitigationer("zioy_t");
-							// }
-							// player.addMark("zioy_t",0.5)
-							// game.log(player.countMark('zioy_t'))
-							// game.changeGlobalStatus("test", 2, false)
-							// game.changeGlobalStatus(["xiyu", "rerang"].randomGet(), 5, 4, "phase");
-							// if([false,true].randomGet())
-							//     player.addDamageLimiter(1,'test123456')
-							// else{
-							//     player.removeDamageLimiter('test123456')
-							// }
-							// for(var i in _status.event){
-							//     game.log(i," ==> ",_status.event[i])
-							// }
-							// game.log(_status.event.name)
-							// game.changeGlobalStatusEnd(-1, -999);
-							// // game.changeGlobalStatus("mizhang", 2, 1, true)
-							// // game.clearGlobalStatus(false)
-							// // game.clearGlobalStatus(true)
-							// // game.changeGlobalStatus("mizhang", 2, 1)
-							// // player.addBuffImmune(["shuimian", "ranshao"]);
-							// player.addBuffImmune("all", true);
-							// if ([true, false].randomGet()) player.removeBuffImmune("all");
-							// player.addBuff(["shuimian", "bingdong"].randomGet(), [null, player].randomGet(), [true, false].randomGet());
-							// // player.removeBuff('all');
-							// num = 6;
-							// if (player.storage.enhancementArray["miss"] != 0) num = -6;
-							// player.changeEnhancement("all", num);
-							// player.lockEnhancement(1, "round");
-							// player.addSkill('jiang');
-							// var p = player.next;
-							// while(p != player){
-							//     game.log(p,p.storage.enhancementArray['miss']);
-							//     p = p.next;
-							// }
 						},
 						init: function (player) {},
-						subSkill: {
+						group: ['yingzi'],
+						subSkill:{
+							test:{
+
+							}
+						},
+						autoSubSkill: {
 							"t1": {
 								trigger: {
-									player: "damageBegin3"
+									global: "phaseBegin"
 								},
-								frequent: false,
+								frequent: true,
 								filter: function (event, player) {
-									return false;
+									return true;
 								},
 								content: function () {
-									// trigger.cancel();
-									// player.say("test");
-									// trigger.num /= 10
+									player.draw()
 								},
 								sub: true,
 								"_priority": 0
 							}
 						},
-						group: ["zioy_t_t1"],
+						autoTranslate:{
+							name:'测试技能',
+							info:'测试自动导入翻译'
+						},
 						"_priority": 0
 					},
 					"zioy_shuohui": {
@@ -5970,15 +5939,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								}
 							}
 						},
-						"_priority": 0
-					},
-					"zioy_lanzhiyuane": {
-						"_priority": 0
-					},
-					"zioy_liuzhenxiongxiang": {
-						"_priority": 0
-					},
-					"zioy_yinhuxiaowu": {
 						"_priority": 0
 					},
 					"zioy_leimingqiangu": {
@@ -8549,7 +8509,98 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							trigger.getParent().effectCount+=num;
 							player.removeMark('zioy_minchao');
 						},
-					}
+					},
+					"zioy_lanzhiyuane": {
+						autoTranslate:{
+							"name": "滥蛭垣厄",
+							"info":"锁定技，你使用【杀】造成的伤害+X(X为log2(目标角色当前体力)且向下取整)，若造成伤害后目标角色体力值不小于其最大体力值*0.5则你弃置2张牌并弃置其至多2张牌，否则倒置其下次回复体力效果并令此技能本轮游戏无法再对其发动。",
+						},
+						trigger:{
+							source:'damageBegin1'
+						},
+						filter(event,player){
+							if(event.player.hasSkill('zioy_lanzhiyuane_block')){
+								return false
+							}
+							return event?.card?.name==='sha'
+						},
+						forced:true,
+						locked:true,
+						content:async function(event,trigger,player){
+							const num = Math.floor(Math.log2(trigger.player.hp))
+							trigger.num += num
+						},
+						_priority:115615684,
+						subSkill:{
+							targetRecover:{
+								trigger:{
+									player:'recoverBefore'
+								},
+								direct:true,
+								mark:true,
+								marktext:'蛭',
+								intro:{
+									name:'滥蛭垣厄',
+									mark:()=>'回复体力改为失去体力'
+								},
+								content:async function(event,trigger,player){
+									const num = trigger.num
+									trigger.cancel()
+									trigger.player.loseHp(num)
+									trigger.player.removeSkill('zioy_lanzhiyuane_targetRecover')
+								},
+								_priority:115615684,
+							},
+							block:{
+								trigger:{
+									global:'roundStart'
+								},
+								content:async function (event,trigger,player){
+									player.removeSkill('zioy_lanzhiyuane_block')
+								},
+								_priority:115615684,
+							}
+						},
+						autoSubSkill:{
+							damageEnd:{
+								trigger:{
+									source:'damageEnd'
+								},
+								forced:true,
+								locked:true,
+								filter(event,player){
+									if(event.player.hasSkill('zioy_lanzhiyuane_block')){
+										return false
+									}
+									return event?.card?.name==='sha'
+								},
+								content:async function(event,trigger,player){
+									let target = trigger.player
+									if(target.hp >= target.maxHp/2){
+										player.chooseToDiscard(2,'he',true)
+										player.discardPlayerCard('hej',trigger.player,[1,2],false)
+									}else{
+										trigger.player.addSkill('zioy_lanzhiyuane_targetRecover')
+										trigger.player.removeSkill('zioy_lanzhiyuane_block')
+										
+									}
+								},
+								_priority:115615684,
+							}
+						},
+					},
+					"zioy_liuzhenxiongxiang": {
+						autoTranslate:{
+							"name": "流鸩汹飨",
+							"info":"",
+						},
+					},
+					"zioy_yinhuxiaowu": {
+						autoTranslate:{
+							"name": "饮蛊销污",
+							"info":"",
+						},
+					},
 				},
 				translate: {
 					"zioy_xixue": "汲血",
@@ -8776,8 +8827,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_huangyi": "煌熠",
 					"zioy_huangyi_info":
 						"锁定技，你即将造成伤害时，未觉醒状态下你令此伤害-1并回复1点体力，然后你可以移动受伤角色区域内至多2张牌，觉醒状态下若目标角色强化锁定则解除锁定，然后倒置目标角色强化，令伤害+X(X为你以此法倒置的强化项数之和)",
-					"zioy_t": "测试",
-					"zioy_t_info": "测试技能",
 					"zioy_t1": "测试",
 					"zioy_t1_info": "sadadwadwaedaw",
 					"zioy_shuohui": "朔回",
@@ -8837,13 +8886,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"起舞弄清影，何似在人间。<br>①你手牌中的【闪】均视为【杀】，当你需要使用或打出【闪】时，你可以视为打出一张【闪】。<br>②每当你发动〖弄影①〗或将【闪】视为【杀】使用或打出时，若你已受伤，你失去1点体力上限并恢复1点体力，否则你获得1点体力上限并失去1点体力。",
 					"zioy_chanjuan": "婵娟",
 					"zioy_chanjuan_info": "但愿人长久，千里共婵娟。<br>你回复体力后，可令任意名已受伤的其他角色回复等量体力。",
-					"zioy_lanzhiyuane": "滥蛭垣厄",
-					"zioy_lanzhiyuane_info":
-						"锁定技，你的【杀】造成的伤害+X(X为log2(目标角色当前体力)且向下取整)，若造成伤害后目标角色体力值不小于最大体力值*0.5则弃置其2张牌，否则倒置其下次回复体力效果并令此技能无法再对其发动。",
-					"zioy_liuzhenxiongxiang": "流鸩汹飨",
-					"zioy_liuzhenxiongxiang_info": "",
-					"zioy_yinhuxiaowu": "饮蛊销污",
-					"zioy_yinhuxiaowu_info": "测试是否有更新",
 					"zioy_leimingqiangu": "雷鸣千古",
 					"zioy_leimingqiangu_info":
 						'①记你的体力上限+你拥有的“雷殊”数量为你的"尾数"，若你的"尾数"小于9，每次使用进攻类型的牌或即将受到伤害时你获得1点体力上限并回复1点体力值。<br>②你即将受到的伤害不超过尾数/3(向下取整)，你受到时伤害获得尾数*5枚“鸣雷”标记，当“鸣雷”标记数量达到200枚时你移去200枚“鸣雷”标记并回复1点体力值，若尾数达到9则使你下一次造成伤害后对受伤角色造成1点不会触发此技能③效果的雷属性伤害。<br>③当你尾数达到9时，你为伤害来源的任何伤害数值+2，你造成任何伤害后获得伤害值*尾数*3点“鸣雷”标记。<br>④每个回合开始阶段将你超过9的体力上限部分与全部护甲转换为体力。<br>⑤你的摸牌阶段摸牌数基数为你的尾数/1.5(向下取整)。',
@@ -8925,7 +8967,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_kuangyong:'狂涌',
 					zioy_kuangyong_info:'当你使用基本牌或普通锦囊牌指定一名角色为唯一目标时，你可以结算X次以下效果：你有50%概率令此牌额外结算一次。然后弃置1枚“涌”（X为你“涌”标记的数量）。',
 				}
-			},
+			}),
 			intro: "??????????????????????????<br>拒绝规范描述",
 			author: "喵喵",
 			diskURL: "",
