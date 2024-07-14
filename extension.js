@@ -8562,8 +8562,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						}
 					},
 					zioy_minchao: {
+						autoTranslate:{
+							zioy_minchao: "冥潮",
+							zioy_minchao_info:
+						"<br>①你的回合开始阶段，你须将“涌”标记获得/弃置至X枚（X为3+你的攻击范围，至多为9）。<br>②你计算与其他角色的距离时-X（X为你“涌”标记的数量）。<br>③你攻击范围外的角色无法成为你使用牌的目标。",
+						},
 						trigger: {
-							global: "phaseBegin"
+							player: "phaseBegin"
 						},
 						forced: true,
 						marktext: "涌",
@@ -8572,11 +8577,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						slient: true,
 						filter: function (event, player) {
-							const num = Math.min(3 + player.getAttackRange(true) - player.countMark("zioy_minchao"), 9);
+							const num = Math.min(3 + player.getAttackRange() - player.countMark("zioy_minchao"), 9);
 							return player.countMark("zioy_minchao") !== num;
 						},
 						content: async function (event, trigger, player) {
-							const num = Math.min(3 + player.getAttackRange(true) - player.countMark("zioy_minchao"), 9);
+							const num = Math.min(3 + player.getAttackRange() - player.countMark("zioy_minchao"), 9);
 							if (num > 0) {
 								player.addMark("zioy_minchao", num);
 							} else {
@@ -8595,6 +8600,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						}
 					},
 					zioy_kuangyong: {
+						autoTranslate:{
+							name: "狂涌",
+							info:
+						"当你使用基本牌或普通锦囊牌指定一名角色为唯一目标时，你可以结算X次以下效果：你有50%概率令此牌额外结算一次。然后弃置1枚“涌”（X为你“涌”标记的数量）。"
+						},
 						trigger: {
 							player: "useCardToPlayered"
 						},
@@ -9171,12 +9181,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_juhun: "聚魂",
 					zioy_juhun_info:
 						"一轮游戏开始时，你可选择至多X名角色，你依次询问该角色是否令你获得其死亡前的体力，护甲，体力上限，技能并令其死亡（X为2-因你以此法选择“是”的角色）。",
-					zioy_minchao: "冥潮",
-					zioy_minchao_info:
-						"<br>①一名角色的回合开始阶段，你将“涌”标记获得/弃置至X枚（X为3+你的攻击范围，至多为9）。<br>②你计算与其他角色的距离时-X（X为你“涌”标记的数量）。<br>③你攻击范围外的角色无法成为你使用牌的目标。",
-					zioy_kuangyong: "狂涌",
-					zioy_kuangyong_info:
-						"当你使用基本牌或普通锦囊牌指定一名角色为唯一目标时，你可以结算X次以下效果：你有50%概率令此牌额外结算一次。然后弃置1枚“涌”（X为你“涌”标记的数量）。"
 				}
 			}),
 			intro: "??????????????????????????<br>拒绝规范描述",
