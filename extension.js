@@ -8522,7 +8522,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							if(event.player.hasSkill('zioy_lanzhiyuane_block')){
 								return false
 							}
-							return event?.card?.name==='sha'
+							return event.card && event.card.name==='sha'
 						},
 						forced:true,
 						locked:true,
@@ -8572,7 +8572,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									if(event.player.hasSkill('zioy_lanzhiyuane_block')){
 										return false
 									}
-									return event?.card?.name==='sha'
+									return event.card && event.card.name==='sha'
 								},
 								content:async function(event,trigger,player){
 									let target = trigger.player
