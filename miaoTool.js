@@ -4,8 +4,8 @@ export function skillFactory(skill) {
 		const skill_content = skill.skill[skill_name];
 		// 自动导入在autoSubSkill下的子技能
 		if (skill_content.autoSubSkill) {
-			skill_content.subSkill || (skill_content.subSkill = {})
 			skill_content.group || (skill_content.group = []);
+			skill_content.subSkill || (skill_content.subSkill = {});
 			// skill_content.subSkill = skill_content.subSkill ?? {};
 			// skill_content.group = skill_content.group ?? [];
 			for (let autoSubSkillName in skill_content.autoSubSkill) {
