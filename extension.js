@@ -4331,7 +4331,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							target.changeHujia(event.num);
 							player
 								.chooseTarget(
-									"令一名角色恢复" + event.num + "点体力",
+									"令一名角色回复" + event.num + "点体力",
 									function (card, player, target) {
 										return true;
 									},
@@ -5937,7 +5937,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							"step 0"
 							player
 								.chooseTarget(
-									"令任意名其他角色恢复" + trigger.num + "点体力",
+									"令任意名其他角色回复" + trigger.num + "点体力",
 									function (card, player, target) {
 										return target.hp < target.maxHp && target != player;
 									},
@@ -8632,14 +8632,60 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_lanzhiyuane": {
 						autoTranslate: {
 							"name": "滥蛭垣厄",
-							"info":
-								"锁定技，你使用【杀】造成的伤害+X(X为log2(目标角色当前体力)且向下取整)，若造成伤害后目标角色体力值不小于其最大体力值*0.5则你弃置2张牌并弃置其至多2张牌，否则倒置其下次回复体力效果并令此技能本轮游戏无法再对其发动。"
+							"info": "当你即将受到非属性/属性伤害时，若你本局游戏受到的非属性/属性伤害总额大于属性/非属性伤害总额，你可以令你本次受到的伤害减半（向上取整）。"
+						},
+						trigger:{
+							player:'damageBegin2'
+						},
+						frequent:true,
+						filter:function(event,player){
+							let res = false
+							if(event.hasNature() && player.storage.zioy_lanzhiyuane_count_nature >= player.storage.zioy_lanzhiyuane_count_normal){
+								res = true
+							}if(!event.hasNature() && player.storage.zioy_lanzhiyuane_count_normal >= player.storage.zioy_lanzhiyuane_count_nature){
+								res = true
+							}
+							return res
+						},
+						content:async function(event,trigger,player){
+							trigger.num = Math.ceil(trigger.num / 2)
+						},
+						_priority:-5649532135,
+						autoSubSkill:{
+							count:{
+								trigger:{
+									player:'damageEnd'
+								},
+								filter:function(event,player){
+									return true;
+								},
+								direct:true,
+								init:function(player){
+									player.storage.zioy_lanzhiyuane_count_nature = 0
+									player.storage.zioy_lanzhiyuane_count_normal = 0
+								},
+								content:async function(event,trigger,player){
+									if(trigger.hasNature()){
+										player.storage.zioy_lanzhiyuane_count_nature += trigger.num
+									}else{
+										player.storage.zioy_lanzhiyuane_count_normal += trigger.num
+									}
+								},
+								_priority:5649532135
+							}
+						}
+					},
+					"zioy_liuzhenxiongxiang": {
+						autoTranslate: {
+							"name": "流鸩汹飨",
+							"info": 
+								"锁定技。你使用【杀】造成的伤害+X(X为log2(目标角色当前体力)且向下取整)，若造成伤害后目标角色体力值不小于其最大体力值*0.5则你弃置2张牌并弃置其至多2张牌，否则倒置其下次回复体力效果并令此技能本轮游戏无法再对其发动。"
 						},
 						trigger: {
 							source: "damageBegin1"
 						},
 						filter(event, player) {
-							if (event.player.hasSkill("zioy_lanzhiyuane_block")) {
+							if (event.player.hasSkill("zioy_liuzhenxiongxiang_block")) {
 								return false;
 							}
 							return event.card && event.card.name === "sha";
@@ -8658,16 +8704,16 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								direct: true,
 								mark: true,
-								marktext: "蛭",
+								marktext: "飨",
 								intro: {
-									name: "滥蛭垣厄",
+									name: "流鸩汹飨",
 									mark: () => "回复体力改为失去体力"
 								},
 								content: async function (event, trigger, player) {
 									const num = trigger.num;
 									trigger.cancel();
 									trigger.player.loseHp(num);
-									trigger.player.removeSkill("zioy_lanzhiyuane_targetRecover");
+									trigger.player.removeSkill("zioy_liuzhenxiongxiang_targetRecover");
 								},
 								_priority: 115615684
 							},
@@ -8676,7 +8722,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									global: "roundStart"
 								},
 								content: async function (event, trigger, player) {
-									player.removeSkill("zioy_lanzhiyuane_block");
+									player.removeSkill("zioy_liuzhenxiongxiang_block");
 								},
 								_priority: 115615684
 							}
@@ -8689,7 +8735,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								forced: true,
 								locked: true,
 								filter(event, player) {
-									if (event.player.hasSkill("zioy_lanzhiyuane_block")) {
+									if (event.player.hasSkill("zioy_liuzhenxiongxiang_block")) {
 										return false;
 									}
 									return event.card && event.card.name === "sha";
@@ -8700,26 +8746,20 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 										player.chooseToDiscard(2, "he", true);
 										player.discardPlayerCard("hej", trigger.player, [1, 2], false);
 									} else {
-										trigger.player.addSkill("zioy_lanzhiyuane_targetRecover");
-										trigger.player.removeSkill("zioy_lanzhiyuane_block");
+										trigger.player.addSkill("zioy_liuzhenxiongxiang_targetRecover");
+										trigger.player.removeSkill("zioy_liuzhenxiongxiang_block");
 									}
 								},
 								_priority: 115615684
 							}
 						}
 					},
-					"zioy_liuzhenxiongxiang": {
-						autoTranslate: {
-							"name": "流鸩汹飨",
-							"info": ""
-						}
-					},
 					"zioy_yinhuxiaowu": {
 						autoTranslate: {
 							"name": "饮蛊销污",
 							"info": `<br>①隐匿技。当你亮出武将牌时，你获得3枚“蛊”标记，若当前回合角色不为你，则你额外获得1枚“蛊”标记。
-							<br>②出牌阶段：若你有“蛊”，你可以移去1枚“蛊”，然后选择至多X名角色，你与这些角色各恢复X点体力并摸X张牌；
-							若你没有“蛊”，你可以对自己造成9点伤害并失去〖饮蛊销污〗
+							<br>②出牌阶段：若你有“蛊”，你可以移去1枚“蛊”，然后选择至多X名角色，你与这些角色各回复X点体力并摸X张牌；
+							若你没有“蛊”，你可以复活一名已死亡角色，令其回复9点体力并摸9张牌，然后你失去〖饮蛊销污〗并对自己造成9点伤害
 							（X为2^(你的“蛊”的数量)且不大于5）。`
 						},
 						enable: "phaseUse",
@@ -8729,8 +8769,19 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						intro: {
 							name: "蛊"
 						},
+						filter: function (event, player) {
+							if(player.countMark("zioy_yinhuxiaowu") === 0 && game.dead.length === 0){
+								return false
+							}
+							return true
+						},
 						content: async function (event, trigger, player) {
 							if (player.countMark("zioy_yinhuxiaowu") === 0) {
+								const {result} = await player.chooseTarget((_, player, target)=>target.isDead(),true).set('deadTarget',true)
+								const target = result.targets[0]
+								target.revive()
+								target.recover(9)
+								target.draw(9)
 								player.removeSkill("zioy_yinhuxiaowu");
 								player.damage(9);
 								return;
@@ -8742,10 +8793,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									(card, player, target) => target !== player,
 									[1, num],
 									false,
-									`选择至多${num}名角色，你与这些角色各恢复${num}点体力并摸${num}张牌`
+									`选择至多${num}名角色，你与这些角色各回复${num}点体力并摸${num}张牌`
 								)
 								.set("ai", target => {
-									if (target.hasSkill("zioy_lanzhiyuane_targetRecover")) return num - 1;
+									if (target.hasSkill("zioy_liuzhenxiongxiang_targetRecover")) return num - 1;
 									var att = get.attitude(player, target);
 									return att;
 								});
@@ -8764,11 +8815,21 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							result: {
 								player: function (player) {
 									if (player.countMark("zioy_yinhuxiaowu") === 0) {
+										if(game.zhu === player){
+											return -111
+										}
+										for(let target of game.dead){
+											if(target.maxHp < 2)continue
+											let att = get.attitude(player, target);
+											if(att > 0 && player.hp < 3){
+												return 10
+											}
+										}
 										return -111;
 									}
 									let count = 0;
 									for (let target of game.players) {
-										if (target.hasSkill("zioy_lanzhiyuane_targetRecover")) {
+										if (target.hasSkill("zioy_liuzhenxiongxiang_targetRecover")) {
 											count += 2;
 											continue;
 										}
@@ -9051,13 +9112,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					"zioy_pianhongxiusao_info": "啼莺散，馀花乱，寂寞画堂深院。",
 					"zioy_yujin": "余烬",
 					"zioy_yujin_info":
-						"①获得此技能时你获得5点“烬”，若你有“烬”，限制你受到的伤害不超过1点且防止你失去体力。每次触发限伤或防止失去体力时你失去2点“烬”并在下次受到伤害后获得1点护甲。<br>②你的护甲被击破时，你恢复1点体力，弃置伤害来源至多2张牌并令其受到由你造成的1点火属性伤害。",
+						"①获得此技能时你获得5点“烬”，若你有“烬”，限制你受到的伤害不超过1点且防止你失去体力。每次触发限伤或防止失去体力时你失去2点“烬”并在下次受到伤害后获得1点护甲。<br>②你的护甲被击破时，你回复1点体力，弃置伤害来源至多2张牌并令其受到由你造成的1点火属性伤害。",
 					"zioy_xumie": "虚灭",
 					"zioy_xumie_info":
 						"当你造成伤害时，根据你对该受伤角色造成伤害的次数追加以下效果：<br>大于0次：其始终在你攻击范围内且不能响应你使用的【杀】。<br>大于1次：你弃置其至多2张牌。<br>大于2次：其下一次造成的伤害-1。<br>大于3次：你对其追加1点伤害，此伤害无法触发〖虚灭〗。<br>大于4次:你获得1点“烬”",
 					"zioy_v07yuxie": "V07-驭械",
 					"zioy_v07yuxie_info":
-						"①游戏开始时你获得4点护甲并进入“驭械”状态，当你的护甲被击破时你退出“驭械”状态。<br>②“驭械”状态为你提供以下增益：<br>1.你的手牌上限+X(X为你的护甲值)。<br>2.你免疫任何异常状态。<br><br>·>当你手牌数不小于体力值时，你为暴走状态，获得以下增益：<br>1.你的进攻距离+2。<br>2.你的【杀】无法被响应。<br>3.你使用牌没有次数限制。<br>4.你使用牌时需额外弃置1张牌。<br><br>·>当你手牌数小于体力值时，你为冷却状态，获得以下增益：<br>1.你使用锦囊牌指定角色为目标时，你可以弃置目标角色至多2张牌。<br>2.你使用非装备牌结算完成后，你收回此牌。每回合限1次，获得手牌时若手牌数大于体力值则重置此计数。每张牌每回合限1次。<br>3.你即将受到超过1点的伤害时令此伤害值-1并恢复你1点体力。<br><br>③非“驭械”状态下限制你受到的伤害不超过1点。<br>④进入或退出“驭械”状态时清除自身任何强化与异常状态并获得判定区内的所有牌。",
+						"①游戏开始时你获得4点护甲并进入“驭械”状态，当你的护甲被击破时你退出“驭械”状态。<br>②“驭械”状态为你提供以下增益：<br>1.你的手牌上限+X(X为你的护甲值)。<br>2.你免疫任何异常状态。<br><br>·>当你手牌数不小于体力值时，你为暴走状态，获得以下增益：<br>1.你的进攻距离+2。<br>2.你的【杀】无法被响应。<br>3.你使用牌没有次数限制。<br>4.你使用牌时需额外弃置1张牌。<br><br>·>当你手牌数小于体力值时，你为冷却状态，获得以下增益：<br>1.你使用锦囊牌指定角色为目标时，你可以弃置目标角色至多2张牌。<br>2.你使用非装备牌结算完成后，你收回此牌。每回合限1次，获得手牌时若手牌数大于体力值则重置此计数。每张牌每回合限1次。<br>3.你即将受到超过1点的伤害时令此伤害值-1并回复你1点体力。<br><br>③非“驭械”状态下限制你受到的伤害不超过1点。<br>④进入或退出“驭械”状态时清除自身任何强化与异常状态并获得判定区内的所有牌。",
 					"zioy_f42chongzai": "F42-重载",
 					"zioy_f42chongzai_info":
 						"出牌阶段各限1次：<br>①若你为“驭械”状态，你令所有角色受到1点无来源伤害，然后你摸3张牌，然后若你体力不为1则储存1点体力，若你拥有护甲则储存1点护甲。<br>②若你不为“驭械”状态，你可以弃置任意张花色各不相同的手牌，根据你弃置的手牌数执行以下效果：<br>不为4张：你获得等同于弃置手牌数-1枚“能量”标记。<br>4张：你获得4枚“能量”标记。<br>然后将当前体力值超过1的部分转化为等量“能量”标记，之后释放你储存的体力值。使用此技能后的每个的回合结束阶段，根据你的“能量”标记数量，执行以下效果：<br>小于体力上限：你获得1枚“能量”标记并回复1点体力。<br>不小于体力上限：你弃置所有“能量”标记，获得等量护甲并释放储存的护甲，进入“驭械”状态，若你以此法获得的护甲值大于你的体力上限，你获得1点体力上限。",
@@ -9078,7 +9139,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"血脉技，免疫失效。<br>①令你获得“燚之神佑”。<br>②你的摸牌阶段摸牌数+2，结束阶段与一轮游戏开始时你摸1张牌.<br>③你使用【杀】对非神势力非拥有“神佑”或拥有“苏之神佑”的角色造成的伤害+1。",
 					"zioy_zhuxingwuchang": "诸行无常",
 					"zioy_zhuxingwuchang_info":
-						"锁定技，若场上为天气，你使用的牌视为火属性且造成伤害后弃置受伤角色1张牌；若场上为环境，你的牌不可被响应；若你没有“无瞋”：造成伤害后你失去1点体力(若当前体力值为1则不失去)然后恢复2点体力，“风林火山”环境下提升至4点，若当前为奇数轮则召唤3轮“热浪”天气，否则召唤3轮“风林火山”环境。",
+						"锁定技，若场上为天气，你使用的牌视为火属性且造成伤害后弃置受伤角色1张牌；若场上为环境，你的牌不可被响应；若你没有“无瞋”：造成伤害后你失去1点体力(若当前体力值为1则不失去)然后回复2点体力，“风林火山”环境下提升至4点，若当前为奇数轮则召唤3轮“热浪”天气，否则召唤3轮“风林火山”环境。",
 					"zioy_zhufashengmie": "诸法生灭",
 					"zioy_zhufashengmie_info": "一局游戏限一次，你死亡时，取消之，然后你令你的体力值等于体力上限并锁定体力直到你的出牌阶段结束。",
 					"zioy_yongyeqingxiao": "永夜清宵",
@@ -9086,7 +9147,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						"①获得此技能时你获得5个“无瞋”标记。若你有“无瞋”，你使用牌结算后需弃置1张牌（没有则不弃）并失去1个“无瞋”。<br>②出牌阶段，若你有“无瞋”标记且不为5个，你可以将“无瞋”补至5个，记补充数量为X，你摸X*1.25（向下取整）张牌，回复X/2（向下取整）点体力（回复体力效果每回合限1次），获得X轮异常免疫，若当前为奇数轮则召唤X轮“热浪”天气，否则召唤X轮“风林火山”环境。<br>③若你没有“无瞋”，你废弃你的判定区，永久获得全异常免疫，进攻距离+4，出牌阶段可以额外使用1张【杀】。",
 					"zioy_nongying": "弄影",
 					"zioy_nongying_info":
-						"起舞弄清影，何似在人间。<br>①你手牌中的【闪】均视为【杀】，当你需要使用或打出【闪】时，你可以视为打出一张【闪】。<br>②每当你发动〖弄影①〗或将【闪】视为【杀】使用或打出时，若你已受伤，你失去1点体力上限并恢复1点体力，否则你获得1点体力上限并失去1点体力。",
+						"起舞弄清影，何似在人间。<br>①你手牌中的【闪】均视为【杀】，当你需要使用或打出【闪】时，你可以视为打出一张【闪】。<br>②每当你发动〖弄影①〗或将【闪】视为【杀】使用或打出时，若你已受伤，你失去1点体力上限并回复1点体力，否则你获得1点体力上限并失去1点体力。",
 					"zioy_chanjuan": "婵娟",
 					"zioy_chanjuan_info": "但愿人长久，千里共婵娟。<br>你回复体力后，可令任意名已受伤的其他角色回复等量体力。",
 					"zioy_leimingqiangu": "雷鸣千古",
