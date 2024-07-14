@@ -8563,8 +8563,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					},
 					zioy_minchao: {
 						autoTranslate:{
-							zioy_minchao: "冥潮",
-							zioy_minchao_info:
+							name: "冥潮",
+							info:
 						"<br>①你的回合开始阶段，你须将“涌”标记获得/弃置至X枚（X为3+你的攻击范围，至多为9）。<br>②你计算与其他角色的距离时-X（X为你“涌”标记的数量）。<br>③你攻击范围外的角色无法成为你使用牌的目标。",
 						},
 						trigger: {
