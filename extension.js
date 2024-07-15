@@ -48,7 +48,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_badun": ["male", "qun", "8/8/8", ["zioy_yuemai"], []],
 					"zioy_nemesis": ["female", "wu", "4/7", ["zioy_pinghuqiuyue", "zioy_yurangzhijian", "zioy_liechenyuyou_water"], []],
 					"zioy_osiris": ["male", "shu", 5, ["zioy_zhuxingwuchang", "zioy_zhufashengmie", "zioy_yongyeqingxiao", "zioy_liechenyuyou_fire"], []],
-					"zioy_morana": ["female", "jin", 6, ["zioy_lanzhiyuane", "zioy_liuzhenxiongxiang", "zioy_yinhuxiaowu"], ["hiddenSkill"]],
+					"zioy_morana": ["female", "jin", 5, ["zioy_lanzhiyuane", "zioy_liuzhenxiongxiang", "zioy_yinhuxiaowu"], ["hiddenSkill"]],
 					"zioy_guanghan": ["female", "wu", "2/9", ["zioy_nongying", "zioy_chanjuan"], ["des:2023中秋"]],
 					"zioy_xuanhu": ["male", "wei", 1, ["zioy_leimingqiangu", "zioy_zhoumingchuanxuan"], []],
 					"zioy_xiyueying": ["double", "shen", 4, ["zioy_riyuexingkong"], []],
@@ -8679,7 +8679,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						autoTranslate: {
 							"name": "流鸩汹飨",
 							"info": 
-								"锁定技。你使用【杀】造成的伤害+X(X为log2(目标角色当前体力)且向下取整)，若造成伤害后目标角色体力值不小于其最大体力值*0.5则你弃置2张牌并弃置其至多2张牌，否则倒置其下次回复体力效果并令此技能本轮游戏无法再对其发动。"
+								`锁定技。你使用【杀】造成的伤害+X(X为log2(目标角色当前体力)且向下取整)，
+								若造成伤害后目标角色体力值不小于其最大体力值*0.5则你弃置2张牌并弃置其至多2张牌，
+								否则倒置其下次回复体力效果并令此技能本局游戏无法再对其发动。`
 						},
 						trigger: {
 							source: "damageBegin1"
@@ -8721,6 +8723,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								trigger: {
 									global: "roundStart"
 								},
+								filter(event,player){
+									return false;
+								},
 								content: async function (event, trigger, player) {
 									player.removeSkill("zioy_liuzhenxiongxiang_block");
 								},
@@ -8752,6 +8757,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								_priority: 115615684
 							}
+						},
+						ai:{
+							threaten:1.5
 						}
 					},
 					"zioy_yinhuxiaowu": {
@@ -8812,6 +8820,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						ai: {
 							order: 1,
+							threaten: 3,
 							result: {
 								player: function (player) {
 									if (player.countMark("zioy_yinhuxiaowu") === 0) {
