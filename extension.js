@@ -55,7 +55,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					"zioy_purangsigai": ["none", "wu", 4, ["zioy_jisuishengjin"], ["des:plus黄盖"]],
 					"zioy_bidu": ["female", "jin", "3/14/2", ["zioy_biubiubiu"], []],
 					"zioy_dacongming": ["male", "qun", "6/6/6", ["zioy_shoufa"], ["des:聪明手法的角色"]],
-					"zioy_exchel": ["female", "wei", "2/4", ["zioy_liwuyaomiao", "zioy_zhifenghuifang", "zioy_liechenyuyou_wood"], []],
+					"zioy_exchel": ["female", "wei", "3/4", ["zioy_liwuyaomiao", "zioy_zhifenghuifang", "zioy_liechenyuyou_wood"], []],
 					"zioy_sushuang": ["male", "wei", "4/5/1", ["zioy_jietian", "zioy_yunshuang"], []],
 					"zioy_kaixier": ["female", "qun", "2/4/3", ["zioy_helu"], []],
 					"zioy_ji1": ["male", "jin", "3", ["zioy_shimeng", "zioy_heimeng"], ["hiddenSkill"]],
@@ -72,7 +72,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_jingwu: ["female", "shu", "1/3/5", ["zioy_que"], []],
 					zioy_sanjijie: ["male", "qun", "3/3/3", ["zioy_fouzhiyu", "zioy_ningguxi"], []],
 					zioy_yuze: ["none", "wei", "2", ["zioy_juhun"], []],
-					zioy_luosa: ["male", "wu", "4", ["zioy_minchao", "zioy_kuangyong"]]
+					zioy_luosa: ["male", "wu", "4", ["zioy_minchao", "zioy_kuangyong"]],
+					zioy_gold: ["male", "qun", "5", ["zioy_shihunzhuo"]]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -129,7 +130,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_jingwu: "靖芜",
 					zioy_sanjijie: "三畿界",
 					zioy_yuze: "羽泽",
-					zioy_luosa: "罗萨"
+					zioy_luosa: "罗萨",
+					zioy_gold: '黄金'
 				}
 			},
 			card: {
@@ -8867,6 +8869,290 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									}
 									player.addMark("zioy_yinhuxiaowu", num);
 								}
+							}
+						}
+					},
+					zioy_shihunzhuo:{
+						autoTranslate: {
+							"name": "世溷浊",
+							"info": `<br>
+							①游戏开始时，你获得'恒'。<br>
+							②当你于出牌阶段使用牌结算结束后，若你当前回合于出牌阶段使用的牌超过log1.4(游戏轮数)张，你结束出牌阶段。<br>
+							③你造成/受到不因此技能造成的伤害后，伤害来源受到由你造成的X点伤害（X为你此次造成/受到的伤害/2且向下取整）<br>
+							④你造成/受到伤害后，你与伤害来源各获得'空'，若其已有'空'则重置'空'的发动次数。<br>
+							⑤一名角色于你的回合内失去牌时，你令其获得'舍'，若其已有'舍'则重置'舍'的发动次数。<br>
+							⑥你的回合开始阶段，以逆时针顺序从你开始的所有角色依次失去'空'与"舍"，每有一名角色以此法失去'空'，你获得1枚'隙'，每有一名角色以此法失去'舍'，你获得1枚'嗜'。<br>
+							⑦每当你获得4枚'隙'，你失去1点体力上限并将体力回复至体力上限。<br>
+							⑧每当你获得'嗜'时，你摸一张牌。你的手牌上限-X（X为你'嗜'的数量/3）<br>
+							恒：你的体力上限-1。你的体力上限增加无效。<br>
+							空：获得此技能时你失去1点体力，失去此技能时你回复1点体力。当你回复体力时，取消之。此技能在发动2次后被失去。<br>
+							舍：获得此技能时你弃置你区域内的1张牌，失去此技能时你摸1张牌。当你获得牌后，你须弃置等量的牌，此技能在发动3次后将被失去。`
+						},
+						trigger:{
+							global:"phaseBefore",
+							player:"enterGame",
+						},
+						forced:true,
+						locked:false,
+						filter:function(event,player){
+							return (event.name!='phase'||game.phaseNumber==0);
+						},
+						content: async function(event,trigger,player){
+							player.addSkill('zioy_shihunzhuo_heng')
+						},
+						mod:{
+							maxHandcard:function(player,num){
+								return num-Math.floor(player.countMark('zioy_shihunzhuo_shi')/3);
+							},
+						},
+						subSkill:{
+							heng:{
+								mark:true,
+								marktext:'恒',
+								intro:{
+									name:'恒',
+									mark:()=>'你的体力上限-1。你的体力上限增加无效。'
+								},
+								init:function(player){
+									player.loseMaxHp(1)
+								},
+								onremove:function(player){
+									player.gainMaxHp(1)
+								},
+								direct:true,
+								trigger:{
+									player:'gainMaxHpBeginBefore'
+								},
+								content:async function(event,trigger,player){
+									trigger.cancel()
+								},
+								priority:539943419
+							},
+							kong:{
+								mark:true,
+								marktext:'空',
+								intro:{
+									name:'空',
+									mark:(_,__,player)=>`获得此技能时你失去1点体力，失去此技能时你回复1点体力。当你回复体力时，取消之。此技能在发动${2-player.storage.zioy_shihunzhuo_kong_count}次后被失去。`
+								},
+								init:function(player){
+									player.loseHp()
+									player.storage.zioy_shihunzhuo_kong_count = 0
+								},
+								onremove:function(player){
+									player.recover()
+								},
+								direct:true,
+								trigger:{
+									player:'recoverBefore'
+								},
+								content:async function(event,trigger,player){
+									trigger.cancel()
+									player.storage.zioy_shihunzhuo_kong_count += 1
+									if(player.storage.zioy_shihunzhuo_kong_count === 2){
+										player.storage.zioy_shihunzhuo_kong_count = 0
+										player.removeSkill('zioy_shihunzhuo_kong')
+									}
+								},
+								priority:539943419
+							},
+							she:{
+								mark:true,
+								marktext:'舍',
+								intro:{
+									name:'舍',
+									mark:(_,__,player)=>`获得此技能时你弃置你区域内的1张牌，失去此技能时你摸1张牌。当你获得牌后，你须弃置1张牌，此技能在发动${3-player.storage.zioy_shihunzhuo_she_count}次后将被失去。`
+								},
+								init:function(player){
+									player.chooseToDiscard(1,'hej')
+									player.storage.zioy_shihunzhuo_she_count = 0
+								},
+								onremove:function(player){
+									player.draw()
+								},
+								direct:true,
+								trigger:{
+									player:"gainAfter",
+								},
+								content:async function(event,trigger,player){
+									// const num = trigger.cards.length
+									player.chooseToDiscard(1,'he',true)
+									player.storage.zioy_shihunzhuo_she_count += 1
+									if(player.storage.zioy_shihunzhuo_she_count === 2){
+										player.storage.zioy_shihunzhuo_she_count = 0
+										player.removeSkill('zioy_shihunzhuo_kong')
+									}
+								},
+								priority:539943419
+							},
+							xi:{
+								mark:true,
+								marktext:'隙',
+								intro:{
+									name:'隙',
+									mark:(_,__,player)=>`每当你获得4枚'隙'，你失去1点体力上限并将体力回复至体力上限。`
+								},
+							},
+							shi:{
+								mark:true,
+								marktext:'嗜',
+								intro:{
+									name:'嗜',
+									mark:(_,__,player)=>`你的手牌上限-${Math.floor(player.countMark('zioy_shihunzhuo_shi')/3)}。`
+								},
+							}
+						},
+						autoSubSkill:{
+							damageBegin1:{
+								trigger:{
+									player:'damageBegin1',
+									source:'damageBegin1'
+								},
+								filter:()=>{
+									return false
+									return true
+								},
+								direct:true,
+								content:async function(event,trigger,player){
+									trigger.num *= 2
+								},
+								priority:-539943419
+							},
+							damageBegin3:{
+								trigger:{
+									player:'damageBegin3',
+									source:'damageBegin3'
+								},
+								filter:(event,player)=>{
+									return false
+									return event.num < 2
+								},
+								direct:true,
+								content:async function(event,trigger,player){
+									trigger.num = 2
+								},
+								priority:-539943419
+							},
+							damageEnd:{
+								trigger:{
+									player:'damageEnd',
+									source:'damageEnd'
+								},
+								direct:true,
+								filter:(event)=>{
+									// console.log(event.getParent().name)
+									return event.getParent().name !== `zioy_shihunzhuo_damageEnd` && event.num > 1
+								},
+								content:async function(event,trigger,player){
+									const num = Math.floor(trigger.num / 2)
+									trigger.source.damage(num)
+								},
+								priority:-539943419
+							},
+							damageEnd_addKong:{
+								trigger:{
+									player:'damageEnd',
+									source:'damageEnd'
+								},
+								direct:true,
+								filter:(event)=>{
+									return true
+								},
+								content:async function(event,trigger,player){
+									for(let target of [trigger.player,trigger.source]){
+										if(target){
+											if(target.hasSkill('zioy_shihunzhuo_kong')){
+												target.storage.zioy_shihunzhuo_kong_count = 0
+											}else{
+												target.addSkill('zioy_shihunzhuo_kong')
+											}
+										}
+									}
+								},
+								priority:7058211
+							},
+							loseAfter:{
+								trigger:{
+									global:["loseAfter","loseAsyncAfter"],
+								},
+								direct:true,
+								filter:function(event,player){
+									if(_status.currentPhase!=player) return false;
+									return true
+								},
+								content:async function(event,trigger,player){
+									const target = trigger.player
+									if(target.hasSkill('zioy_shihunzhuo_she')){
+										target.storage.zioy_shihunzhuo_she_count = 0
+									}else{
+										target.addSkill('zioy_shihunzhuo_she')
+									}
+								},
+								priority:7058211
+							},
+							phaseBegin:{
+								trigger:{
+									player:'phaseBegin',
+								},
+								direct:true,
+								filter:function(event,player){
+									return true
+								},
+								content:async function (event,trigger,player){
+									let current = player;
+									while(true){
+										if(current.hasSkill('zioy_shihunzhuo_kong')){
+											current.removeSkill('zioy_shihunzhuo_kong')
+											player.addMark('zioy_shihunzhuo_xi')
+											if(player.countMark('zioy_shihunzhuo_xi') % 4 === 0){
+												player.loseMaxHp(1)
+												player.recover(player.maxHp - player.hp)
+											}
+										}
+										if(current.hasSkill('zioy_shihunzhuo_she')){
+											current.removeSkill('zioy_shihunzhuo_she')
+											player.addMark('zioy_shihunzhuo_shi')
+											player.draw()
+										}
+										current = current.next
+										if(current === player){
+											break
+										}
+									}
+								},
+								priority:7058211
+							},
+							phaseUseBegin:{
+								trigger:{
+									player:"phaseUseBegin",
+								},
+								direct:true,
+								content:async function(_,__,player){
+									player.storage.zioy_shihunzhuo_useCard_count = 0
+								},
+								priority:7058211
+							},
+							useCard:{
+								trigger:{
+									player:"useCardAfter",
+								},
+								filter:function(event,player){
+									if(!player.isPhaseUsing()) return false;
+									return true;
+								},
+								direct:true,
+								content:async function(event,_,player){
+									const num = Math.ceil(Math.log2(game.roundNumber) - Math.log2(1.4))
+									player.storage.zioy_shihunzhuo_useCard_count += 1
+									if(player.storage.zioy_shihunzhuo_useCard_count > num){
+										var evt=_status.event.getParent('phaseUse');
+										if(evt&&evt.name=='phaseUse'){
+											evt.skipped=true;
+										}
+										event.finish();
+									}
+								},
+								priority:7058211
 							}
 						}
 					}
