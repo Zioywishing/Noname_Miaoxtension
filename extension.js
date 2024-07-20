@@ -2,7 +2,7 @@ import content from "./content.js";
 import _miaoTool from "./miaoTool.js";
 import { skillFactory } from "./miaoTool.js";
 game.import("extension", function (lib, game, ui, get, ai, _status) {
-	const mtool = _miaoTool(lib, game, ui, get, ai, _status);
+	const _mt = _miaoTool(lib, game, ui, get, ai, _status);
 	return {
 		name: "喵喵喵喵",
 		content: content(lib, game, ui, get, ai, _status),
@@ -73,7 +73,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_sanjijie: ["male", "qun", "3/3/3", ["zioy_fouzhiyu", "zioy_ningguxi"], []],
 					zioy_yuze: ["none", "wei", "2", ["zioy_juhun"], []],
 					zioy_luosa: ["male", "wu", "4", ["zioy_minchao", "zioy_kuangyong"]],
-					zioy_gold: ["male", "qun", "5", ["zioy_shihunzhuo"]]
+					zioy_gold: ["male", "qun", "5", ["zioy_shihunzhuo","zioy_nuhuangfeng","zioy_duwenlei"]]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -8876,17 +8876,17 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						autoTranslate: {
 							"name": "世溷浊",
 							"info": `<br>
-							①游戏开始时，你获得'恒'。<br>
+							①游戏开始时，你获得“恒”。<br>
 							②当你于出牌阶段使用牌结算结束后，若你当前回合于出牌阶段使用的牌超过log1.4(游戏轮数)张，你结束出牌阶段。<br>
 							③你造成/受到不因此技能造成的伤害后，伤害来源受到由你造成的X点伤害（X为你此次造成/受到的伤害/2且向下取整）<br>
-							④你造成/受到伤害后，你与伤害来源各获得'空'，若其已有'空'则重置'空'的发动次数。<br>
-							⑤一名角色于你的回合内失去牌时，你令其获得'舍'，若其已有'舍'则重置'舍'的发动次数。<br>
-							⑥你的回合开始阶段，以逆时针顺序从你开始的所有角色依次失去'空'与"舍"，每有一名角色以此法失去'空'，你获得1枚'隙'，每有一名角色以此法失去'舍'，你获得1枚'嗜'。<br>
-							⑦每当你获得4枚'隙'，你失去1点体力上限并将体力回复至体力上限。<br>
-							⑧每当你获得'嗜'时，你摸一张牌。你的手牌上限-X（X为你'嗜'的数量/3）<br>
+							④你造成/受到伤害后，你与伤害来源各获得“空”，若其已有“空”则重置“空”的发动次数。<br>
+							⑤一名角色于你的出牌阶段内失去牌时，你令其获得“舍”，若其已有“舍”则重置“舍”的发动次数。<br>
+							⑥你的回合开始阶段，以逆时针顺序从你开始的所有角色依次失去“空”与"舍"，每有一名角色以此法失去“空”，你获得1枚“隙”，每有一名角色以此法失去“舍”，你获得1枚“嗜”。<br>
+							⑦每当你获得4枚“隙”，你失去1点体力上限并将体力回复至体力上限。<br>
+							⑧每当你获得“嗜”时，你摸一张牌。你的手牌上限-X（X为你“嗜”的数量/3）<br>
 							恒：你的体力上限-1。你的体力上限增加无效。<br>
 							空：获得此技能时你失去1点体力，失去此技能时你回复1点体力。当你回复体力时，取消之。此技能在发动2次后被失去。<br>
-							舍：获得此技能时你弃置你区域内的1张牌，失去此技能时你摸1张牌。当你获得牌后，你须弃置等量的牌，此技能在发动3次后将被失去。`
+							舍：获得此技能时你弃置你区域内的1张牌，失去此技能时你摸1张牌。当你从游戏内获得牌后，你须弃置等量的牌，此技能在发动3次后将被失去。`
 						},
 						trigger:{
 							global:"phaseBefore",
@@ -8961,10 +8961,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								marktext:'舍',
 								intro:{
 									name:'舍',
-									mark:(_,__,player)=>`获得此技能时你弃置你区域内的1张牌，失去此技能时你摸1张牌。当你获得牌后，你须弃置1张牌，此技能在发动${3-player.storage.zioy_shihunzhuo_she_count}次后将被失去。`
+									mark:(_,__,player)=>`获得此技能时你弃置你区域内的1张牌，失去此技能时你摸1张牌。当你从游戏内获得牌后，你须弃置1张牌，此技能在发动${3-player.storage.zioy_shihunzhuo_she_count}次后将被失去。`
 								},
 								init:function(player){
-									player.chooseToDiscard(1,'hej')
+									if(player.countCards('he') > 0)
+										player.chooseToDiscard(1,'hej',true)
 									player.storage.zioy_shihunzhuo_she_count = 0
 								},
 								onremove:function(player){
@@ -8974,13 +8975,20 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								trigger:{
 									player:"gainAfter",
 								},
+								filter:function(event,player){
+									if(player.countCards('he') === 0)return false
+									return !(event.fromStorage==true||game.hasPlayer2(function(current){
+										var evt=event.getl(current);
+										return evt&&evt.xs&&evt.xs.length>0;
+									}))
+								},
 								content:async function(event,trigger,player){
 									// const num = trigger.cards.length
 									player.chooseToDiscard(1,'he',true)
 									player.storage.zioy_shihunzhuo_she_count += 1
 									if(player.storage.zioy_shihunzhuo_she_count === 2){
 										player.storage.zioy_shihunzhuo_she_count = 0
-										player.removeSkill('zioy_shihunzhuo_kong')
+										player.removeSkill('zioy_shihunzhuo_she')
 									}
 								},
 								priority:539943419
@@ -8990,7 +8998,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								marktext:'隙',
 								intro:{
 									name:'隙',
-									mark:(_,__,player)=>`每当你获得4枚'隙'，你失去1点体力上限并将体力回复至体力上限。`
+									mark:(_,__,player)=>`每当你获得4枚“隙”，你失去1点体力上限并将体力回复至体力上限。`
 								},
 							},
 							shi:{
@@ -9078,10 +9086,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								direct:true,
 								filter:function(event,player){
 									if(_status.currentPhase!=player) return false;
-									return true
+									return event.player.isPhaseUsing()
 								},
 								content:async function(event,trigger,player){
 									const target = trigger.player
+									if(!target){
+										return
+									}
 									if(target.hasSkill('zioy_shihunzhuo_she')){
 										target.storage.zioy_shihunzhuo_she_count = 0
 									}else{
@@ -9155,6 +9166,129 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								priority:7058211
 							}
 						}
+					},
+					zioy_nuhuangfeng:{
+						autoTranslate: {
+							"name": "笯凰凤",
+							"info": `回合结束阶段：<br>
+							若你未处于【灵降】状态且场上存在未拥有“恒”的其他角色，你须选择一名未拥有“恒”的其他角色，你令其获得“恒”并根据你选择的角色进入【灵降】状态。<br>
+							若你未处于【灵降】状态且场上所有角色均已拥有“恒”，你进入【常灭】状态并进行3个额外的回合。<br>
+							<br>【灵降】状态具有以下特性:<br>
+							①进入【灵降】状态时，记录你当前的体力，体力上限，区域内的牌。然后将你区域内的所有牌移出游戏。将你的武将牌替换为你进入【灵降】状态时选择的角色的武将牌。
+							将你的体力，体力上限调整为与该角色游戏开始时相等。你获得其所有技能并摸4张牌。<br>
+							②【灵降】状态下你即将进入濒死状态时，取消之，改为退出【灵降】状态。<br>
+							③退出【灵降】状态时，你失去你区域内的所有牌，失去你于【灵降】状态期间获得的所有技能，将武将牌替换为进入【灵降】状态前的武将牌。将你当前的体力，体力上限
+							调整为于进入【灵降】状态前相等。然后将进入【灵降】前区域内的牌移入相应位置。<br>`
+						},
+						init:function(player){
+							player.storage.zioy_nuhuangfeng_status = null
+						},
+						direct:true,
+						trigger:{
+							player:'phaseEnd'
+						},
+						filter(event,player){
+							return player.storage.zioy_nuhuangfeng_status === null
+						},
+						async content(_e,_t,player){
+							const noneHasHeng = game.players.reduce((f,v)=>{return f && v.hasSkill('zioy_shihunzhuo_heng')},true)
+							if(!noneHasHeng){
+								// 选择角色进行【灵降】
+								const { result } = await player
+								.chooseTarget(
+									(card, player, target) => target !== player && !target.hasSkill('zioy_shihunzhuo_heng'),
+									1,
+									true,
+									`选择1名未拥有“恒”的其他角色以进入【灵降】状态`
+								)
+								.set("ai", target => {
+									var att = get.attitude(player, target);
+									return -att;
+								});
+								const target = result.targets[0]
+								target.addSkill('zioy_shihunzhuo_heng')
+								player.storage.zioy_nuhuangfeng_storage = {
+									hp: player.hp,
+									maxHp: player.maxHp,
+									skills: [...player.skills],
+									card:{
+										h:[...player.getCards('h')],
+										e:[...player.getCards('e')],
+										j:[...player.getCards('j')]
+									},
+									name: player.name2 === 'zioy_gold' ? player.node.name2.innerHTML : player.node.name.innerHTML,
+									group:player.group
+								}
+								player.addToExpansion(player.getCards('hej')).gaintag.add('zioy_nuhuangfeng_gainLingJiang');
+								const targetInfo = lib.character[target.name1]
+								player.hp = get.infoHp(targetInfo[2]);
+								player.maxHp = get.infoMaxHp(targetInfo[2]);
+								// player.hujia = get.infoHujia(targetInfo[2]);
+								player.draw(4)
+								const skills = [...targetInfo[3]];
+								for(let skill of skills){
+									player.addSkill(skill)
+								}
+								_mt.player.changeAvatar(player, target.name, 'zioy_gold')
+								_mt.player.setName(player,`灵降·${target.node.name.innerHTML}`, 'zioy_gold')
+								player.changeGroup(target.group)
+								player.storage.zioy_nuhuangfeng_status = 'lingjiang'
+								// 退出灵降
+								player.exitLingjiang = ()=>{
+									player.discard(player.getCards('hej'))
+									const storage = player.storage.zioy_nuhuangfeng_storage
+									const rmSkills = [...player.skills].filter(v=>!storage.skills.includes(v))
+									for(let s of rmSkills){
+										player.removeSkill(s)
+									}
+									player.hp = storage.hp
+									player.maxHp = storage.maxHp
+									for(let s of storage.skills){
+										if(!player.hasSkill(s)){
+											player.addSkill(s)
+										}
+									}
+									for(let c of storage.card.e){
+										player.equip(c)
+									}
+									for(let c of storage.card.j){
+										player.addJudge(c)
+									}
+									player.gain(storage.card.h, 'fromStorage')
+									player.changeGroup(storage.group)
+									_mt.player.changeAvatar(player, 'zioy_gold', 'zioy_gold')
+									_mt.player.setName(player,`${storage.name}`, 'zioy_gold')
+									player.storage.zioy_nuhuangfeng_status = null
+								}
+							}else{
+
+							}
+						},
+						autoSubSkill:{
+							lin_dyingBefore:{
+								trigger:{
+									player:'dyingBefore'
+								},
+								direct:true,
+								_priority:5399439705821,
+								filter(_e,player){
+									return player.storage.zioy_nuhuangfeng_status === 'lingjiang'
+								},
+								async content(_e,_t,player){
+									player.exitLingjiang()
+								}
+							}
+						}
+					},
+					zioy_duwenlei:{
+						autoTranslate: {
+							"name": "独抆泪",
+							"info": `你即将死亡时，若满足：<br>
+							1.你当前体力大于0<br>
+							2.你于【常灭】状态下杀死至少3名其他角色<br>
+							其中任意条，则终止死亡，你失去【常灭】状态并获得〖规神舞〗。<br>
+							若均不满足，你令一名死亡角色复活并回复所有体力，获得你所有牌。`
+						},
 					}
 				},
 				translate: {
