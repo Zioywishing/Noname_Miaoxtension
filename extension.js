@@ -8880,7 +8880,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							②当你于出牌阶段使用牌结算结束后，若你当前回合于出牌阶段使用的牌超过log1.4(游戏轮数)张，你结束出牌阶段。<br>
 							③你造成/受到不因此技能造成的伤害后，伤害来源受到由你造成的X点伤害（X为你此次造成/受到的伤害/2且向下取整）<br>
 							④你造成/受到伤害后，你与伤害来源各获得“空”，若其已有“空”则重置“空”的发动次数。<br>
-							⑤一名角色于你的出牌阶段内失去牌时，你令其获得“舍”，若其已有“舍”则重置“舍”的发动次数。<br>
+							⑤每个出牌阶段每名角色限10次。一名角色于你的出牌阶段内失去牌时，你令其获得“舍”，若其已有“舍”则重置“舍”的发动次数。<br>
 							⑥你的回合开始阶段，以逆时针顺序从你开始的所有角色依次失去“空”与"舍"，每有一名角色以此法失去“空”，你获得1枚“隙”，每有一名角色以此法失去“舍”，你获得1枚“嗜”。<br>
 							⑦每当你获得4枚“隙”，你失去1点体力上限并将体力回复至体力上限。<br>
 							⑧每当你获得“嗜”时，你摸一张牌。你的手牌上限-X（X为你“嗜”的数量/3）<br>
@@ -9084,8 +9084,12 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									global:["loseAfter","loseAsyncAfter"],
 								},
 								direct:true,
+								init(player){
+									player.storage.zioy_shihunzhuo_she_gainHistory = {}
+								},
 								filter:function(event,player){
 									if(_status.currentPhase!=player) return false;
+									if(player.storage.zioy_shihunzhuo_she_gainHistory[event.player] >= 10) return false
 									return event.player.isPhaseUsing()
 								},
 								content:async function(event,trigger,player){
@@ -9093,6 +9097,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									if(!target){
 										return
 									}
+									if(!player.storage.zioy_shihunzhuo_she_gainHistory[target]){
+										player.storage.zioy_shihunzhuo_she_gainHistory[target] = 0
+									}
+									player.storage.zioy_shihunzhuo_she_gainHistory[target] += 1
 									if(target.hasSkill('zioy_shihunzhuo_she')){
 										target.storage.zioy_shihunzhuo_she_count = 0
 									}else{
@@ -9100,6 +9108,19 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									}
 								},
 								priority:7058211
+							},
+							clearShe_gainHistory:{
+								trigger:{
+									player:['phaseUseEnd','phaseEnd']
+								},
+								direct:true,
+								silent:true,
+								filter:_=>true,
+								async content(_,__,player){
+									player.storage.zioy_shihunzhuo_she_gainHistory = {}
+									console.log(
+										player.storage.zioy_shihunzhuo_she_gainHistory)
+								}
 							},
 							phaseBegin:{
 								trigger:{
@@ -9230,7 +9251,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.addSkill(skill)
 								}
 								_mt.player.changeAvatar(player, target.name, 'zioy_gold')
-								_mt.player.setName(player,`灵降·${target.node.name.innerHTML}`, 'zioy_gold')
+								_mt.player.setName(player,`降·${target.node.name.innerHTML}`, 'zioy_gold')
 								player.changeGroup(target.group)
 								player.storage.zioy_nuhuangfeng_status = 'lingjiang'
 								// 退出灵降
@@ -9283,7 +9304,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_duwenlei:{
 						autoTranslate: {
 							"name": "独抆泪",
-							"info": `你即将死亡时，若满足：<br>
+							"info": `你即将死亡时，若你满足：<br>
 							1.你当前体力大于0<br>
 							2.你于【常灭】状态下杀死至少3名其他角色<br>
 							其中任意条，则终止死亡，你失去【常灭】状态并获得〖规神舞〗。<br>
