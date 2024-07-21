@@ -73,7 +73,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_sanjijie: ["male", "qun", "3/3/3", ["zioy_fouzhiyu", "zioy_ningguxi"], []],
 					zioy_yuze: ["none", "wei", "2", ["zioy_juhun"], []],
 					zioy_luosa: ["male", "wu", "4", ["zioy_minchao", "zioy_kuangyong"]],
-					zioy_gold: ["male", "qun", "5", ["zioy_shihunzhuo","zioy_nuhuangfeng","zioy_duwenlei"]]
+					zioy_gold: ["male", "qun", 5, ["zioy_shihunzhuo","zioy_nuhuangfeng","zioy_duwenlei"]]
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -8374,7 +8374,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									global: "phaseBegin"
 								},
 								filter: () => true,
-								forced: true,
+								direct: true,
 								init: player => (player.storage.zioy_que2 = true),
 								content: function () {
 									player.storage.zioy_que2 = true;
@@ -9011,36 +9011,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}
 						},
 						autoSubSkill:{
-							damageBegin1:{
-								trigger:{
-									player:'damageBegin1',
-									source:'damageBegin1'
-								},
-								filter:()=>{
-									return false
-									return true
-								},
-								direct:true,
-								content:async function(event,trigger,player){
-									trigger.num *= 2
-								},
-								priority:-539943419
-							},
-							damageBegin3:{
-								trigger:{
-									player:'damageBegin3',
-									source:'damageBegin3'
-								},
-								filter:(event,player)=>{
-									return false
-									return event.num < 2
-								},
-								direct:true,
-								content:async function(event,trigger,player){
-									trigger.num = 2
-								},
-								priority:-539943419
-							},
 							damageEnd:{
 								trigger:{
 									player:'damageEnd',
@@ -9118,8 +9088,6 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								filter:_=>true,
 								async content(_,__,player){
 									player.storage.zioy_shihunzhuo_she_gainHistory = {}
-									console.log(
-										player.storage.zioy_shihunzhuo_she_gainHistory)
 								}
 							},
 							phaseBegin:{
@@ -9192,25 +9160,33 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						autoTranslate: {
 							"name": "笯凰凤",
 							"info": `回合结束阶段：<br>
-							若你未处于【灵降】状态且场上存在未拥有“恒”的其他角色，你须选择一名未拥有“恒”的其他角色，你令其获得“恒”并根据你选择的角色进入【灵降】状态。<br>
-							若你未处于【灵降】状态且场上所有角色均已拥有“恒”，你进入【常灭】状态并进行3个额外的回合。<br>
+							若你未处于【灵降】且未进入过【常灭】状态且场上存在未拥有“恒”的其他角色，你须选择一名未拥有“恒”的其他角色，你令其获得“恒”并根据你选择的角色进入【灵降】状态。<br>
+							若你未处于【灵降】且未进入过【常灭】状态且场上所有角色均已拥有“恒”，你进入【常灭】状态并进行3个额外的回合。<br>
 							<br>【灵降】状态具有以下特性:<br>
-							①进入【灵降】状态时，记录你当前的体力，体力上限，区域内的牌。然后将你区域内的所有牌移出游戏。将你的武将牌替换为你进入【灵降】状态时选择的角色的武将牌。
-							将你的体力，体力上限调整为与该角色游戏开始时相等。你获得其所有技能并摸4张牌。<br>
+							①进入【灵降】状态时，记录你当前的体力，体力上限，区域内的牌。然后将你区域内的所有牌移出游戏。将你的武将牌替换为你进入【灵降】状态时选择的角色的武将牌。将你的体力，体力上限调整为与该角色游戏开始时相等。你获得其所有技能并摸4张牌。<br>
 							②【灵降】状态下你即将进入濒死状态时，取消之，改为退出【灵降】状态。<br>
-							③退出【灵降】状态时，你失去你区域内的所有牌，失去你于【灵降】状态期间获得的所有技能，将武将牌替换为进入【灵降】状态前的武将牌。将你当前的体力，体力上限
-							调整为于进入【灵降】状态前相等。然后将进入【灵降】前区域内的牌移入相应位置。<br>`
+							③退出【灵降】状态时，你失去你区域内的所有牌，失去你于【灵降】状态期间获得的所有技能，将武将牌替换为进入【灵降】状态前的武将牌。将你当前的体力，体力上限调整为于进入【灵降】状态前相等。然后将进入【灵降】前区域内的牌移入相应位置。<br>
+							<br>【常灭】状态具有以下特性:<br>
+							①进入【常灭】状态时，所有其他角色立即获得“空”与“舍”。<br>
+							②你的回合开始阶段，你将你的体力与体力上限修改为9，并将你的手牌补至X（X为你“嗜”的数量）。<br>
+							③你使用牌没有距离限制。拥有“空”或“舍”的其他角色无法响应你使用的牌。<br>
+							④你即将造成/受到的伤害*2且结算时至少为2。<br>
+							⑤你造成伤害时，若受伤角色拥有“恒”，你令其失去之，然后你获得1枚“神罪”。<br>
+							⑥你杀死一名角色时，你获得3枚“神罪”。<br>
+							⑦其他角色的回合开始阶段，你失去所有体力。`
 						},
 						init:function(player){
 							player.storage.zioy_nuhuangfeng_status = null
 						},
-						direct:true,
+						forced:true,
 						trigger:{
 							player:'phaseEnd'
 						},
 						filter(event,player){
 							return player.storage.zioy_nuhuangfeng_status === null
 						},
+						skillAnimation: true,
+						animationColor: "thunder",
 						async content(_e,_t,player){
 							const noneHasHeng = game.players.reduce((f,v)=>{return f && v.hasSkill('zioy_shihunzhuo_heng')},true)
 							if(!noneHasHeng){
@@ -9254,6 +9230,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								_mt.player.setName(player,`降·${target.node.name.innerHTML}`, 'zioy_gold')
 								player.changeGroup(target.group)
 								player.storage.zioy_nuhuangfeng_status = 'lingjiang'
+								player.update()
 								// 退出灵降
 								player.exitLingjiang = ()=>{
 									player.discard(player.getCards('hej'))
@@ -9280,17 +9257,29 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									_mt.player.changeAvatar(player, 'zioy_gold', 'zioy_gold')
 									_mt.player.setName(player,`${storage.name}`, 'zioy_gold')
 									player.storage.zioy_nuhuangfeng_status = null
+									player.update()
 								}
 							}else{
-
+								player.storage.zioy_nuhuangfeng_status = 'changmie'
+								for(let i = 0;i < 3;i++){
+									player.insertPhase();
+								}
+								game.players.forEach(current=>{
+									if(!current.hasSkill('zioy_shihunzhuo_kong')){
+										current.addSkill('zioy_shihunzhuo_kong')
+									}
+									if(!current.hasSkill('zioy_shihunzhuo_she')){
+										current.addSkill('zioy_shihunzhuo_she')
+									}
+								})
 							}
 						},
 						autoSubSkill:{
 							lin_dyingBefore:{
 								trigger:{
-									player:'dyingBefore'
+									player:['dyingBefore','dieBefore']
 								},
-								direct:true,
+								forced:true,
 								_priority:5399439705821,
 								filter(_e,player){
 									return player.storage.zioy_nuhuangfeng_status === 'lingjiang'
@@ -9298,15 +9287,140 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								async content(_e,_t,player){
 									player.exitLingjiang()
 								}
+							},
+							chang_phaseBegin:{
+								trigger:{
+									player:'phaseBegin'
+								},
+								filter(event,player){
+									return player.storage.zioy_nuhuangfeng_status === 'changmie'
+								},
+								forced:true,
+								async content(_e,_t,player){
+									player.hp = 9
+									player.maxHp = 9
+									player.update()
+									const drawTo = player.countMark('zioy_shihunzhuo_shi')
+									if(player.countCards('h') < drawTo){
+										player.draw(drawTo - player.countCards('h'))
+									}
+								},
+								_priority:170058
+							},
+							chang_directHit:{
+								trigger:{
+									player:"useCardToPlayered",
+								},
+								forced:true,
+								filter(event,player){
+									if(event.player === player){
+										return false
+									}
+									if(player.storage.zioy_nuhuangfeng_status === 'changmie'){
+										return false
+									}
+									return event.player.hasSkill('zioy_shihunzhuo_kong') || event.player.hasSkill('zioy_shihunzhuo_she')
+								},
+								_priority:170058,
+								async function (_e,trigger,player){
+									game.log(player,'令',trigger.card,'不能被',trigger.target,'响应');
+									trigger.directHit.push(trigger.target);
+								}
+							},
+							chang_damageBegin1:{
+								trigger:{
+									player:'damageBegin1',
+									source:'damageBegin1'
+								},
+								filter(event,player){
+									return player.storage.zioy_nuhuangfeng_status === 'changmie'
+								},
+								direct:true,
+								content:async function(event,trigger,player){
+									trigger.num *= 2
+								},
+								priority:-539943419
+							},
+							chang_damageBegin3:{
+								trigger:{
+									player:'damageBegin3',
+									source:'damageBegin3'
+								},
+								filter:(event,player)=>{
+									return player.storage.zioy_nuhuangfeng_status === 'changmie' && event.num < 2
+								},
+								direct:true,
+								content:async function(event,trigger,player){
+									trigger.num = 2
+								},
+								priority:-539943419
+							},
+							chang_damageBeginSource:{
+								trigger:{
+									source:'damageEnd'
+								},
+								forced:true,
+								filter(event,player){
+									return player.storage.zioy_nuhuangfeng_status === 'changmie' && event.player.hasSkill('zioy_shihunzhuo_heng')
+								},
+								async content(_e,trigger,player){
+									trigger.player.removeSkill('zioy_shihunzhuo_heng')
+									player.addMark('zioy_nuhuangfeng_shenzui')
+								},
+								priority:-151654684
+							},
+							chang_dieAfterSource:{
+								trigger:{
+									source:'dieAfter'
+								},
+								forced:true,
+								filter(_e,player){
+									return player.storage.zioy_nuhuangfeng_status === 'changmie'
+								},
+								async content(_e,trigger,player){
+									player.addMark('zioy_nuhuangfeng_shenzui', 3)
+								},
+								priority:-151654684
+							},
+							chang_phaseBegin_other:{
+								trigger:{
+									global:"phaseBegin",
+								},
+								forced:true,
+								filter:function(event,player){
+									return event.player!=player && player.storage.zioy_nuhuangfeng_status === 'changmie';
+								},
+								async content(_,__,player){
+									player.loseHp(player.hp)
+								},
+								priority:-151654684
 							}
-						}
+						},
+						subSkill:{
+							shenzui:{
+								mark:false,
+								marktext:'神罪',
+								intro:{
+									name:'神罪',
+									mark(_,__,player){
+										return player.countMark('zioy_nuhuangfeng_shenzui') >= 5 ?
+										'神明反叛':'伪神无赦'
+									}
+								}
+							}
+						},
+						mod:{
+							targetInRange(card,player,target){
+								if(player.storage.zioy_nuhuangfeng_status === 'changmie') return true;
+							},
+						},
 					},
 					zioy_duwenlei:{
 						autoTranslate: {
 							"name": "独抆泪",
 							"info": `你即将死亡时，若你满足：<br>
 							1.你当前体力大于0<br>
-							2.你于【常灭】状态下杀死至少3名其他角色<br>
+							2.你的“神罪”标记数量不小于5<br>
 							其中任意条，则终止死亡，你失去【常灭】状态并获得〖规神舞〗。<br>
 							若均不满足，你令一名死亡角色复活并回复所有体力，获得你所有牌。`
 						},

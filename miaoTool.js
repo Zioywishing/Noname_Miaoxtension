@@ -24,10 +24,6 @@ export function skillFactory(skill) {
 
 export default (lib, game, ui, get, ai, _status) => {
 	return {
-		isAsyncFunction(func) {
-			return func.constructor.name === "AsyncFunction";
-		},
-		watch: function (obj, key, callback) {},
 		game: {},
 		/**
 		 * Description 角色相关操作
@@ -90,6 +86,19 @@ export default (lib, game, ui, get, ai, _status) => {
 				return (...args) => {
 					console.log(count++, ...args);
 				};
+			},
+			/**
+			 * Description 类似python的sleep，配合await使用，使async函数暂停。
+			 * @param {number} timeout 暂停时间
+			 * @returns {null}
+			 */
+			async sleep(timeout) {
+				await new Promise(r => setTimeout(r, timeout));
+				return;
+			},
+
+			isAsyncFunction(func) {
+				return func.constructor.name === "AsyncFunction";
 			}
 		}
 	};
