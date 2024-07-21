@@ -8882,7 +8882,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							④你造成/受到伤害后，你与伤害来源各获得“空”，若其已有“空”则重置“空”的发动次数。<br>
 							⑤每个出牌阶段每名角色限10次。一名角色于你的出牌阶段内失去牌时，你令其获得“舍”，若其已有“舍”则重置“舍”的发动次数。<br>
 							⑥你的回合开始阶段，以逆时针顺序从你开始的所有角色依次失去“空”与"舍"，每有一名角色以此法失去“空”，你获得1枚“隙”，每有一名角色以此法失去“舍”，你获得1枚“嗜”。<br>
-							⑦每当你获得4枚“隙”，你失去1点体力上限并将体力回复至体力上限。<br>
+							⑦每当你获得4枚“隙”，你失去1点体力上限，若你未处于【灵降】状态，你将体力回复至体力上限。<br>
 							⑧每当你获得“嗜”时，你摸一张牌。你的手牌上限-X（X为你“嗜”的数量/3）<br>
 							恒：你的体力上限-1。你的体力上限增加无效。<br>
 							空：获得此技能时你失去1点体力，失去此技能时你回复1点体力。当你回复体力时，取消之。此技能在发动2次后被失去。<br>
@@ -9019,7 +9019,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								direct:true,
 								filter:(event)=>{
 									// console.log(event.getParent().name)
-									return event.getParent().name !== `zioy_shihunzhuo_damageEnd` && event.num > 1
+									return event.getParent().name !== `zioy_shihunzhuo_damageEnd` && event.num > 1 && event.source
 								},
 								content:async function(event,trigger,player){
 									const num = Math.floor(trigger.num / 2)
@@ -9106,7 +9106,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 											player.addMark('zioy_shihunzhuo_xi')
 											if(player.countMark('zioy_shihunzhuo_xi') % 4 === 0){
 												player.loseMaxHp(1)
-												player.recover(player.maxHp - player.hp)
+												if(player.storage.zioy_nuhuangfeng_status !== 'lingjiang'){
+													player.recover(player.maxHp - player.hp)
+												}
 											}
 										}
 										if(current.hasSkill('zioy_shihunzhuo_she')){
@@ -9154,12 +9156,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								priority:7058211
 							}
-						}
+						},
+						_priority:9579
 					},
 					zioy_nuhuangfeng:{
 						autoTranslate: {
 							"name": "笯凰凤",
-							"info": `回合结束阶段：<br>
+							"info": `游戏开始时或回合结束阶段：<br>
 							若你未处于【灵降】且未进入过【常灭】状态且场上存在未拥有“恒”的其他角色，你须选择一名未拥有“恒”的其他角色，你令其获得“恒”并根据你选择的角色进入【灵降】状态。<br>
 							若你未处于【灵降】且未进入过【常灭】状态且场上所有角色均已拥有“恒”，你进入【常灭】状态并进行3个额外的回合。<br>
 							<br>【灵降】状态具有以下特性:<br>
@@ -9180,9 +9183,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						forced:true,
 						trigger:{
-							player:'phaseEnd'
+							player:['phaseEnd','zioy_nuhuangfeng_enterGame']
 						},
 						filter(event,player){
+							// 进入过常灭状态
+							if(player.storage.zioy_nuhuangfeng_changmie_flag)return false
 							return player.storage.zioy_nuhuangfeng_status === null
 						},
 						skillAnimation: true,
@@ -9203,6 +9208,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									return -att;
 								});
 								const target = result.targets[0]
+								player.line(target)
 								target.addSkill('zioy_shihunzhuo_heng')
 								player.storage.zioy_nuhuangfeng_storage = {
 									hp: player.hp,
@@ -9260,11 +9266,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.update()
 								}
 							}else{
+								player.storage.zioy_nuhuangfeng_changmie_flag = true
 								player.storage.zioy_nuhuangfeng_status = 'changmie'
 								for(let i = 0;i < 3;i++){
 									player.insertPhase();
 								}
 								game.players.forEach(current=>{
+									player.line(current)
 									if(!current.hasSkill('zioy_shihunzhuo_kong')){
 										current.addSkill('zioy_shihunzhuo_kong')
 									}
@@ -9275,6 +9283,20 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							}
 						},
 						autoSubSkill:{
+							enterGame:{
+								trigger:{
+									global:'phaseBefore',
+									player:['enterGame']
+								},
+								filter(event,player){
+									if(event.name=='phase'&&game.phaseNumber>0) return false;
+									return true
+								},
+								direct:true,
+								async content(event,trigger,player){
+									_status.event.trigger("zioy_nuhuangfeng_enterGame");
+								}
+							},
 							lin_dyingBefore:{
 								trigger:{
 									player:['dyingBefore','dieBefore']
@@ -9414,16 +9436,69 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								if(player.storage.zioy_nuhuangfeng_status === 'changmie') return true;
 							},
 						},
+						_priority: 8648,
 					},
 					zioy_duwenlei:{
 						autoTranslate: {
 							"name": "独抆泪",
-							"info": `你即将死亡时，若你满足：<br>
+							"info": `每局游戏限1次。你即将死亡时，若你满足：<br>
 							1.你当前体力大于0<br>
 							2.你的“神罪”标记数量不小于5<br>
-							其中任意条，则终止死亡，你失去【常灭】状态并获得〖规神舞〗。<br>
-							若均不满足，你令一名死亡角色复活并回复所有体力，获得你所有牌。`
+							其中任意条，则终止死亡，你退出【常灭】状态并使你〖规神舞〗有效。<br>
+							若均不满足，你令一名死亡角色复活并将其体力与体力上限设置为与该角色游戏开始时相等，令其获得你区域内所有牌。`
 						},
+						autoSubSkill:{
+							goDie:{
+								trigger:{
+									player:'dieBefore'
+								},
+								forced:true,
+								filter(event,player){
+									if(player.storage.zioy_duwenlei_used)return false
+									return player.hp < 0 && player.countMark('zioy_nuhuangfeng_shenzui') < 5
+								},
+								forceDie:true,
+								async content(_e,_t,player){
+									player.storage.zioy_duwenlei_used = true
+									const {result} = await player.chooseTarget('令一名死亡角色复活并将其体力与体力上限设置为与该角色游戏开始时相等，令其获得你区域内所有牌。',(_, player, target)=>target.isDead()).set('deadTarget',true)
+									.set("ai", target => {
+										var att = get.attitude(player, target);
+										return att;
+									});
+									if(result.bool){
+										const target = result.targets[0]
+										target.revive()
+										const targetInfo = lib.character[target.name1]
+										target.hp = get.infoHp(targetInfo[2]);
+										target.maxHp = get.infoMaxHp(targetInfo[2]);
+										target.gain(player.getCards('hej'))
+										target.update()
+									}
+								},
+								_priority:7055432
+							},
+							BecomeGod:{
+								trigger:{
+									player:'dieBefore'
+								},
+								forced:true,
+								skillAnimation: true,
+								animationColor: "thunder",
+								forceDie:true,
+								filter(event,player){
+									if(player.storage.zioy_duwenlei_used)return false
+									return player.hp > 0 || player.countMark('zioy_nuhuangfeng_shenzui') >= 5
+								},
+								async content(_e,trigger,player){
+									player.storage.zioy_duwenlei_used = true
+									trigger.cancel()
+									if(player.storage.zioy_nuhuangfeng_status === 'changmie'){
+										player.storage.zioy_nuhuangfeng_status = null
+									}
+								},
+								_priority:7055433
+							}
+						}
 					}
 				},
 				translate: {
