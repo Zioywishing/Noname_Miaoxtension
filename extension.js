@@ -6307,6 +6307,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player: "dieBefore"
 								},
 								filter: function (event, player) {
+									if(!player.storage._miao_twins)return false
 									// game.log(player.storage._miao_twins.hp > 0&& player.storage._miao_twins.isIn()&&event.getParent().name!='giveup'&&player.maxHp>0)
 									return !player.storage._miao_twins.storage.zioy_riyuexingkong_die;
 								},
@@ -8882,7 +8883,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							④你造成/受到伤害后，你与伤害来源各获得“空”，若其已有“空”则重置“空”的发动次数。<br>
 							⑤每个出牌阶段每名角色限10次。一名角色于你的出牌阶段内失去牌时，你令其获得“舍”，若其已有“舍”则重置“舍”的发动次数。<br>
 							⑥你的回合开始阶段，以逆时针顺序从你开始的所有角色依次失去“空”与"舍"，每有一名角色以此法失去“空”，你获得1枚“隙”，每有一名角色以此法失去“舍”，你获得1枚“嗜”。<br>
-							⑦每当你获得4枚“隙”，你失去1点体力上限，若你未处于【灵降】状态，你将体力回复至体力上限。<br>
+							⑦每当你获得4枚“隙”（【灵降】状态下为2枚），你失去1点体力上限（【灵降】状态下为2点），若你未处于【灵降】状态，你将体力回复至体力上限。<br>
 							⑧每当你获得“嗜”时，你摸一张牌。你的手牌上限-X（X为你“嗜”的数量/3）<br>
 							恒：你的体力上限-1。你的体力上限增加无效。<br>
 							空：获得此技能时你失去1点体力，失去此技能时你回复1点体力。当你回复体力时，取消之。此技能在发动2次后被失去。<br>
@@ -8998,7 +8999,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								marktext:'隙',
 								intro:{
 									name:'隙',
-									mark:(_,__,player)=>`每当你获得4枚“隙”，你失去1点体力上限并将体力回复至体力上限。`
+									mark:(_,__,player)=>`每当你获得${player.storage.zioy_nuhuangfeng_status !== 'lingjiang' ? 4 : 2}枚“隙”，你失去${player.storage.zioy_nuhuangfeng_status !== 'lingjiang' ? 1 : 2}点体力上限。`
 								},
 							},
 							shi:{
@@ -9058,6 +9059,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.storage.zioy_shihunzhuo_she_gainHistory = {}
 								},
 								filter:function(event,player){
+									if(!event.player) return false
 									if(_status.currentPhase!=player) return false;
 									if(player.storage.zioy_shihunzhuo_she_gainHistory[event.player] >= 10) return false
 									return event.player.isPhaseUsing()
@@ -9104,8 +9106,8 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 										if(current.hasSkill('zioy_shihunzhuo_kong')){
 											current.removeSkill('zioy_shihunzhuo_kong')
 											player.addMark('zioy_shihunzhuo_xi')
-											if(player.countMark('zioy_shihunzhuo_xi') % 4 === 0){
-												player.loseMaxHp(1)
+											if(player.countMark('zioy_shihunzhuo_xi') % (player.storage.zioy_nuhuangfeng_status !== 'lingjiang' ? 4 : 2) === 0){
+												player.loseMaxHp(player.storage.zioy_nuhuangfeng_status !== 'lingjiang' ? 1 : 2)
 												if(player.storage.zioy_nuhuangfeng_status !== 'lingjiang'){
 													player.recover(player.maxHp - player.hp)
 												}
@@ -9223,7 +9225,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									group:player.group
 								}
 								player.addToExpansion(player.getCards('hej')).gaintag.add('zioy_nuhuangfeng_gainLingJiang');
-								const targetInfo = lib.character[target.name1]
+								const targetInfo = lib.character[target.name1] ? lib.character[target.name1] : [target.sex, target.group, `${target.hp}/${target.maxHp}/${target.hujia}`, [...target.skills]]
 								player.hp = get.infoHp(targetInfo[2]);
 								player.maxHp = get.infoMaxHp(targetInfo[2]);
 								// player.hujia = get.infoHujia(targetInfo[2]);
