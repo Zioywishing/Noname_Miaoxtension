@@ -9268,6 +9268,18 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.update()
 								}
 							}else{
+								// setInterval(()=>{
+								// 	const sm = '▝▞▖▗▘▚'
+								// 	const g = ()=>{
+								// 		const rn = _mt.math.randInt(0,sm.length-1)
+								// 		return sm.substring(rn,rn+1)
+								// 	}
+								// 	const rs = `${g()}${g()}${g()}`
+								// 	_mt.player.setName(player, rs,'zioy_gold')
+								// },200)
+								// 祭祀-神枝桠
+								_mt.player.setName(player, 'ꆦꑞꉂ', 'zioy_gold')
+								_mt.player.changeAvatarStyle(player,"glitch",'zioy_gold')
 								player.storage.zioy_nuhuangfeng_changmie_flag = true
 								player.storage.zioy_nuhuangfeng_status = 'changmie'
 								for(let i = 0;i < 3;i++){
@@ -9457,7 +9469,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								forced:true,
 								filter(event,player){
 									if(player.storage.zioy_duwenlei_used)return false
-									return player.hp < 0 && player.countMark('zioy_nuhuangfeng_shenzui') < 5
+									return player.hp <= 0 && player.countMark('zioy_nuhuangfeng_shenzui') < 5
 								},
 								forceDie:true,
 								async content(_e,_t,player){
@@ -9492,6 +9504,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									return player.hp > 0 || player.countMark('zioy_nuhuangfeng_shenzui') >= 5
 								},
 								async content(_e,trigger,player){
+									_mt.player.changeAvatarStyle(player,"glitch",'zioy_gold')
 									player.storage.zioy_duwenlei_used = true
 									trigger.cancel()
 									if(player.storage.zioy_nuhuangfeng_status === 'changmie'){

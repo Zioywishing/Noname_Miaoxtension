@@ -2,6 +2,10 @@ import miaoTool from "./miaoTool.js";
 
 export default (lib, game, ui, get, ai, _status) => (config, pack) => {
     lib.miaoTool = miaoTool(lib, game, ui, get, ai, _status)
+	lib.miaoStorage = {
+        // 已初始化的style的class
+        initedStyle: [] 
+    };
     // console.log(666,miaoTool(lib, game, ui, get, ai, _status))
     /*---------------------------------------------------------------以下为杂项---------------------------------------------------------------*/
     get.is.xuemai = function (skill) {
