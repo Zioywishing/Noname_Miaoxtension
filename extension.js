@@ -73,7 +73,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_sanjijie: ["male", "qun", "3/3/3", ["zioy_fouzhiyu", "zioy_ningguxi"], []],
 					zioy_yuze: ["none", "wei", "2", ["zioy_juhun"], []],
 					zioy_luosa: ["male", "wu", "4", ["zioy_minchao", "zioy_kuangyong"]],
-					zioy_gold: ["male", "qun", 5, ["zioy_shihunzhuo","zioy_nuhuangfeng","zioy_duwenlei"]]
+					zioy_gold: ["male", "qun", 5, ["zioy_shihunzhuo","zioy_nuhuangfeng","zioy_duwenlei"]],
+					zioy_hezhe: ["male", "qun", 4, ["zioy_yuekong", "zioy_tanxi", "zioy_gengyi"]],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -131,7 +132,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_sanjijie: "三畿界",
 					zioy_yuze: "羽泽",
 					zioy_luosa: "罗萨",
-					zioy_gold: '黄金'
+					zioy_gold: '黄金',
+					zioy_hezhe: '何者'
 				}
 			},
 			card: {
@@ -9514,6 +9516,116 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								_priority:7055433
 							}
 						}
+					},
+					zioy_tanxi:{
+						autoTranslate: {
+							"name": "谈息",
+							"info": `锁定技。每回合限1次。当你使用或打出基本牌或成为使用基本牌的目标时，你获得1枚“息”（不超过11枚），然后你摸等同于“息”的数量/3张牌（向上取整）并将护甲值调整为“息”的数量/5（向下取整）。`
+						},
+						trigger:{
+							target:"useCardToTarget",
+							player:['useCardToTarget', "respond", "useCard"]
+						},
+						marktext:'息',
+						intro:{
+							name:'息',
+							mark:()=>lib.translate.zioy_tanxi_info
+						},
+						locked: true,
+						forced: true,
+						filter(event,player){
+							return !player.hasSkill('zioy_tanxi_blocker') && get.type(event.card)=='basic'
+						},
+						async content(_e,_t,player){
+							player.addSkill('zioy_tanxi_blocker')
+							const count = player.countMark('zioy_tanxi')
+							if(count < 11){
+								player.addMark('zioy_tanxi')
+							}
+							player.draw(Math.ceil(count/3))
+							player.changeHujia(Math.floor(count/5) - player.hujia)
+						},
+						subSkill:{
+							blocker:{
+								trigger:{
+									global:'phaseEnd'
+								},
+								filter:()=>true,
+								silent:true,
+								direct:true,
+								async content(_e,__,player){
+									player.removeSkill('zioy_tanxi_blocker')
+								}
+							}
+						},
+						_priority: 3
+					},
+					zioy_yuekong:{
+						autoTranslate: {
+							"name": "阅空",
+							"info": `锁定技。你造成/受到的伤害不超过1点。`
+						},
+						trigger:{
+							source:'damageBegin3',
+							player:['damageBegin3']
+						},
+						locked: true,
+						forced: true,
+						filter(event,player){
+							return event.num > 1
+						},
+						async content(_e,trigger,_p){
+							trigger.num = 1
+						},
+						_priority: -5646541,
+					},
+					zioy_gengyi:{
+						autoTranslate: {
+							"name": "亘一",
+							"info": `出牌阶段限1次。你可以失去1/2的“息”（向下取整），令所有角色弃置区域内所有牌并失去所有护甲，然后调整体力上限/体力与武将牌上相同并摸4张牌。`
+						},
+						enable: "phaseUse",
+						usable: 1,
+						skillAnimation: true,
+						filter(){return true},
+						async content(_e,_t,player){
+							player.removeMark('zioy_tanxi', Math.floor(player.countMark('zioy_tanxi')/2))
+							game.players.forEach(p=>{
+								p.discard(p.getCards('hej'))
+								p.changeHujia(-p.hujia)
+								const maxHp = get.infoMaxHp(lib.character[p.name][2]);
+								if(p.maxHp > maxHp){
+									p.loseMaxHp(p.maxHp - maxHp)
+								}
+								if(p.maxHp < maxHp){
+									p.gainMaxHp(maxHp - p.maxHp)
+								}
+								const hp = get.infoHp(lib.character[p.name][2]);
+								if(p.hp > hp){
+									p.loseHp(p.hp - hp)
+								}
+								if(p.hp < hp){
+									p.recover(hp - p.hp)
+								}
+								// p.recover(p.maxHp - p.hp)
+								p.draw(4)
+							})
+						},
+						ai: {
+							order: 2,
+							result: {
+								player: function (player) {
+									if(player.hp == 1){
+										return 999
+									}
+									let count = 0
+									game.players.forEach(p=>{
+										count += get.attitude(player,p) * (2 + (get.infoHp(lib.character[p.name][2]) - p.hp)**3 - p.countCards('h') - 3 * p.countCards('e') - 2 * p.hujia)
+									})
+									return count
+								}
+							}
+						},
 					}
 				},
 				translate: {
