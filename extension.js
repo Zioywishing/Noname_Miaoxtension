@@ -9520,7 +9520,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_tanxi:{
 						autoTranslate: {
 							"name": "谈息",
-							"info": `锁定技。每回合限1次。当你使用或打出基本牌或成为使用基本牌的目标时，你获得1枚“息”（不超过11枚），然后你摸等同于“息”的数量/3张牌（向上取整）并将护甲值调整为“息”的数量/5（向下取整）。`
+							"info": `锁定技。每回合限1次。当你使用或打出基本牌或成为使用基本牌的目标时，你获得1枚“息”（不超过11枚），然后你摸等同于“息”的数量/3张牌（向上取整）并将护甲值调整为“息”的数量/7（向下取整）。`
 						},
 						trigger:{
 							target:"useCardToTarget",
@@ -9543,7 +9543,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								player.addMark('zioy_tanxi')
 							}
 							player.draw(Math.ceil(count/3))
-							player.changeHujia(Math.floor(count/5) - player.hujia)
+							player.changeHujia(Math.floor(count/7) - player.hujia)
 						},
 						subSkill:{
 							blocker:{
