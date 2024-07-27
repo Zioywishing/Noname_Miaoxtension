@@ -9593,19 +9593,21 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							for(let p of game.players){
 								p.discard(p.getCards('hej'))
 								p.changeHujia(-p.hujia)
-								const hp = get.infoHp(lib.character[p.name][2]);
-								const maxHp = get.infoMaxHp(lib.character[p.name][2]);
-								if(p.maxHp > maxHp){
-									await p.loseMaxHp(p.maxHp - maxHp)
-								}
-								if(p.maxHp < maxHp){
-									await p.gainMaxHp(maxHp - p.maxHp)
-								}
-								if(p.hp > hp){
-									await p.loseHp(p.hp - hp)
-								}
-								if(p.hp < hp){
-									await p.recover(hp - p.hp)
+								if(p.name !== 'unknown'){
+									const hp = get.infoHp(lib.character[p.name][2]);
+									const maxHp = get.infoMaxHp(lib.character[p.name][2]);
+									if(p.maxHp > maxHp){
+										await p.loseMaxHp(p.maxHp - maxHp)
+									}
+									if(p.maxHp < maxHp){
+										await p.gainMaxHp(maxHp - p.maxHp)
+									}
+									if(p.hp > hp){
+										await p.loseHp(p.hp - hp)
+									}
+									if(p.hp < hp){
+										await p.recover(hp - p.hp)
+									}
 								}
 								p.draw(4)
 							}
