@@ -7444,9 +7444,15 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 										if (player.storage.gui_usedSkill.length > 0) {
 											var skill = player.storage.gui_usedSkill.randomGet();
 											player.restoreSkill(skill);
+											const a1 = [...player.storage.gui_usedSkill]
+											const l1 = player.storage.gui_usedSkill.length
 											player.storage.gui_usedSkill = player.storage.gui_usedSkill.filter(s => {
 												return s != skill;
 											});
+											const l2 = player.storage.gui_usedSkill.length
+											if(1){
+												console.log('1111', skill, a1, player.storage.gui_usedSkill)
+											}
 										}
 									}
 								},
@@ -7727,7 +7733,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.awakenSkill(skill);
 								}
 							}
-							player.storage.skillMap = r.skillMap;
+							player.storage.gui_usedSkill = r.skillMap;
 							"step 3"
 							player.update();
 						},
