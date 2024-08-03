@@ -75,6 +75,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_luosa: ["male", "wu", "4", ["zioy_minchao", "zioy_kuangyong"]],
 					zioy_gold: ["male", "qun", 5, ["zioy_shihunzhuo","zioy_nuhuangfeng","zioy_duwenlei"]],
 					zioy_hezhe: ["male", "qun", 4, ["zioy_yuekong", "zioy_tanxi", "zioy_gengyi"]],
+					zioy_fanbunusi: ["none", "wei", 4, ['zioy_youxia', 'zioy_changai']],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -133,7 +134,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_yuze: "羽泽",
 					zioy_luosa: "罗萨",
 					zioy_gold: '黄金',
-					zioy_hezhe: '何者'
+					zioy_hezhe: '何者',
+					zioy_fanbunusi: '罕晡努斯'
 				}
 			},
 			card: {
@@ -9633,7 +9635,83 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								}
 							}
 						},
-					}
+					},
+					zioy_youxia:{
+						autoTranslate: {
+							name: "犹狎",
+							info: "一名其他角色即将受到伤害时，你可与其交换座位并代替其进行后续结算。"
+						},
+						trigger: {
+							global:'damageBefore'
+						},
+						filter(event, player){
+							return event.player !== player
+						},
+						direct: true,
+						async content(event, trigger, player){
+							const { result } = await player.chooseBool(`${get.translation(event.name)}: 是否代替${get.translation(trigger.player)}进行后续结算`, function(){
+								return get.attitude(trigger.player,player) > 0 && player.identity !== 'zhu'
+							})
+							if(result.bool) {
+								player.logSkill(event.name)
+								game.swapSeat(player, trigger.player);
+								trigger.player = player
+							}
+						},
+						ai: {
+							threaten: 1
+						},
+						_priority: 1,
+					},
+					zioy_changai:{
+						autoTranslate: {
+							name: "长哀",
+							info: "当你死亡后，你可令杀死你的角色弃置其区域内所有牌，失去所有护甲并将体力失去至1点，然后你结束当前回合并令一名其他角色执行一个额外的回合。"
+						},
+						trigger: {
+							player: 'die'
+						},
+						frequent: true,
+						forceDie: true,
+						skillAnimation: true,
+						filter(event, player){
+							return event.source;
+						},
+						async content(event, trigger, player){
+							const target = trigger.source
+							// const { result } = await player.chooseBool(`是否对${get.translation(target)}发动${get.translation(event.name)}`,`长哀: 当你死亡时，你可令杀死你的角色弃置其区域内所有牌并将体力失去至1点，然后你结束当前回合并令一名其他角色执行一个额外的回合。`,function(){
+							// 	return get.attitude(target,player) <= 1
+							// })
+							// if(result.bool) {
+							// player.logSkill(event.name)
+							player.line(target)
+							target.discard(target.getCards('hej'))
+							if(target.hujia){
+								target.changeHujia(-target.hujia)
+							}
+							if(target.hp - 1 > 0){
+								target.loseHp(target.hp - 1)
+							}
+							const evt=trigger.getParent('phase');
+							if(evt){
+								game.log(target,'结束了回合');
+								evt.finish();
+							}
+							const _r = await player.chooseTarget(`令一名角色进行一个额外的回合`, [1,1], true, (_, player, target)=>{
+								return true
+							}).set("ai", target => {
+								var att = get.attitude(player, target);
+								return att;
+							});
+							const _res = _r.result
+							const _p = _res.targets[0]
+							_p.insertPhase()
+							// }
+						},
+						ai: {
+							threaten: 1
+						}
+					},
 				},
 				translate: {
 					"zioy_xixue": "汲血",

@@ -1,0 +1,25 @@
+{
+	"Skill Template": {
+	  "prefix": "skill_template",
+	  "body": [
+		"$1:{",
+		"    autoTranslate: {",
+		"        name: \"\",",
+		"        info: \"\"",
+		"    },",
+		"    trigger: {",
+		"    },",
+		"    filter(event, player){",
+		"    },",
+		"    async content(event, trigger, player){",
+		"    },",
+		"    ai: {",
+		"        threaten: 1",
+		"    }",
+		"    _priority: 1,",
+		"},"
+	  ],
+	  "description": "一般技能模板"
+	}
+  }
+  
