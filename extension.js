@@ -9720,7 +9720,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_ji_jiyue: {
 						autoTranslate: {
 							name: "激·极跃",
-							info: "锁定技。每名角色限1次。其他角色的回合开始阶段，若你拥有护甲则失去所有护甲，终止一切结算并令你与其各执行一个额外的回合。"
+							info: "锁定技。每名角色限1次。一名角色的回合开始阶段，若你拥有护甲则失去所有护甲，终止一切结算并令你与其各执行一个额外的回合。"
 						},
 						trigger: {
 							global: 'phaseBegin'
