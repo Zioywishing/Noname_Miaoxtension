@@ -2,10 +2,10 @@
 	"Skill Template": {
 	  "prefix": "skill_template",
 	  "body": [
-		"$1:{",
+		"$1: {",
 		"    autoTranslate: {",
 		"        name: \"\",",
-		"        info: \"\"",
+		"        info: ``",
 		"    },",
 		"    trigger: {",
 		"    },",
@@ -15,7 +15,7 @@
 		"    },",
 		"    ai: {",
 		"        threaten: 1",
-		"    }",
+		"    },",
 		"    _priority: 1,",
 		"},"
 	  ],

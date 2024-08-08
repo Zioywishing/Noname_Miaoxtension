@@ -76,6 +76,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_gold: ["male", "qun", 5, ["zioy_shihunzhuo","zioy_nuhuangfeng","zioy_duwenlei"]],
 					zioy_hezhe: ["male", "qun", 4, ["zioy_yuekong", "zioy_tanxi", "zioy_gengyi"]],
 					zioy_fanbunusi: ["none", "wei", 4, ['zioy_youxia', 'zioy_changai']],
+					zioy_fukeleide: ["male", "qun", "4/5/1", ['zioy_ji_jiyue', 'zioy_ji_jidian']],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -135,7 +136,8 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_luosa: "罗萨",
 					zioy_gold: '黄金',
 					zioy_hezhe: '何者',
-					zioy_fanbunusi: '罕晡努斯'
+					zioy_fanbunusi: '罕晡努斯',
+					zioy_fukeleide: '弗克雷德',
 				}
 			},
 			card: {
@@ -8508,9 +8510,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						filter: () => true,
 						direct: true,
 						content: async function (event, trigger, player) {
-							// lib.translate.zioy_ningguxi_info
+							const dn = Math.ceil(game.roundNumber/3)
 							let c = await player
-								.chooseTarget(`对一名角色造成${game.roundNumber}点伤害`, false, function (card, player, target) {
+								.chooseTarget(`对一名角色造成${dn}点伤害`, false, function (card, player, target) {
 									return true;
 								})
 								.set("ai", target => {
@@ -8522,7 +8524,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							if (c.result.bool) {
 								let tg = c.result.targets[0];
 								player.logSkill(event.name, c.result.targets);
-								tg.damage(game.roundNumber);
+								tg.damage(dn);
 							}
 						},
 						ai: {
@@ -9650,10 +9652,11 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						direct: true,
 						async content(event, trigger, player){
 							const { result } = await player.chooseBool(`${get.translation(event.name)}: 是否代替${get.translation(trigger.player)}进行后续结算`, function(){
-								return get.attitude(trigger.player,player) > 0 && player.identity !== 'zhu'
+								if(player.hp <= trigger.num && !trigger.source) return false
+								return get.attitude(player, trigger.player) > 0 && player.identity !== 'zhu'
 							})
 							if(result.bool) {
-								player.logSkill(event.name)
+								player.logSkill(event.name, trigger.player)
 								game.swapSeat(player, trigger.player);
 								trigger.player = player
 							}
@@ -9671,6 +9674,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						trigger: {
 							player: 'die'
 						},
+						nolog: true,
 						frequent: true,
 						forceDie: true,
 						skillAnimation: true,
@@ -9679,11 +9683,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						async content(event, trigger, player){
 							const target = trigger.source
-							// const { result } = await player.chooseBool(`是否对${get.translation(target)}发动${get.translation(event.name)}`,`长哀: 当你死亡时，你可令杀死你的角色弃置其区域内所有牌并将体力失去至1点，然后你结束当前回合并令一名其他角色执行一个额外的回合。`,function(){
-							// 	return get.attitude(target,player) <= 1
-							// })
-							// if(result.bool) {
-							// player.logSkill(event.name)
+							player.logSkill(event.name, target)
 							player.line(target)
 							target.discard(target.getCards('hej'))
 							if(target.hujia){
@@ -9716,6 +9716,108 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						ai: {
 							threaten: 1
 						}
+					},
+					zioy_ji_jiyue: {
+						autoTranslate: {
+							name: "激·极跃",
+							info: "锁定技。每名角色限1次。其他角色的回合开始阶段，若你拥有护甲则失去所有护甲，终止一切结算并令你与其各执行一个额外的回合。"
+						},
+						trigger: {
+							global: 'phaseBegin'
+						},
+						forced: true,
+						locked: true,
+						init(player){
+							player.storage.ji_jiyue_players = [player]
+						},
+						filter(event, player){
+							return player.hujia > 0 && !player.storage.ji_jiyue_players.includes(event.player)
+						},
+						async content(event, trigger, player){
+							player.storage.ji_jiyue_players.push(trigger.player);
+							await player.changeHujia(-player.hujia)
+							const evt=_status.event.getParent('phase');
+							if(evt){
+								game.resetSkills();
+								_status.event=evt;
+								_status.event.finish();
+								// _status.event.untrigger(true);
+							}
+							player.insertPhase()
+							trigger.player.insertPhase()
+						},
+						ai: {
+							threaten: 1
+						},
+						_priority: 73326573756997,
+					},
+					zioy_ji_jidian: {
+						autoTranslate: {
+							name: "极·激电",
+							info: `锁定技。<br>①当你使用牌指定一名角色为唯一目标结算完成后，你有50%概率对其造成1点雷属性伤害，否则你将你的护甲调整至1点。<br>②当你造成雷属性伤害后，你有50%的概率令其获得“麻痹”异常。<br>③当你受到非雷属性伤害后，你有50%的概率获得1点护盾，否则你摸一张牌。<br>④你免疫“麻痹”异常。`
+						},
+						trigger: {
+							player:"useCardAfter",
+						},
+						init(player){
+							player.addBuffImmune('mabi', Infinity, "id=zioy_ji_jidian")
+						},
+						locked: true,
+						forced: true,
+						filter(event, player){
+							// console.log('event ===> ', event)
+							return event.targets.length === 1
+						},
+						async content(event, trigger, player){
+							const target = trigger.targets[0]
+							if (_mt.math.randInt(0,1)) {
+								console.log(1)
+								target.damage(1, 'thunder')
+							} else {
+								console.log(2)
+								player.changeHujia(1 - player.hujia)
+							}
+						},
+						autoSubSkill: {
+							damageSource: {
+								trigger: {
+									source:"damageAfter",
+								},
+								locked: true,
+								forced: true,
+								filter(event, player){
+									if (_mt.math.randInt(0,1) === 0) {
+										return false
+									}
+									return event.hasNature('thunder')
+								},
+								async content(event, trigger, player) {
+									const target = trigger.player
+									target.addBuff('mabi')
+								}
+							},
+							damagePlayer: {
+								trigger: {
+									player:"damageAfter",
+								},
+								locked: true,
+								forced: true,
+								filter(event, player){
+									return !event.hasNature('thunder')
+								},
+								async content(event, trigger, player) {
+									if (_mt.math.randInt(0,1) === 0) {
+										player.changeHujia(1)
+									}else{
+										player.draw()
+									}
+								}
+							}
+						},
+						ai: {
+							threaten: 1
+						},
+						_priority: 541,
 					},
 				},
 				translate: {
@@ -10094,7 +10196,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_fouzhiyu: "否知域",
 					zioy_fouzhiyu_info: "锁定技。防止你回复体力，防止你体力流失。若[你拥有护盾]异或[游戏轮数为奇数]为1，防止你受到伤害。",
 					zioy_ningguxi: "宁古息",
-					zioy_ningguxi_info: "回合开始阶段，你可对一名角色造成X点伤害（X为游戏轮数）。",
+					zioy_ningguxi_info: "回合开始阶段，你可对一名角色造成X点伤害（X为游戏轮数/3且向上取整）。",
 					zioy_juhun: "聚魂",
 					zioy_juhun_info:
 						"一轮游戏开始时，你可选择至多X名角色，你依次询问该角色是否令你获得其死亡前的体力，护甲，体力上限，技能并令其死亡（X为2-因你以此法选择“是”的角色）。",

@@ -1711,6 +1711,12 @@ export default (lib, game, ui, get, ai, _status) => (config, pack) => {
             type: "control",
             intro: "始终跳过出牌阶段，无法使用或打出任何牌，每轮游戏开始时有25*n%概率移除此状态,受到伤害时立即移除此状态。（n为异常状态已持续轮数）"
         },
+        "mabi": {
+            translation: "麻痹",
+            skill: "zioy_buff_mabi",
+            type: "control",
+            intro: "50%的几率跳过出牌阶段。每轮游戏开始时有50%概率移除此状态。"
+        },
         // "bingdong": {
         // 	translation: "冰冻",
         // 	skill: "zioy_buff_bingdong",
@@ -1874,6 +1880,43 @@ export default (lib, game, ui, get, ai, _status) => (config, pack) => {
                 content: function () {
                     player.storage.shuimian_count++;
                     if (player.storage.shuimian_count * 0.25 > Math.random()) player.removeBuff("shuimian");
+                }
+            },
+            mabi: {
+                mark: true,
+                marktext: "麻痹",
+                trigger: {
+                    player: "phaseUseBegin"
+                },
+                priority: 30147445327,
+                direct: true,
+                silent:true,
+                filter: function () {
+                    return Math.random() > 0.5;
+                },
+                content: function () {
+                    trigger.cancel(null, null, "notrigger");
+                },
+                group: ["zioy_buff_mabi_remove"],
+                intro: {
+                    name: lib.buffMiao.mabi.translation,
+                    mark: function (dialog, storage, player) {
+                        return lib.buffMiao.mabi.intro;
+                    }
+                }
+            },
+            mabi_remove: {
+                trigger: {
+                    global: "roundStart"
+                },
+                priority: -34563601727,
+                direct: true,
+                silent:true,
+                filter: function () {
+                    return Math.random() > 0.5;
+                },
+                content: function () {
+                    player.removeBuff("mabi");
                 }
             }
         }
