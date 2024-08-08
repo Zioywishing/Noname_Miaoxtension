@@ -9771,10 +9771,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						async content(event, trigger, player){
 							const target = trigger.targets[0]
 							if (_mt.math.randInt(0,1)) {
-								console.log(1)
+								player.line(target)
 								target.damage(1, 'thunder')
 							} else {
-								console.log(2)
 								player.changeHujia(1 - player.hujia)
 							}
 						},
