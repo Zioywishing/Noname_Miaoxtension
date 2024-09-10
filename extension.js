@@ -77,6 +77,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_hezhe: ["male", "qun", 4, ["zioy_yuekong", "zioy_tanxi", "zioy_gengyi"]],
 					zioy_fanbunusi: ["none", "wei", 4, ['zioy_youxia', 'zioy_changai']],
 					zioy_fukeleide: ["male", "qun", "4/5/1", ['zioy_ji_jiyue', 'zioy_ji_jidian']],
+					zioy_kongwu: ["male", "qun", "0/0/0", ['zioy_kong', 'zioy_wu']],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -138,6 +139,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_hezhe: '何者',
 					zioy_fanbunusi: '罕晡努斯',
 					zioy_fukeleide: '弗克雷德',
+					zioy_kongwu: '空无',
 				}
 			},
 			card: {
@@ -9817,6 +9819,123 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							threaten: 1
 						},
 						_priority: 541,
+					},
+					zioy_kong: {
+						autoTranslate: {
+							name: "空",
+							info: `锁定技。你的体力上限等于场上存活角色数。游戏开始时你回复所有体力。`
+						},
+						locked: true,
+						forced: true,
+						trigger: {
+							global: ['phaseBefore', 'phaseBegin', 'phaseEnd', 'dieEnd', 'dieBefore', 'dieAfter', 'reviveEnd', 'reviveBefore', 'reviveAfter'],
+							player:"enterGame",
+						},
+						filter(event, player){
+							return game.players.length !== player.maxHp;
+						},
+						async content(event, trigger, player){
+							const diff = game.players.length - player.maxHp;
+							if(diff < 0) {
+								player.loseMaxHp(-diff)
+							} else {
+								player.gainMaxHp(diff)
+							}
+						},
+						autoSubSkill:{
+							enterGame:{
+								trigger:{
+									global:"phaseBefore",
+									player:"enterGame",
+								},
+								filter:function(event,player){
+									return (event.name!='phase'||game.phaseNumber==0);
+								},
+								direct:true,
+								async content(__,___,player){
+									player.recover(player.maxHp);
+								},
+								_priority: -1,
+							},
+							gainMaxHpBefore: {
+								trigger:{
+									player:['gainMaxHpBefore']
+								},
+								direct:true,
+								filter(event, player) {
+									return event.num + player.maxHp !== game.players.length;
+								},
+								async content(event, trigger, player){
+									trigger.cancel();
+								}
+							},
+							loseMaxHpBefore: {
+								trigger:{
+									player:['loseMaxHpBefore']
+								},
+								direct:true,
+								filter(event, player) {
+									return player.maxHp - event.num !== game.players.length;
+								},
+								async content(event, trigger, player){
+									trigger.cancel();
+								}
+							}
+						},
+						ai: {
+							threaten: 1
+						},
+						_priority: 1,
+					},
+					zioy_wu: {
+						autoTranslate: {
+							name: "无",
+							info: `锁定技。你于摸牌阶段的摸牌数，你的手牌上限，你的攻击范围，你造成的伤害均等于你的当前体力值。`
+						},
+						locked: true,
+						mod:{
+							maxHandcardBase:function(player,num){
+								return player.hp;
+							},
+							attackRange:(player,num)=>player.hp,
+						},
+						autoSubSkill:{
+							damage: {
+								trigger: {
+									source: 'damageBegin2'
+								},
+								forced: true,
+								filter(event, player){
+									return true
+								},
+								async content(event, trigger, player){
+									trigger.num = player.hp
+								},
+								ai: {
+									threaten: 1
+								},
+								_priority: -351651,
+							},
+							phaseDraw: {
+								trigger:{
+									player:"phaseDrawBegin2",
+								},
+								forced: true,
+								filter(event,player){
+									return true;
+								},
+								async content(event,trigger,player){
+									trigger.num = player.hp;
+								},
+								ai:{
+									threaten:1.3,
+								},
+							},
+						},
+						ai: {
+							threaten: 1
+						},
+						_priority: 1,
 					},
 				},
 				translate: {
