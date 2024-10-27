@@ -10170,7 +10170,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_zongwanqianshenglingshengmie: {
 						autoTranslate: {
 							name: "纵万千生灵生灭",
-							info: `限定技。回合开始阶段，你可以弃置你区域内所有牌，然后选择若干名其他角色，依次将其区域内的所有牌移动至你区域内的相应位置，然后你将所有“契月”移动至你的区域内并摸等同于本次移动“契月”数量的牌，然后你移去所有“契月”，恢复等量体力并对所有其他角色造成等同于你当前体力/3（向下取整）的伤害。`
+							info: `限定技。回合开始阶段，你可以弃置你区域内所有牌，然后选择若干名其他角色，依次将其区域内的所有牌移动至你区域内的相应位置，然后将其所有“契月”移动至你的区域内并摸等同于本次移动“契月”数量的牌，然后你移去所有“契月”，恢复等量体力并对所有其他角色造成等同于你当前体力/3（向下取整）的伤害。`
 						},
 						trigger: {
 							player: 'phaseBegin'
@@ -10178,6 +10178,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						limit: true,
 						skillAnimation: true,
 						animationColor: "soil",
+						check: function (event, player) {
+							return player.hp <= 2;
+						},
 						async content(event,trigger,player){
 							player.awakenSkill('zioy_zongwanqianshenglingshengmie')
 							player.discard('hej')
