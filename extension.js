@@ -9942,7 +9942,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_chiqi: {
 						autoTranslate: {
 							name: "赤契",
-							info: `①游戏开始时，你获得X点体力上限并获得1枚“契月”（X为场上每名角色体力上限的最大值）<br>②当你拥有“契月”时：你攻击范围+X；你造成的伤害+X；你使用牌无次数限制；当你使用的基本牌结算完成后，你收回此牌；造成伤害后，你移去一枚“契月”标记。<br>③当你不因〖纵万千生灵生灭〗恢复体力时，取消之。`
+							info: `①游戏开始时，你获得X点体力上限并获得1枚“契月”（X为场上每名角色体力上限的最大值）<br>②当你拥有“契月”时：你攻击范围+X；你造成的伤害+X/3（向下取整）；你使用牌无次数限制；当你于回合外使用或打出基本牌结算完成后，你收回此牌并移去一枚“契月”标记；造成伤害后，你移去一枚“契月”标记。`
 						},
 						trigger:{
 							global:"phaseBefore",
@@ -9983,7 +9983,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								forced:true,
 								async content(event,trigger,player){
-									trigger.num += player.countMark('zioy_chiqi');
+									trigger.num += Math.floor(player.countMark('zioy_chiqi') / 3);
 								},
 								"_priority": 6354564654,
 							},
@@ -10002,13 +10002,14 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							},
 							useCardAfter: {
 								trigger:{
-									player:["useCardAfter"],
+									player:['useCard', 'respond'],
 								},
-								filter:function(event,player){
-									return player.countMark('zioy_chiqi') > 0 && get.type(event.card) === 'basic';
+								filter:function (event,player){
+									return player.countMark('zioy_chiqi') > 0 && player!=_status.currentPhase && get.type(event.card) === 'basic';
 								},
 								async content(event,trigger,player){
 									player.gain(trigger.cards)
+									player.removeMark('zioy_chiqi', 1)
 								},
 								forced:true,
 								"_priority":485965631,
@@ -10018,8 +10019,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_aici: {
 						autoTranslate: {
 							name: "哀慈",
-							info: `①出牌阶段，你可选择任意名未拥有“契月”且座次连续的角色。你令其依次获得等同于其体力上限枚“契月”标记，摸等量的牌，并使其依次获得〖赤月东升〗。<br>②当拥有“契月”标记的角色即将死亡时，你获得其所有“契月”标记。`
+							info: `①出牌阶段，你可选择任意名未拥有“契月”且座次连续的角色。你令其依次获得等同于其体力上限枚“契月”标记（若其为你则获得3枚标记），摸等量的牌，并使其依次获得〖赤月东升〗。<br>②当拥有“契月”标记的角色即将死亡时，你获得其所有“契月”标记。`
 						},
+						derivation: ["zioy_chiyuedongsheng"],
 						locked: false,
 						mod:{
 							maxHandcardBase:function(player,num){
@@ -10033,7 +10035,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								usable:1,
 								forced: true,
 								filter(event, player){
-									return game.players.filter(t => t.countMark('zioy_chiqi') > 0).length > 0;
+									return game.players.filter(t => t.countMark('zioy_chiqi') === 0).length > 0;
 								},
 								filterTarget:function(card,player,target){
 									// if(player==target) return false;
@@ -10050,13 +10052,19 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								async content(event, trigger, player){
 									const num = event.num
 									const t = event.targets[num]
-									const maxHp = t.maxHp
-									t.addMark('zioy_chiqi', maxHp)
-									t.draw(maxHp)
+									const getCardNum = t === player ? 3 : t.maxHp
+									t.addMark('zioy_chiqi', getCardNum)
+									t.draw(getCardNum)
 									t.addSkill('zioy_chiyuedongsheng')
 								},
 								ai: {
-									threaten: 1
+									threaten: 1,
+									result:{
+										target: function (player, target) {
+											return get.attitude(player, target)
+										},
+									},
+									order:1,
 								},
 								_priority: -351651,
 							},
@@ -10086,7 +10094,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_chiyuedongsheng: {
 						autoTranslate: {
 							name: "赤月东升",
-							info: `①当你即将恢复体力时，取消之，然后你移去一枚“契月”标记。<br>②回合开始阶段，你移去一枚“契月”标记。<br>③当你因此技能失去所有“契月”时，你失去此技能并受到1点无来源伤害。`
+							info: `①当你即将恢复体力时，取消之，然后你移去一枚“契月”标记。<br>②回合开始阶段，你移去一枚“契月”标记。<br>③当你失去所有“契月”时，你失去此技能并受到1点由你造成伤害。`
 						},
 						locked: false,
 						mod:{
@@ -10094,6 +10102,23 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								return player.hp;
 							},
 							attackRange:(player,num)=>player.hp,
+						},
+						init: (player) => {
+							const unhook = _mt.other.hook(player, 'removeMark', {
+								after: () => {
+									if(player.countMark('zioy_chiqi') === 0) {
+										unhook()
+										player.damage()
+										player.removeSkill('zioy_chiyuedongsheng')
+									}
+								}
+							})
+							player.storage.zioy_chiyuedongsheng = {
+								unhook
+							}
+						},
+						onremove: (player) => {
+							player.storage.zioy_chiyuedongsheng.unhook()
 						},
 						autoSubSkill:{
 							recover: {
@@ -10107,10 +10132,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								async content(event, trigger, player){
 									trigger.cancel()
 									player.removeMark('zioy_chiqi', 1)
-									if(player.countMark('zioy_chiqi') === 0) {
-										player.damage()
-										player.removeSkill('zioy_chiyuedongsheng')
-									}
+									// if(player.countMark('zioy_chiqi') === 0) {
+									// 	player.damage()
+									// 	player.removeSkill('zioy_chiyuedongsheng')
+									// }
 								},
 								ai: {
 									threaten: 1
@@ -10127,10 +10152,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								},
 								async content(event,trigger,player){
 									player.removeMark('zioy_chiqi', 1)
-									if(player.countMark('zioy_chiqi') === 0) {
-										player.damage()
-										player.removeSkill('zioy_chiyuedongsheng')
-									}
+									// if(player.countMark('zioy_chiqi') === 0) {
+									// 	player.damage()
+									// 	player.removeSkill('zioy_chiyuedongsheng')
+									// }
 								},
 								ai:{
 									threaten:1.3,
@@ -10145,7 +10170,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_zongwanqianshenglingshengmie: {
 						autoTranslate: {
 							name: "纵万千生灵生灭",
-							info: `限定技。回合开始阶段，你可以弃置你区域内所有牌，然后将其他角色区域内的所有牌移动至你区域内的相应位置，然后你将所有“契月”移动至你的区域内并摸等同于本次移动“契月”数量的牌，然后你移去所有“契月”，恢复等量体力并对所有其他角色造成等同于你当前体力/3的伤害。`
+							info: `限定技。回合开始阶段，你可以弃置你区域内所有牌，然后选择若干名其他角色，依次将其区域内的所有牌移动至你区域内的相应位置，然后你将所有“契月”移动至你的区域内并摸等同于本次移动“契月”数量的牌，然后你移去所有“契月”，恢复等量体力并对所有其他角色造成等同于你当前体力/3（向下取整）的伤害。`
 						},
 						trigger: {
 							player: 'phaseBegin'
@@ -10156,7 +10181,13 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						async content(event,trigger,player){
 							player.awakenSkill('zioy_zongwanqianshenglingshengmie')
 							player.discard('hej')
-							for(const target of game.players) {
+							const {result: { targets }} = (await (player.chooseTarget(get.translation('zioy_zongwanqianshenglingshengmie'), [1,game.players.length - 1], true, (_, player, target)=>{
+								return player !== target
+							}).set("ai", target => {
+								var att = get.attitude(player, target);
+								return -att;
+							})));
+							for(const target of targets) {
 								if(target === player) {
 									continue
 								}
@@ -10177,7 +10208,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 							const count = player.countMark('zioy_chiqi');
 							player.removeMark('zioy_chiqi', count)
 							player.recover(count)
-							for(const target of game.players) {
+							for(const target of targets) {
 								if(target === player) {
 									continue
 								}

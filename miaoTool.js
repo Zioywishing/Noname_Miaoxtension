@@ -51,7 +51,7 @@ const CSSS = {
 };
 
 export default (lib, game, ui, get, ai, _status) => {
-	return {
+	const miaoTool = {
 		/**
 		 * Description 游戏全局相关操作
 		 */
@@ -166,7 +166,40 @@ export default (lib, game, ui, get, ai, _status) => {
 				return func.constructor.name === "AsyncFunction";
 			},
 
-			loadStyleString
+			loadStyleString,
+
+			/**
+			 * Description 让一个obj的某一函数执行前后额外执行一些东西
+			 * @param {object} target
+			 * @param {string} key
+			 * @param {{before: () => void; after: () => void}} config
+			 * @returns {() => void} unhook
+			 */
+			hook(target, key, config) {
+				let enable = true;
+				const originFunc = target[key];
+				const _do = (func, args) => {
+					// if(miaoTool.other.isAsyncFunction) {
+					// 	await func(...args)
+					// } else {
+					func(...args);
+					// }
+				};
+				target[key] = (...args) => {
+					if (enable && config.before) {
+						_do(config.before, args);
+					}
+					const result = originFunc.call(target, ...args);
+					if (enable && config.after) {
+						_do(config.after, args);
+					}
+					return result;
+				};
+				return () => {
+					enable = false;
+				};
+			}
 		}
 	};
+	return miaoTool;
 };
