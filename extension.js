@@ -79,6 +79,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_fukeleide: ["male", "qun", "4/5/1", ['zioy_ji_jiyue', 'zioy_ji_jidian']],
 					zioy_kongwu: ["male", "qun", "0/0", ['zioy_kong', 'zioy_wu']],
 					zioy_buluohong: ["male", "shu", "3", ['zioy_chiqi', 'zioy_aici', 'zioy_zongwanqianshenglingshengmie']],
+					zioy_lingfeng: ["female", "qun", "4", ['zioy_bolian', 'zioy_fengzhen']],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -142,6 +143,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_fukeleide: '弗克雷德',
 					zioy_kongwu: '空无',
 					zioy_buluohong: '不落红',
+					zioy_lingfeng: '凌风',
 				}
 			},
 			card: {
@@ -10225,6 +10227,225 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 						},
 						_priority: 1,
 					},
+					zioy_bolian: {
+						autoTranslate: {
+							name: "波敛",
+							info: `锁定技。<br>①你的【杀】均视为【桃】。<br>②出牌阶段，你可以弃置一张【桃】，视为对一名受伤角色使用一张【桃】。<br>③当其他角色受到来源为你的回复时，其获得〖风祝〗。<br>④当拥有〖风祝〗的角色死亡时，你移除此技能并获得〖寒息〗。`
+						},
+						mod:{
+							cardname:function(card,player){
+								if(card.name=='sha') return 'tao';
+							},
+						},
+						// global:['zioy_bolian_taoUseable'],
+						enable:"phaseUse",
+						usable:Infinity,
+						// filterTarget:true,
+						selectTarget:1,
+						filter:function(event,player){
+							if(game.players.filter(p => p.hp !== p.maxHp).length === 0) return false;
+							if(player.getCards('hej').filter(c => c.name === 'tao' || c.name === 'sha').length === 0) return false
+							return true
+						},
+						filterTarget:function(card, player,target){
+							if(card.name!=='tao') return;
+							if(target.hp!== target.maxHp) return true;
+							return false;
+						},
+						filterCard(card){
+							return get.name(card)=='tao';
+						},
+						content:async function(event,trigger,player){
+							// console.log(event.cards,event, trigger, player)
+							player.useCard({name: 'tao', isCard: false},event.targets[0])
+						},
+						ai:{
+							order:9,
+							result:{
+								target(player,target){
+									if(target.hp==1) return 5;
+									if(player==target&&player.countCards('h')>player.hp) return 5;
+									return 2;
+								},
+							},
+							threaten:2,
+						},
+						_priority: 1,
+						autoSubSkill:{
+							aftRecover: {
+								trigger: {
+									global: "recoverEnd",
+								},
+								forced: true,
+								filter(event,player){
+									// console.log(event, event.source)
+									return event.source === player
+								},
+								content: async function(event,trigger,player){
+									const target = trigger.player
+									if(!target.hasSkill('zioy_fengzhu')) {
+										target.addSkill('zioy_fengzhu')
+										target.storage.fengzhu_source = player
+									}
+								},
+							},
+							fengzhuDie: {
+								trigger: {
+									global: "dieAfter",
+								},
+								filter: function (event, player) {
+									console.log('fzdie', event)
+									return event.player.hasSkill('zioy_fengzhu') && event.player.storage.fengzhu_source === player;
+								},
+								forced: true,
+    							skillAnimation:true,
+								content: async function (event, trigger, player) {
+									player.removeSkill('zioy_bolian')
+									player.addSkill('zioy_hanxi')
+								},
+							}
+						},
+					},
+					zioy_fengzhu: {
+						autoTranslate: {
+							name: "风祝",
+							info: `锁定技。当你回复体力时，你获得1点护甲。`
+						},
+						mark: true,
+						marktext: '风祝',
+						intro: {
+							name: "风祝",
+							mark: () => "当你回复体力时，你获得1点护甲"
+						},
+						init: function (player) {
+							if(player.hasSkill('zioy_chiliu')) {
+								player.removeSkill('zioy_chiliu')
+							}
+						},
+						trigger: {
+							player: 'recoverEnd'
+						},
+						filter: function (event, player) {
+							return true
+						},
+						forced: true,
+						content: async function (event, trigger, player) {
+							player.changeHujia(1)
+						},
+					},
+					zioy_hanxi: {
+						autoTranslate: {
+							name: "寒溪",
+							info: `锁定技。<br>①你的【闪】均视为【杀】，你使用【杀】无距离与次数限制。<br>②当你使用【杀】指定目标后，你令所有目标获得〖斥流〗。`
+						},
+						mod:{
+							cardname:function(card,player){
+								if(card.name=='shan') return 'sha';
+							},
+							targetInRange:function(card,player){
+								if(card.name==='sha') return true;
+							},
+							cardUsable(card,player,num){
+								if(card.name=='sha') return Infinity;
+							},
+						},
+						trigger:{
+							player:"useCardToPlayered",
+						},
+						filter(event,player){
+							return event.card.name=='sha';
+						},
+						forced: true,
+						content: async function (event, trigger, player) {
+							const target=trigger.target;
+							if(!target.hasSkill('zioy_chiliu')) {
+								target.addSkill('zioy_chiliu')
+								target.storage.chiliu_source = player
+							}
+						},
+						autoSubSkill: {
+							aftSha: {
+								trigger:{
+									player:"useCardAfter",
+								},
+								direct:true,
+								filter:function(event,player){
+									return event.card.name=='sha'
+								},
+								async content(event,trigger,player){
+									console.log('aftsha', {
+										player,
+										trigger,
+									})
+									for(const p of game.players) {
+										if(p.hasSkill('zioy_chiliu')) {
+											p.useCard({name: 'sha', isCard: false},trigger.targets)
+										}
+									}
+								},
+							}
+						}
+					},
+					zioy_chiliu: {
+						autoTranslate: {
+							name: "斥流",
+							info: `锁定技。当〖斥流〗的来源使用【杀】结算完成后，视为你对相同目标使用一张【杀】。`
+						},
+						init: function (player) {
+							if(player.hasSkill('zioy_fengzhu')) {
+								player.removeSkill('zioy_fengzhu')
+							}
+						},
+						mark: true,
+						marktext: '斥流',
+						intro: {
+							name: "斥流",
+							mark: () => "锁定技。当〖斥流〗的来源使用【杀】结算完成后，视为你对相同目标使用一张【杀】。"
+						},
+					},
+
+					zioy_fengzhen: {
+						autoTranslate: {
+							name: "风阵",
+							info: `限定技。若你拥有〖寒溪〗，你可以选择任意名其他角色，你依次对其使用一张【杀】，然后你失去〖寒溪〗，并获得〖波敛〗。若你拥有〖波敛〗，你可以选择任意名角色，你依次对其使用一张【桃】，然后你失去〖波敛〗，并获得〖寒溪〗。`
+						},
+						limited:true,
+						line:"fire",
+    					enable:"phaseUse",
+						async content(event,trigger,player){
+							player.awakenSkill('zioy_fengzhen')
+							if(player.hasSkill('zioy_bolian')) {
+								const res = await player.chooseTarget(`你可以选择任意名其他角色，你依次对其使用一张【桃】`, [0,game.players.length], true, (_, player, target)=>{
+									return true
+								}).set("ai", target => {
+									var att = get.attitude(player, target);
+									return att;
+								});
+								const result = res.result
+								const targets = result.targets;
+								for(const target of targets) {
+									await player.useCard({name:'tao', isCard: false},target)
+								}
+								player.removeSkill('zioy_bolian')
+								player.addSkill('zioy_hanxi')
+							} else {
+								const res = await player.chooseTarget(`你可以选择任意名其他角色，你依次对其使用一张【杀】`, [0,game.players.length], true, (_, player, target)=>{
+									return player!== target
+								}).set("ai", target => {
+									var att = get.attitude(player, target);
+									return -att;
+								});
+								// console.log(res)
+								const result = res.result
+								const targets = result.targets;
+								for(const target of targets) {
+									await player.useCard({name:'sha', isCard: false},target)
+								}
+								player.removeSkill('zioy_hanxi')
+								player.addSkill('zioy_bolian')
+							}
+						}
+					}
 				},
 				translate: {
 					"zioy_xixue": "汲血",
