@@ -10522,9 +10522,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 												// "视为使用一张【" + get.translation(card) + "】",
 												true
 											);
-											if(player.hasCard(card)) {
-												await player.discard(card);	
-											}
+											await player.discard(card);
 										} else {
 											await player.discard(card);
 											player.storage.shenjiDamage = (player.storage.shenjiDamage || 0) + 1
