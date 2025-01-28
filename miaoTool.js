@@ -109,6 +109,17 @@ export default (lib, game, ui, get, ai, _status) => {
 					}
 					dom.classList.add(CSSS[styleName].className);
 				}
+			},
+			/**
+			 * Description 判断玩家是否可以使用卡牌
+			 * @param {Player} player 玩家对象
+			 * @param {Card} card 卡牌对象
+			 * @returns {boolean} 如果玩家可以使用卡牌，则返回true，否则返回false
+			 */
+			canUse(player, card) {
+				return game.filterPlayer(current => {
+					return lib.filter.targetEnabled2(card, player, current);
+				}).length != 0	
 			}
 		},
 		loadash: {
@@ -125,6 +136,23 @@ export default (lib, game, ui, get, ai, _status) => {
 					return { ...target };
 				}
 				return target;
+			},
+			/**
+			* Description 从数组中随机获取指定数量的元素
+			* @param {Array} arr 原始数组
+			* @param {number} count 需要获取的元素数量，默认为1
+			* @returns {Array} 返回一个包含随机元素的新数组
+			*/
+			arrRandomGet(arr, count) {
+				arr = [...arr];
+				count = count || 1;
+				const result = [];
+				for (let i = 0; i < count; i++) {
+					const index = Math.floor(Math.random() * arr.length);
+					result.push(arr[index]);
+					arr.splice(index, 1);	
+				}
+				return result;
 			}
 		},
 		// 提供一些便捷的math功能

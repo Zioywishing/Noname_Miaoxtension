@@ -1,6 +1,6 @@
 import content from "./content.js";
 import _miaoTool from "./miaoTool.js";
-import { skillFactory } from "./miaoTool.js";
+import miaoTool, { skillFactory } from "./miaoTool.js";
 game.import("extension", function (lib, game, ui, get, ai, _status) {
 	const _mt = _miaoTool(lib, game, ui, get, ai, _status);
 	return {
@@ -80,6 +80,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_kongwu: ["male", "qun", "0/0", ['zioy_kong', 'zioy_wu']],
 					zioy_buluohong: ["male", "shu", "3", ['zioy_chiqi', 'zioy_aici', 'zioy_zongwanqianshenglingshengmie']],
 					zioy_lingfeng: ["female", "qun", "4", ['zioy_bolian', 'zioy_fengzhen']],
+					zioy_huahuo: ["female", "shu", "2/5", ['zioy_shenji', 'zioy_huahuo']],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -144,6 +145,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_kongwu: '空无',
 					zioy_buluohong: '不落红',
 					zioy_lingfeng: '凌风',
+					zioy_huahuo: '花火',
 				}
 			},
 			card: {
@@ -10445,7 +10447,154 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								player.addSkill('zioy_bolian')
 							}
 						}
-					}
+					},
+					zioy_shenji: {
+						autoTranslate: {
+							name: "神机",
+							info: `<br>①锁定技。当有牌于〖神机〗结算期间外被装备或进入弃牌堆时，你有20%的概率将其置于武将牌上，称为“花火”。若此时为你的回合内，则概率提升至100%。“花火”至多为5张，当“花火”牌超过5张时，你弃置最早获得的“花火”。<br>②出牌阶段，你可以依次使用所有的“花火”，以此法使用的牌无距离与次数限制。`
+						},
+						trigger: {
+							global:["loseAfter","loseAsyncAfter"],
+						},
+						filter(event, player){
+							console.log(event.type, {event})
+							// if(event.getParent(2).name = 'zioy_shenji') return false
+							if(event.name=='lose'&&event.parent.name=='equip') return false;
+							if(player.storage.forbidShenji === true) return false
+							return true;
+						},
+						mark: true,
+						marktext:"花火",
+						intro:{
+							content:"expansion",
+							markcount:"expansion",
+						},
+						locked: true,
+						forced: true,
+						async content(event, trigger, player){
+							player.storage.forbidShenji = true
+							if(!trigger.cards) return;
+							for (const c of trigger.cards) {
+								const randRes = _status.currentPhase === player ? true : Math.random() < .2;
+								if(!randRes) continue;
+								const next = player.addToExpansion(c, 'gain2');
+								next.gaintag.add('zioy_shenji');
+								await next;
+								if(player.getExpansions('zioy_shenji').length > 5) {
+									player.storage.forbidShenji = true
+									await player.discard(player.getExpansions('zioy_shenji').pop())
+									player.storage.forbidShenji = false
+								}
+							}
+							player.storage.forbidShenji = false
+						},
+						autoSubSkill: {
+							use: {
+								enable: "phaseUse",
+								usable: Infinity,
+								check: function () {
+									return true;
+								},
+								mod:{
+									cardUsable:function(card,player,num){
+										if(player.storage.zioy_shenji_unlimit) return Infinity;
+									},
+									targetInRange(card,player,target,now){
+										if(player.storage.zioy_shenji_unlimit) return true;
+									},
+								},
+								filter: function (event, player) {
+									return player.getExpansions('zioy_shenji').length > 0;	
+								},
+								async content(event, trigger, player) {
+									player.storage.forbidShenji = true
+									player.storage.zioy_shenji_unlimit = true
+									const cards = player.getExpansions('zioy_shenji')
+
+									for(let card of cards.reverse()) {
+										console.log({
+											card,
+											canuse: _mt.player.canUse(player, card)
+										})
+										if (_mt.player.canUse(player, card)) {
+											await player.chooseUseTarget(
+												card,
+												// "视为使用一张【" + get.translation(card) + "】",
+												true
+											);
+											if(player.hasCard(card)) {
+												await player.discard(card);	
+											}
+										} else {
+											await player.discard(card);
+											player.storage.shenjiDamage = (player.storage.shenjiDamage || 0) + 1
+										}
+									}
+									player.storage.shenjiDamage = 0
+									player.storage.zioy_shenji_unlimit = false
+									player.storage.forbidShenji = false
+								},
+								ai: {
+									order: 9,
+									result: {
+										// target: function (player, target) {
+										// 	return target.hp - target.maxHp - 1;
+										// 	return get.damageEffect(target, player);
+										// },
+										player: 1
+									},
+									threaten: 2
+								},
+								"_priority": 0
+							},
+							damage1:{
+								trigger:{
+									source:"damageBegin1",
+								},
+								filter(event, player){
+									return player.storage.shenjiDamage;
+								},
+								forced:true,
+								async content(event,trigger,player){
+									trigger.num += player.storage.shenjiDamage || 0;
+								},
+								ai:{
+									damageBonus:true,
+								},
+								"_priority":245446556
+							}
+						},
+						ai: {
+							threaten: 1
+						},
+						_priority: 564564564,
+					},
+					zioy_huahuo: {
+						autoTranslate: {
+							name: "花火",
+							info: `出牌阶段限一次，你可以随机获得并弃置场上手牌区内的5张基本牌。`
+						},
+						enable: "phaseUse",
+						usable: 1,
+						check: function () {
+							return true;
+						},
+						async content(event, trigger, player) {
+							const cards = []
+							game.players.forEach(p => {
+								cards.push(...p.getCards('h'))
+							})
+							const bcs = cards.filter(c => get.type(c) === 'basic')
+							console.log({
+								bcs,
+								cards	
+							})
+							const t = _mt.loadash.arrRandomGet(bcs, 5)
+							await player.gain(t)
+							await player.discard(t)
+						},
+						_priority: 1,
+					},
 				},
 				translate: {
 					"zioy_xixue": "汲血",
