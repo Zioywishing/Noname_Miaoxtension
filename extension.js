@@ -10451,7 +10451,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_shenji: {
 						autoTranslate: {
 							name: "神机",
-							info: `<br>①锁定技。当有牌于〖神机〗结算期间外被装备或进入弃牌堆时，你有20%的概率将其置于武将牌上，称为“花火”。若此时为你的回合内，则概率提升至100%。“花火”至多为5张，当“花火”牌超过5张时，你弃置最早获得的“花火”。<br>②出牌阶段，你可以依次使用所有的“花火”，以此法使用的牌无距离与次数限制。`
+							info: `<br>①锁定技。当有牌于〖神机〗结算期间外被装备或进入弃牌堆时，你有20%的概率将其置于武将牌上，称为“花火”。若此时为你的回合内，则概率提升至100%。“花火”至多为5张，当“花火”牌超过5张时，你弃置最早获得的“花火”。<br>②出牌阶段，你可以依次使用所有的“花火”，以此法使用的牌无距离与次数限制，若此牌无法使用则弃置之并使本次结算流程后续造成的伤害+1。`
 						},
 						trigger: {
 							global:["loseAfter","loseAsyncAfter"],
@@ -10588,8 +10588,12 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								cards	
 							})
 							const t = _mt.loadash.arrRandomGet(bcs, 5)
-							await player.gain(t)
-							await player.discard(t)
+							for(const c of t) {
+								await player.gain(c)
+							}
+							for(const c of t) {
+								await player.discard(c)
+							}
 						},
 						_priority: 1,
 					},

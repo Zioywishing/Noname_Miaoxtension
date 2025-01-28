@@ -117,9 +117,10 @@ export default (lib, game, ui, get, ai, _status) => {
 			 * @returns {boolean} 如果玩家可以使用卡牌，则返回true，否则返回false
 			 */
 			canUse(player, card) {
-				return game.filterPlayer(current => {
-					return lib.filter.targetEnabled2(card, player, current);
-				}).length != 0	
+				return player.hasUseTarget(card)
+				// return game.filterPlayer(current => {
+				// 	return lib.filter.targetEnabled2(card, player, current);
+				// }).length != 0	
 			}
 		},
 		loadash: {
