@@ -10560,7 +10560,22 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									damageBonus:true,
 								},
 								"_priority":245446556
-							}
+							},
+							phaseEnd: {
+								trigger: {
+									player: "phaseEnd",
+								},
+								filter: () => true,
+								direct: true,
+								async content(event, trigger, player) {
+									player.storage.zioy_shenji_unlimit = false
+									player.storage.forbidShenji = false
+								},
+								ai: {
+									threaten: 1
+								},
+								_priority: 54645646456,
+							},
 						},
 						ai: {
 							threaten: 1
