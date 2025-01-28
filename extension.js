@@ -81,6 +81,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_buluohong: ["male", "shu", "3", ['zioy_chiqi', 'zioy_aici', 'zioy_zongwanqianshenglingshengmie']],
 					zioy_lingfeng: ["female", "qun", "4", ['zioy_bolian', 'zioy_fengzhen']],
 					zioy_huahuo: ["female", "shu", "2/5", ['zioy_shenji', 'zioy_huahuo']],
+					zioy_si: ["female", "wu", "20/25", ['zioy_tiangongkaiwu', 'zioy_tianqiaonianchai']],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
@@ -146,6 +147,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_buluohong: '不落红',
 					zioy_lingfeng: '凌风',
 					zioy_huahuo: '花火',
+					zioy_si: "巳"
 				}
 			},
 			card: {
@@ -180,6 +182,143 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 			},
 			skill: skillFactory({
 				skill: {
+					zioy_tiangongkaiwu: {
+						autoTranslate: {
+							name: "天工开物",
+							info: `<br>①锁定技。获得此技能时废除你所有的装备栏。防止你恢复装备栏与新增装备栏。你无法使用装备牌。<br>②游戏开始时，你获得场上所有的装备牌。<br>③出牌阶段，你可以将你区域内的所有装备牌移出游戏，失去1点体力上限并获得其效果。`
+						},
+						enable: "phaseUse",
+						useable: Infinity,
+						mod:{
+							cardEnabled(card){
+								if(get.type(card)=='equip') return false;
+							},
+							globalFrom:function (from, to, current) {
+								return current + from.storage.zioy_tiangongkaiwu_distance.globalFrom;
+							},
+							globalTo:function (from, to, current) {
+								return current + to.storage.zioy_tiangongkaiwu_distance.globalFrom;
+							},
+							attackFrom:function (from, to, current) {
+								return current + from.storage.zioy_tiangongkaiwu_distance.attackFrom;
+							},
+						},
+						locked: true,
+						mark: true,
+						marktext:"天工",
+						intro:{
+							content:"expansion",
+							markcount:"expansion",
+						},
+						init: function (player) {
+							player.storage.zioy_tiangongkaiwu_cards = []
+							player.storage.zioy_tiangongkaiwu_distance = {
+								globalTo: 0,
+								globalFrom: 0,
+								attackFrom: 0,
+							}
+							var list=[];
+							for(var i=1;i<6;i++){
+								for(var j=0;j<player.countEnabledSlot(i);j++){
+									list.push(i);
+								}
+							}
+							player.disableEquip(list);
+							player.expandEquip = () => new Promise(_ => _())
+							player.enableEquip = () => new Promise(_ => _())
+						},
+						filter(event, player){
+							return player.getCards('h').filter(c => get.type(c) == "equip").length;
+						},
+						// filterCard: (card, player) => {
+						// 	return get.type(card) == "equip";
+						// },
+						async content(event, trigger, player){
+							const cards = player.getCards('hej').filter(c => get.type(c) == "equip");
+							for(const card of cards){
+								player.storage.zioy_tiangongkaiwu_cards.push(card);
+								player.addToExpansion(card).gaintag.add('zioy_tiangongkaiwu');
+								// console.log({card});
+								const cinfo = lib.card[card.name]
+								if(cinfo?.distance){
+									player.storage.zioy_tiangongkaiwu_distance.globalTo += cinfo.distance.globalTo || 0;
+									player.storage.zioy_tiangongkaiwu_distance.globalFrom += cinfo.distance.globalFrom || 0;
+									player.storage.zioy_tiangongkaiwu_distance.attackFrom += cinfo.distance.attackFrom || 0;
+								}
+								if(cinfo?.skills){
+									for(const skill of cinfo.skills){
+										player.addSkill(skill);
+									}
+								}
+								player.loseMaxHp(1)
+							}
+						},
+						autoSubSkill: {
+							gain: {
+								trigger:{
+									global:"phaseBefore",
+									player:"enterGame",
+								},
+								filter:function(event,player){
+									return (event.name!='phase'||game.phaseNumber==0)
+								},
+								forced: true,
+								async content(event, trigger, player){
+									const ecards = game.players.reduce((c, p) => {
+										return [...c, ...p.getCards('hej').filter(c => get.type(c) == "equip")]
+									}, [])
+									// console.log(ecards);
+									for(const card of ecards){
+										player.gain(card)
+									}
+								}
+							}
+						},
+						ai: {
+							order: 9,
+							result: {
+								player: 2
+							},
+							threaten: 1
+						},
+						_priority: 1,
+					},
+					zioy_tianqiaonianchai: {
+						autoTranslate: {
+							name: "天巧拈钗",
+							info: `限定技。出牌阶段，你可以获得场上的所有装备牌。`
+						},
+						enable: "phaseUse",
+						limit: true,
+						skillAnimation: true,
+						animationColor: "soil",
+						check: function (event, player) {
+							return game.players.filter(p=>p !== player).reduce((c, p) => {
+								return [...c,...p.getCards('hej').filter(c => get.type(c) == "equip")]
+							}, []).length - game.players.length;
+						},
+						async content(event, trigger, player){
+							player.awakenSkill('zioy_tianqiaonianchai');
+							const ecards = game.players.reduce((c, p) => {
+								return [...c,...p.getCards('hej').filter(c => get.type(c) == "equip")]
+							}, [])
+							for(const card of ecards){
+								player.gain(card)
+							}
+						},
+						ai: {
+							order: 2,
+							result: {
+								player: (player) => {
+									return game.players.filter(p=>p !== player).reduce((c, p) => {
+										return [...c,...p.getCards('hej').filter(c => get.type(c) == "equip")]
+									}, []).length - game.players.length;
+								}
+							},
+							threaten: 1
+						},
+						_priority: 1456,
+					},
 					"zioy_xixue": {
 						enable: "phaseUse",
 						usable: 1,
