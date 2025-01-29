@@ -79,9 +79,9 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_fukeleide: ["male", "qun", "4/5/1", ['zioy_ji_jiyue', 'zioy_ji_jidian']],
 					zioy_kongwu: ["male", "qun", "0/0", ['zioy_kong', 'zioy_wu']],
 					zioy_buluohong: ["male", "shu", "3", ['zioy_chiqi', 'zioy_aici', 'zioy_zongwanqianshenglingshengmie']],
-					zioy_lingfeng: ["female", "qun", "4", ['zioy_bolian', 'zioy_fengzhen']],
-					zioy_huahuo: ["female", "shu", "2/5/2", ['zioy_shenji', 'zioy_huahuo']],
-					zioy_si: ["female", "wu", "20/25", ['zioy_tiangongkaiwu', 'zioy_tianqiaonianchai']],
+					zioy_lingfeng: ["female", "qun", "4", ['zioy_bolian', 'zioy_fengzhen'], ["des:新春特典.2025<br>旧景无再故人还"]],
+					zioy_huahuo: ["female", "shu", "2/5/2", ['zioy_shenji', 'zioy_huahuo'], ["des:新春特典.2025<br>旧景无再故人还"]],
+					zioy_si: ["female", "wu", "20/25", ['zioy_tiangongkaiwu', 'zioy_tianqiaonianchai'], ["des:新春特典.2025<br>旧景无再故人还"]],
 				},
 				translate: {
 					"zioy_xixuegui": "弗拉基米尔",
