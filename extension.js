@@ -80,7 +80,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_kongwu: ["male", "qun", "0/0", ['zioy_kong', 'zioy_wu']],
 					zioy_buluohong: ["male", "shu", "3", ['zioy_chiqi', 'zioy_aici', 'zioy_zongwanqianshenglingshengmie']],
 					zioy_lingfeng: ["female", "qun", "4", ['zioy_bolian', 'zioy_fengzhen']],
-					zioy_huahuo: ["female", "shu", "5", ['zioy_shenji', 'zioy_huahuo']],
+					zioy_huahuo: ["female", "shu", "2/5/2", ['zioy_shenji', 'zioy_huahuo']],
 					zioy_si: ["female", "wu", "20/25", ['zioy_tiangongkaiwu', 'zioy_tianqiaonianchai']],
 				},
 				translate: {
@@ -10604,7 +10604,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_shenji: {
 						autoTranslate: {
 							name: "神机",
-							info: `<br>①锁定技。当有牌于〖神机〗结算期间外被装备或进入弃牌堆时，你有20%的概率将其置于武将牌上，称为“花火”。若此时为你的回合内，则概率提升至100%。“花火”至多为5张，当“花火”牌超过5张时，你弃置最早获得的“花火”，若你已受伤则回复1点体力并摸一张牌。<br>②出牌阶段限2次，你可以依次使用所有的“花火”，以此法使用的牌无距离与次数限制，若此牌无法使用则弃置之并使本次结算流程后续造成的伤害+1。`
+							info: `<br>①锁定技。当有牌于〖神机〗结算期间外离开手牌区时，你有20%的概率将其置于武将牌上，称为“花火”。若此时为你的回合内，则概率提升至100%。“花火”至多为5张，当“花火”牌超过5张时，你弃置最早获得的“花火”，若你已受伤则摸一张牌且若为你的回合外则有50%的概率回复1点体力。<br>②出牌阶段限2次，你可以依次使用所有的“花火”，以此法使用的牌无距离与次数限制，若此牌无法使用则弃置之并使本次结算流程后续造成的伤害+1。`
 						},
 						trigger: {
 							global:["loseAfter","loseAsyncAfter"],
@@ -10637,7 +10637,9 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 									player.storage.forbidShenji = true
 									await player.discard(player.getExpansions('zioy_shenji').pop())
 									if(player.hp < player.maxHp) {
-										player.recover(1)
+										if(_status.currentPhase !== player && Math.random()<.5) {
+											player.recover(1)
+										}
 										player.draw(1)
 									}
 									player.storage.forbidShenji = false
