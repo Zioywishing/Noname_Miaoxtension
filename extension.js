@@ -185,7 +185,7 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 					zioy_tiangongkaiwu: {
 						autoTranslate: {
 							name: "天工开物",
-							info: `<br>①锁定技。获得此技能时废除你所有的装备栏。防止你恢复装备栏与新增装备栏。你无法使用装备牌。<br>②游戏开始时，你获得场上所有的装备牌。<br>③出牌阶段，你可以将你区域内的所有装备牌移出游戏，失去1点体力上限并获得其效果。`
+							info: `<br>①锁定技。获得此技能时废除你所有的装备栏。防止你恢复装备栏与新增装备栏。你无法使用装备牌。<br>②游戏开始时，你获得场上所有的装备牌。<br>③出牌阶段，你可以将你区域内的所有装备牌移出游戏，失去1点体力上限并获得其效果。<br>④锁定技。摸牌阶段，你额外摸X张牌。（X为log2(你以此法移出游戏的装备牌数量) + 1且向下取整）`
 						},
 						enable: "phaseUse",
 						useable: Infinity,
@@ -271,6 +271,20 @@ game.import("extension", function (lib, game, ui, get, ai, _status) {
 									for(const card of ecards){
 										player.gain(card)
 									}
+								}
+							},
+							draw: {
+								trigger:{
+									player:"phaseDrawBegin2",
+								},
+								filter:function(event,player){
+									return true
+								},
+								forced: true,
+								async content(event, trigger, player){
+									const count = player.getExpansions('zioy_tiangongkaiwu').length;
+									// console.log(count);
+									trigger.num += Math.floor(Math.log2(count)) + 1;
 								}
 							}
 						},
@@ -10590,7 +10604,7 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 					zioy_shenji: {
 						autoTranslate: {
 							name: "神机",
-							info: `<br>①锁定技。当有牌于〖神机〗结算期间外被装备或进入弃牌堆时，你有20%的概率将其置于武将牌上，称为“花火”。若此时为你的回合内，则概率提升至100%。“花火”至多为5张，当“花火”牌超过5张时，你弃置最早获得的“花火”。<br>②出牌阶段限2次，你可以依次使用所有的“花火”，以此法使用的牌无距离与次数限制，若此牌无法使用则弃置之并使本次结算流程后续造成的伤害+1。`
+							info: `<br>①锁定技。当有牌于〖神机〗结算期间外被装备或进入弃牌堆时，你有20%的概率将其置于武将牌上，称为“花火”。若此时为你的回合内，则概率提升至100%。“花火”至多为5张，当“花火”牌超过5张时，你弃置最早获得的“花火”，若你已受伤则回复1点体力并摸一张牌。<br>②出牌阶段限2次，你可以依次使用所有的“花火”，以此法使用的牌无距离与次数限制，若此牌无法使用则弃置之并使本次结算流程后续造成的伤害+1。`
 						},
 						trigger: {
 							global:["loseAfter","loseAsyncAfter"],
@@ -10622,6 +10636,10 @@ if(get.type(card)=='basic' && get.type(card)=='trick')   flag=  true;
 								if(player.getExpansions('zioy_shenji').length > 5) {
 									player.storage.forbidShenji = true
 									await player.discard(player.getExpansions('zioy_shenji').pop())
+									if(player.hp < player.maxHp) {
+										player.recover(1)
+										player.draw(1)
+									}
 									player.storage.forbidShenji = false
 								}
 							}
